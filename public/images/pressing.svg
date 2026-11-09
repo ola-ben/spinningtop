@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F3F4FF"/>
+  <circle cx="640" cy="110" r="190" fill="none" stroke="#0000FE" stroke-opacity=".06" stroke-width="30"/>
+  <!-- ironing board, top-down -->
+  <path d="M150 190 H520 Q690 190 720 300 Q690 410 520 410 H150 Q100 410 100 300 Q100 190 150 190 Z" fill="#fff" stroke="#E1E1E1" stroke-width="5"/>
+  <!-- folded shirt on the board -->
+  <rect x="150" y="232" width="240" height="136" rx="6" fill="#F3F4FF" stroke="#0000FE" stroke-width="4"/>
+  <path d="M150 300 L184 280 L184 320 Z" fill="#0000FE"/>
+  <path d="M230 246 V354 M262 246 V354" stroke="#0000FE" stroke-opacity=".25" stroke-width="3"/>
+  <!-- cord -->
+  <path d="M410 300 Q330 300 300 430 Q290 480 330 520" fill="none" stroke="#313131" stroke-width="5" stroke-linecap="round"/>
+  <!-- iron -->
+  <path d="M440 236 Q570 236 620 300 Q570 364 440 364 Q408 364 408 300 Q408 236 440 236 Z" fill="#0000FE"/>
+  <path d="M452 278 Q526 268 556 300 Q526 332 452 322 Z" fill="#fff" fill-opacity=".9"/>
+  <circle cx="472" cy="300" r="8" fill="#313131"/>
+  <!-- steam -->
+  <g fill="none" stroke="#0000FE" stroke-opacity=".35" stroke-width="5" stroke-linecap="round">
+    <path d="M470 214 q10 -16 0 -32 q-10 -16 0 -32"/>
+    <path d="M510 208 q10 -16 0 -32 q-10 -16 0 -32"/>
+    <path d="M550 214 q10 -16 0 -32 q-10 -16 0 -32"/>
+  </g>
+</svg>

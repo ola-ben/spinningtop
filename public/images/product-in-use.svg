@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F3F4FF"/>
+  <circle cx="640" cy="110" r="190" fill="none" stroke="#0000FE" stroke-opacity=".06" stroke-width="30"/>
+  <!-- bottle tilted, pouring -->
+  <g transform="rotate(115 300 240)">
+    <rect x="240" y="160" width="120" height="190" rx="22" fill="#0000FE"/>
+    <rect x="275" y="124" width="50" height="40" fill="#0000FE"/>
+    <rect x="258" y="210" width="84" height="80" rx="8" fill="#fff"/>
+    <path d="M274 234 H326 M274 254 H310" stroke="#0000FE" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <!-- liquid stream -->
+  <path d="M406 296 Q420 330 422 372" fill="none" stroke="#0000FE" stroke-width="9" stroke-linecap="round" stroke-opacity=".8"/>
+  <!-- measuring cap -->
+  <path d="M366 370 H478 L466 460 H378 Z" fill="#fff" stroke="#313131" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M374 400 H470 L466 430 H378 Z" fill="#0000FE" fill-opacity=".35"/>
+  <path d="M440 390 H462 M444 410 H462" stroke="#313131" stroke-width="3"/>
+  <!-- counter -->
+  <rect x="160" y="460" width="480" height="20" rx="10" fill="#E1E1E1"/>
+  <!-- bubbles -->
+  <g fill="none" stroke="#0000FE" stroke-width="4">
+    <circle cx="570" cy="310" r="34"/>
+    <circle cx="620" cy="390" r="20"/>
+    <circle cx="540" cy="410" r="14"/>
+    <circle cx="650" cy="260" r="12"/>
+  </g>
+</svg>

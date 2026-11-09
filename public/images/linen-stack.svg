@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F3F4FF"/>
+  <circle cx="640" cy="110" r="190" fill="none" stroke="#0000FE" stroke-opacity=".06" stroke-width="30"/>
+  <rect y="480" width="800" height="120" fill="#E8EAFF"/>
+  <!-- folded linen stack -->
+  <g stroke="#E1E1E1" stroke-width="3">
+    <rect x="160" y="420" width="260" height="60" rx="14" fill="#fff"/>
+    <rect x="170" y="364" width="240" height="56" rx="14" fill="#DDE0FF"/>
+    <rect x="164" y="310" width="252" height="56" rx="14" fill="#fff"/>
+    <rect x="174" y="256" width="232" height="56" rx="14" fill="#DDE0FF"/>
+    <rect x="166" y="202" width="248" height="56" rx="14" fill="#fff"/>
+  </g>
+  <!-- band and bow -->
+  <rect x="278" y="198" width="24" height="284" fill="#0000FE"/>
+  <path d="M290 200 q-32 -38 -56 -16 q20 26 56 16 q32 -38 56 -16 q-20 26 -56 16" fill="#0000FE"/>
+  <!-- tag -->
+  <path d="M302 262 L372 300" stroke="#313131" stroke-width="3"/>
+  <rect x="362" y="292" width="56" height="74" rx="6" fill="#fff" stroke="#313131" stroke-width="4" transform="rotate(12 390 329)"/>
+  <circle cx="380" cy="306" r="5" fill="#313131"/>
+  <!-- collection basket -->
+  <path d="M480 340 H660 L640 480 H500 Z" fill="#313131"/>
+  <path d="M490 372 H650 M496 412 H644 M502 452 H638" stroke="#fff" stroke-opacity=".2" stroke-width="6"/>
+  <rect x="510" y="300" width="120" height="44" rx="12" fill="#fff" stroke="#E1E1E1" stroke-width="3"/>
+  <rect x="520" y="268" width="100" height="36" rx="12" fill="#DDE0FF" stroke="#E1E1E1" stroke-width="3"/>
+</svg>

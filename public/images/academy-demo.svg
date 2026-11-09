@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F3F4FF"/>
+  <circle cx="640" cy="110" r="190" fill="none" stroke="#0000FE" stroke-opacity=".06" stroke-width="30"/>
+  <rect y="470" width="800" height="130" fill="#E8EAFF"/>
+  <!-- easel board -->
+  <path d="M300 320 V470 M210 470 L240 320 M390 470 L360 320" stroke="#313131" stroke-width="6" stroke-linecap="round"/>
+  <rect x="150" y="120" width="300" height="200" rx="10" fill="#fff" stroke="#313131" stroke-width="6"/>
+  <g transform="translate(185 148) scale(.72)">
+    <path d="M30 0 L50 10 Q60 20 70 10 L90 0 L120 32 L104 50 L94 42 L94 160 L26 160 L26 42 L16 50 L0 32 Z" fill="none" stroke="#0000FE" stroke-width="6" stroke-linejoin="round"/>
+    <circle cx="60" cy="100" r="16" fill="#0000FE" fill-opacity=".3"/>
+  </g>
+  <path d="M310 170 H420 M310 200 H400 M310 230 H410 M310 260 H380" stroke="#E1E1E1" stroke-width="8" stroke-linecap="round"/>
+  <!-- trainer -->
+  <path d="M486 270 L430 228" stroke="#0000FE" stroke-width="18" stroke-linecap="round"/>
+  <path d="M430 228 L396 210" stroke="#313131" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="530" cy="170" r="32" fill="#313131"/>
+  <path d="M480 470 V270 Q480 220 530 220 Q580 220 580 270 V470 Z" fill="#0000FE"/>
+  <!-- learners (from behind) -->
+  <circle cx="230" cy="500" r="40" fill="#313131"/>
+  <path d="M150 600 Q150 540 230 540 Q310 540 310 600 Z" fill="#313131"/>
+  <circle cx="560" cy="510" r="40" fill="#9CA3D9"/>
+  <path d="M480 600 Q480 550 560 550 Q640 550 640 600 Z" fill="#9CA3D9"/>
+</svg>

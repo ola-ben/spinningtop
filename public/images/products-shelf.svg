@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F3F4FF"/>
+  <circle cx="640" cy="110" r="190" fill="none" stroke="#0000FE" stroke-opacity=".06" stroke-width="30"/>
+  <g fill="#fff" stroke="#E1E1E1" stroke-width="4">
+    <rect x="110" y="300" width="580" height="16" rx="4"/>
+    <rect x="110" y="500" width="580" height="16" rx="4"/>
+  </g>
+  <path d="M150 316 V340 M650 316 V340 M150 516 V540 M650 516 V540" stroke="#313131" stroke-width="6" stroke-linecap="round"/>
+  <!-- detergent bottle -->
+  <rect x="160" y="170" width="84" height="130" rx="16" fill="#0000FE"/>
+  <rect x="186" y="148" width="32" height="26" fill="#0000FE"/>
+  <rect x="182" y="132" width="40" height="18" rx="4" fill="#313131"/>
+  <rect x="174" y="206" width="56" height="54" rx="6" fill="#fff"/>
+  <path d="M184 222 H220 M184 236 H210" stroke="#0000FE" stroke-width="5" stroke-linecap="round"/>
+  <!-- jug -->
+  <path d="M378 210 Q408 214 404 246 Q400 270 378 270" fill="none" stroke="#0000FE" stroke-width="10"/>
+  <rect x="274" y="186" width="104" height="114" rx="18" fill="#fff" stroke="#0000FE" stroke-width="4"/>
+  <rect x="292" y="166" width="36" height="22" rx="4" fill="#0000FE"/>
+  <rect x="276" y="232" width="100" height="30" fill="#0000FE"/>
+  <!-- spray bottle -->
+  <rect x="414" y="210" width="58" height="90" rx="12" fill="#E1E1E1"/>
+  <rect x="430" y="194" width="26" height="18" fill="#E1E1E1"/>
+  <path d="M424 194 H470 L482 172 H434 Z" fill="#313131"/>
+  <rect x="424" y="240" width="38" height="34" rx="4" fill="#fff"/>
+  <!-- box -->
+  <rect x="504" y="214" width="150" height="86" rx="6" fill="#fff" stroke="#313131" stroke-width="4"/>
+  <rect x="506" y="240" width="146" height="20" fill="#0000FE"/>
+  <!-- lower shelf -->
+  <rect x="150" y="402" width="124" height="98" rx="6" fill="#0000FE" fill-opacity=".85"/>
+  <rect x="164" y="420" width="96" height="10" rx="5" fill="#fff" fill-opacity=".7"/>
+  <rect x="290" y="430" width="96" height="70" rx="6" fill="#fff" stroke="#E1E1E1" stroke-width="4"/>
+  <rect x="304" y="446" width="40" height="8" rx="4" fill="#0000FE"/>
+  <path d="M414 420 Q474 370 534 420" fill="none" stroke="#313131" stroke-width="5"/>
+  <path d="M414 420 H534 L522 500 H426 Z" fill="#313131"/>
+  <rect x="560" y="440" width="100" height="60" rx="14" fill="#FFE27A"/>
+  <rect x="560" y="440" width="100" height="22" rx="10" fill="#0000FE"/>
+</svg>
