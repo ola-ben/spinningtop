@@ -101,9 +101,23 @@ body {
     @apply font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-ink/45;
   }
 
+  /* Horizontal swipe tracks: keep scrolling, hide the bar */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .tracking-display {
     letter-spacing: -0.035em;
   }
+}
+
+/* Hide floating buttons while the full-screen mobile menu is open */
+body[data-menu="open"] .floating-actions {
+  display: none;
 }
 
 /* Rotating hero word — same keyframes as the storefront hero */

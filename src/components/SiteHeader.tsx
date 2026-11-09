@@ -2,12 +2,26 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { LINK_HUB, NAV } from "@/lib/site";
+import { NAV, QUOTE_LINK } from "@/lib/site";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
 
+  /* Lock page scroll + flag the body while the mobile menu is open
+     (other floating UI hides itself via body[data-menu="open"]). */
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    if (open) document.body.dataset.menu = "open";
+    else delete document.body.dataset.menu;
+    return () => {
+      document.body.style.overflow = "";
+      delete document.body.dataset.menu;
+    };
+  }, [open]);
+
+  /* Header stays pinned; just add a hairline once the page has scrolled. */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -15,12 +29,33 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* (1) Highlight the nav link for the section in the middle of the screen. */
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
+    const sections = NAV.map((n) => document.getElementById(n.href.slice(1))).filter(
+      (el): el is HTMLElement => el !== null,
+    );
+    if (!sections.length || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(`#${entry.target.id}`);
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
+    );
+    sections.forEach((s) => observer.observe(s));
+
+    // Clear the highlight when back in the hero.
+    const onTop = () => {
+      if (window.scrollY < 200) setActive(null);
     };
-  }, [open]);
+    window.addEventListener("scroll", onTop, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onTop);
+    };
+  }, []);
 
   return (
     <>
@@ -37,22 +72,36 @@ export default function SiteHeader() {
               alt="Spinning Top Drycleaners and Launderers"
               width={1168}
               height={424}
-              priority
+              preload
               className="h-11 w-auto sm:h-12"
             />
           </a>
 
-          <nav className="hidden items-center gap-6 font-mono text-xs uppercase tracking-wider text-ink/70 lg:flex">
-            {NAV.map((item) => (
-              <a key={item.href} href={item.href} className="transition-colors hover:text-brand">
-                {item.label}
-              </a>
-            ))}
+          <nav className="hidden items-center gap-6 font-mono text-xs uppercase tracking-wider lg:flex">
+            {NAV.map((item) => {
+              const isActive = active === item.href;
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? "location" : undefined}
+                  className={`relative py-1 transition-colors hover:text-brand ${isActive ? "text-brand" : "text-ink/70"}`}
+                >
+                  {item.label}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-brand transition-transform duration-300 ${
+                      isActive ? "scale-x-100" : "scale-x-0"
+                    }`}
+                  />
+                </a>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-3">
             <a
-              href={LINK_HUB}
+              href={QUOTE_LINK}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden rounded-full bg-brand px-6 py-2.5 text-xs font-bold text-paper shadow-lg shadow-brand/10 transition-colors hover:bg-brand-deep sm:inline-flex"
@@ -97,25 +146,33 @@ export default function SiteHeader() {
         </div>
 
         <nav className="my-auto flex flex-col items-center gap-6">
-          {NAV.map((item, i) => (
-            <a
-              key={item.href}
-              href={item.href}
-              tabIndex={open ? 0 : -1}
-              onClick={() => setOpen(false)}
-              style={{ transitionDelay: open ? `${120 + i * 50}ms` : "0ms" }}
-              className={`font-display text-3xl font-bold tracking-tight transition-all duration-300 hover:opacity-70 ${
-                open ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
-              }`}
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV.map((item, i) => {
+            const isActive = active === item.href;
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                tabIndex={open ? 0 : -1}
+                aria-current={isActive ? "location" : undefined}
+                onClick={() => setOpen(false)}
+                style={{ transitionDelay: open ? `${120 + i * 50}ms` : "0ms" }}
+                className={`flex items-center gap-3 font-display text-3xl font-bold tracking-tight transition-all duration-300 hover:opacity-70 ${
+                  open ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`h-2 w-2 rotate-45 bg-paper transition-opacity ${isActive ? "opacity-100" : "opacity-0"}`}
+                />
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex flex-col gap-3 border-t border-paper/20 pt-6">
           <a
-            href={LINK_HUB}
+            href={QUOTE_LINK}
             target="_blank"
             rel="noopener noreferrer"
             tabIndex={open ? 0 : -1}

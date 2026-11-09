@@ -30,6 +30,15 @@ export default function Reveal({ children, as: Tag = "div", className = "", id, 
       return;
     }
 
+    // Anything already on screen at load (e.g. the hero) reveals straight away
+    // instead of waiting for the observer. Effects run after the first paint,
+    // so the fade-up transition still plays.
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.dataset.visible = "true";
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
