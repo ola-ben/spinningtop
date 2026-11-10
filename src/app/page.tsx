@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import RotatingWord from "@/components/RotatingWord";
 import SiteHeader from "@/components/SiteHeader";
@@ -33,21 +34,21 @@ const PILLARS = [
     no: "01",
     title: "Care Services",
     desc: "Laundry, wet & dry cleaning, repairs, upholstery & rugs, and pest control.",
-    href: "#services",
+    href: "/services",
     image: IMAGES.pillarServices,
   },
   {
     no: "02",
     title: "Product Shop",
     desc: "Laundry, hygiene and household products for individual and business buyers.",
-    href: "#shop",
+    href: "/shop",
     image: IMAGES.pillarShop,
   },
   {
     no: "03",
     title: "Training Academy",
     desc: "Learning programmes in fabric care, service operations and related skills.",
-    href: "#academy",
+    href: "/academy",
     image: IMAGES.pillarAcademy,
   },
 ];
@@ -178,9 +179,9 @@ export default function Home() {
                 <ExternalCta className="btn-pill">
                   Request a quote <ArrowIcon />
                 </ExternalCta>
-                <a href="#services" className="btn-pill-ghost">
+                <Link href="/services" className="btn-pill-ghost">
                   Explore services
-                </a>
+                </Link>
               </Reveal>
 
               {/* Real, verifiable facts (Google listing + branches) */}
@@ -277,7 +278,7 @@ export default function Home() {
             trackClassName="no-scrollbar -mx-4 mt-12 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-px sm:overflow-visible sm:border sm:border-ink/10 sm:bg-ink/10 sm:px-0"
           >
             {PILLARS.map((p, i) => (
-              <a
+              <Link
                 key={p.no}
                 href={p.href}
                 aria-label={`${p.title} — ${i + 1} of ${PILLARS.length}`}
@@ -323,7 +324,7 @@ export default function Home() {
                   <ArrowIcon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5 group-focus-visible:translate-x-1.5" />
                 </span>
                 </div>
-              </a>
+              </Link>
             ))}
           </SwipeRail>
         </Reveal>

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NAV, QUOTE_LINK } from "@/lib/site";
 
@@ -8,6 +10,12 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string | null>(null);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
+  /* A link is active when you're on its page, or (on the home page) scrolled to its section. */
+  const isActive = (item: (typeof NAV)[number]) =>
+    pathname === item.href || (isHome && active === item.section);
 
   /* Lock page scroll + flag the body while the mobile menu is open
      (other floating UI hides itself via body[data-menu="open"]). */
@@ -29,9 +37,10 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* (1) Highlight the nav link for the section in the middle of the screen. */
+  /* (1) Home page: highlight the nav link for the section in the middle of the screen. */
   useEffect(() => {
-    const sections = NAV.map((n) => document.getElementById(n.href.slice(1))).filter(
+    if (!isHome) return;
+    const sections = NAV.map((n) => document.getElementById(n.section)).filter(
       (el): el is HTMLElement => el !== null,
     );
     if (!sections.length || typeof IntersectionObserver === "undefined") return;
@@ -39,7 +48,7 @@ export default function SiteHeader() {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) setActive(`#${entry.target.id}`);
+          if (entry.isIntersecting) setActive(entry.target.id);
         }
       },
       { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
@@ -55,7 +64,7 @@ export default function SiteHeader() {
       observer.disconnect();
       window.removeEventListener("scroll", onTop);
     };
-  }, []);
+  }, [isHome]);
 
   return (
     <>
@@ -66,7 +75,7 @@ export default function SiteHeader() {
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           {/* Master logo — supplied artwork, on white, unaltered (Brand Book p.9) */}
-          <a href="#top" className="shrink-0" aria-label="Spinning Top Drycleaners & Launderers — home">
+          <Link href="/" className="shrink-0" aria-label="Spinning Top Drycleaners & Launderers — home">
             <Image
               src="/spinning-top-logo.jpg"
               alt="Spinning Top Drycleaners and Launderers"
@@ -75,26 +84,26 @@ export default function SiteHeader() {
               preload
               className="h-11 w-auto sm:h-12"
             />
-          </a>
+          </Link>
 
           <nav className="hidden items-center gap-6 font-mono text-xs uppercase tracking-wider lg:flex">
             {NAV.map((item) => {
-              const isActive = active === item.href;
+              const current = isActive(item);
               return (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
-                  aria-current={isActive ? "location" : undefined}
-                  className={`relative py-1 transition-colors hover:text-brand ${isActive ? "text-brand" : "text-ink/70"}`}
+                  aria-current={current ? (isHome ? "location" : "page") : undefined}
+                  className={`relative py-1 transition-colors hover:text-brand ${current ? "text-brand" : "text-ink/70"}`}
                 >
                   {item.label}
                   <span
                     aria-hidden="true"
                     className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-brand transition-transform duration-300 ${
-                      isActive ? "scale-x-100" : "scale-x-0"
+                      current ? "scale-x-100" : "scale-x-0"
                     }`}
                   />
-                </a>
+                </Link>
               );
             })}
           </nav>
@@ -147,13 +156,13 @@ export default function SiteHeader() {
 
         <nav className="my-auto flex flex-col items-center gap-6">
           {NAV.map((item, i) => {
-            const isActive = active === item.href;
+            const current = isActive(item);
             return (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 tabIndex={open ? 0 : -1}
-                aria-current={isActive ? "location" : undefined}
+                aria-current={current ? (isHome ? "location" : "page") : undefined}
                 onClick={() => setOpen(false)}
                 style={{ transitionDelay: open ? `${120 + i * 50}ms` : "0ms" }}
                 className={`flex items-center gap-3 font-display text-3xl font-bold tracking-tight transition-all duration-300 hover:opacity-70 ${
@@ -162,10 +171,10 @@ export default function SiteHeader() {
               >
                 <span
                   aria-hidden="true"
-                  className={`h-2 w-2 rotate-45 bg-paper transition-opacity ${isActive ? "opacity-100" : "opacity-0"}`}
+                  className={`h-2 w-2 rotate-45 bg-paper transition-opacity ${current ? "opacity-100" : "opacity-0"}`}
                 />
                 {item.label}
-              </a>
+              </Link>
             );
           })}
         </nav>

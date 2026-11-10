@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { BRANCHES, LINK_HUB, NAV, PHONE_DISPLAY, PHONE_E164, SOCIALS, whatsappLink } from "@/lib/site";
 import SocialIcon, { WhatsAppIcon } from "@/components/SocialIcon";
 
@@ -42,9 +43,9 @@ export default function SiteFooter() {
           <ul className="mt-4 space-y-2 text-sm">
             {NAV.map((item) => (
               <li key={item.href}>
-                <a href={item.href} className="text-ink/70 transition-colors hover:text-brand">
+                <Link href={item.href} className="text-ink/70 transition-colors hover:text-brand">
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

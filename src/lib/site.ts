@@ -118,11 +118,44 @@ export const BRANCHES: Branch[] = [
   },
 ];
 
-export const NAV = [
-  { href: "#how", label: "How it works" },
-  { href: "#services", label: "Services" },
-  { href: "#shop", label: "Shop" },
-  { href: "#academy", label: "Academy" },
-  { href: "#corporate", label: "Corporate" },
-  { href: "#visit", label: "Visit us" },
+/* Main navigation. `section` is the matching block on the home page, used
+   to highlight the link while scrolling there. Services, Shop, Academy and
+   Corporate have their own (coming-soon) pages; the rest are home anchors. */
+export const NAV: { href: string; label: string; section: string }[] = [
+  { href: "/#how", label: "How it works", section: "how" },
+  { href: "/services", label: "Services", section: "services" },
+  { href: "/shop", label: "Shop", section: "shop" },
+  { href: "/academy", label: "Academy", section: "academy" },
+  { href: "/corporate", label: "Corporate", section: "corporate" },
+  { href: "/#visit", label: "Visit us", section: "visit" },
 ];
+
+/* Pages that exist as routes but are still being built. */
+export const COMING_SOON = {
+  services: {
+    eyebrow: "Care services",
+    title: "Care Services",
+    description:
+      "Laundry, wet & dry cleaning, tailor repairs & alterations, shoe repair, upholstery & rug cleaning, and pest control.",
+  },
+  shop: {
+    eyebrow: "Product shop",
+    title: "Product Shop",
+    description:
+      "Laundry, hygiene and household products, with clear usage information, for homes and businesses.",
+  },
+  academy: {
+    eyebrow: "Training Academy",
+    title: "Training Academy",
+    description:
+      "Structured learning and supervised practice in fabric care, service operations and related skills.",
+  },
+  corporate: {
+    eyebrow: "For organisations",
+    title: "Corporate Services",
+    description:
+      "Service plans for hotels, schools, offices, healthcare facilities and property managers.",
+  },
+} as const;
+
+export type ComingSoonPage = keyof typeof COMING_SOON;
