@@ -10,7 +10,7 @@ export default function ShopCatalogue() {
     <div className="min-h-screen bg-paper text-ink">
       <ShopBrowser products={PRODUCTS} />
       <SiteFooter />
-      <FloatingActions />
+      <FloatingActions quoteBar={false} />
     </div>
   );
 }

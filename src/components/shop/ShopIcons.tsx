@@ -48,7 +48,13 @@ export const CartIcon = ({ className = "h-6 w-6" }: IconProps) => (
   </svg>
 );
 
-export const ChevronDownIcon = ({ className = "h-4 w-4" }: IconProps) => (
+export const HeartIcon = ({ className = "h-6 w-6", filled = false }: IconProps & { filled?: boolean }) => (
+  <svg className={className} {...base} fill={filled ? "currentColor" : "none"}>
+    <path d="M21 8.25c0-2.49-2.1-4.5-4.69-4.5-1.94 0-3.6 1.12-4.31 2.73-.72-1.61-2.38-2.73-4.31-2.73C5.1 3.75 3 5.76 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+  </svg>
+);
+
+export const ChevronDownIcon =({ className = "h-4 w-4" }: IconProps) => (
   <svg className={className} {...base} strokeWidth={2}>
     <path d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
   </svg>

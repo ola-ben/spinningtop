@@ -1,151 +1,139 @@
-import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import type { Metadata } from "next";
-import { adminConfigured, isAdmin } from "@/lib/admin-auth";
-import { getShopSettings } from "@/lib/shop-settings";
+import { ShopSwitch } from "./AdminForms";
+import { Badge, Card, STATUS_TONE, StatCard, btn, table } from "@/components/admin/ui";
+import { CUSTOMERS, ORDERS, formatDateTime, orderTotal } from "@/lib/admin-demo";
 import { PRODUCTS, formatNaira } from "@/lib/shop-data";
-import { LoginForm, ShopSwitch } from "./AdminForms";
-import { logout } from "./actions";
+import { getShopSettings, settingsStorageReady } from "@/lib/shop-settings";
 
-export const metadata: Metadata = {
-  title: "Admin",
-  robots: { index: false, follow: false },
-};
+// The admin layout's title template only applies to child routes, so set this one in full.
+export const metadata = { title: { absolute: "Dashboard · Admin" } };
 
-export default function AdminPage() {
-  return (
-    <div className="min-h-screen bg-tint text-ink">
-      <header className="border-b border-ink/12 bg-paper">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/spinning-top-logo.jpg"
-              alt="Spinning Top Drycleaners and Launderers"
-              width={1168}
-              height={424}
-              className="h-10 w-auto"
-            />
-          </Link>
-          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/55">Admin</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        {/* Reads the session cookie, so it renders at request time. */}
-        <Suspense fallback={<p className="text-sm text-ink/55">Loading…</p>}>
-          <AdminGate />
-        </Suspense>
-      </main>
-    </div>
-  );
-}
-
-async function AdminGate() {
-  if (!adminConfigured()) {
-    return (
-      <section className="border border-ink/12 bg-paper p-6 sm:p-8">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Admin is not set up</h1>
-        <p className="mt-3 text-sm leading-relaxed text-ink/65">
-          Add <code className="bg-tint px-1.5 py-0.5 font-mono text-xs">ADMIN_PASSWORD=your-password</code> to{" "}
-          <code className="bg-tint px-1.5 py-0.5 font-mono text-xs">.env.local</code>, then restart the server.
-        </p>
-      </section>
-    );
-  }
-
-  if (!(await isAdmin())) {
-    return (
-      <section className="mx-auto max-w-sm border border-ink/12 bg-paper p-6 sm:p-8">
-        <p className="eyebrow">Spinning Top</p>
-        <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight">Admin sign in</h1>
-        <LoginForm />
-      </section>
-    );
-  }
-
-  return <AdminPanel />;
-}
-
-async function AdminPanel() {
+export default async function DashboardPage() {
   const { showProducts } = await getShopSettings();
-  const inStock = PRODUCTS.filter((p) => p.inStock).length;
+  const openOrders = ORDERS.filter((o) => o.status === "New" || o.status === "Confirmed" || o.status === "Ready");
+  const revenue = ORDERS.filter((o) => o.status === "Collected").reduce((sum, o) => sum + orderTotal(o), 0);
+  const outOfStock = PRODUCTS.filter((p) => !p.inStock);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Dashboard</p>
-          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">Site settings</h1>
+          <p className="text-sm text-ink/55">Good morning 👋</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-[1.7rem]">Here&rsquo;s your store today</h1>
         </div>
-        <form action={logout}>
-          <button type="submit" className="btn-pill-ghost !px-5 !py-2.5 !text-sm">
-            Sign out
-          </button>
-        </form>
-      </div>
-
-      {/* Shop switch */}
-      <section className="border border-ink/12 bg-paper p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-6">
-          <div>
-            <h2 className="font-display text-lg font-semibold tracking-tight">Show products on the shop page</h2>
-            <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink/65">
-              <strong className="font-semibold text-ink">On:</strong> /shop lists the products below.{" "}
-              <strong className="font-semibold text-ink">Off:</strong> /shop shows &ldquo;Coming soon&rdquo;.
-            </p>
-          </div>
-          <ShopSwitch on={showProducts} />
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-ink/10 pt-5 text-sm">
-          <span
-            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider ${
-              showProducts ? "bg-emerald-50 text-emerald-700" : "bg-ink/[0.06] text-ink/60"
-            }`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${showProducts ? "bg-emerald-500" : "bg-ink/40"}`} />
-            {showProducts ? "Products live" : "Coming soon showing"}
-          </span>
-          <Link href="/shop" target="_blank" className="font-semibold text-brand hover:text-brand-deep">
-            View /shop ↗
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/products/new" className={btn.primary}>
+            + Add product
+          </Link>
+          <Link href="/admin/orders" className={btn.secondary}>
+            View orders
           </Link>
         </div>
-      </section>
+      </div>
 
-      {/* Product list (read-only for now) */}
-      <section className="border border-ink/12 bg-paper">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 p-6 sm:px-8">
-          <div>
-            <h2 className="font-display text-lg font-semibold tracking-tight">Products</h2>
-            <p className="mt-1 text-sm text-ink/60">
-              {PRODUCTS.length} products · {inStock} in stock
-            </p>
+      {/* Key numbers */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <StatCard label="Open orders" value={String(openOrders.length)} hint={`${ORDERS.filter((o) => o.status === "New").length} new to confirm`} tone="warn" />
+        <StatCard label="Sales collected (7 days)" value={formatNaira(revenue)}  />
+        <StatCard label="Products in stock" value={`${PRODUCTS.length - outOfStock.length}/${PRODUCTS.length}`} hint={`${outOfStock.length} out of stock`} tone={outOfStock.length ? "warn" : "default"} />
+        <StatCard label="Customers" value={String(CUSTOMERS.length)} hint={`${CUSTOMERS.filter((c) => c.type === "Business").length} business accounts`} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Recent orders */}
+        <Card
+          title="Recent orders"
+          className="lg:col-span-2"
+          flush
+          actions={
+            <Link href="/admin/orders" className={btn.ghost}>
+              See all
+            </Link>
+          }
+        >
+          <div className={table.wrap}>
+            <table className={table.table}>
+              <thead>
+                <tr>
+                  <th className={table.th}>Order</th>
+                  <th className={table.th}>Customer</th>
+                  <th className={table.th}>Total</th>
+                  <th className={table.th}>Status</th>
+                  <th className={table.th}>Placed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ORDERS.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-10 text-center text-sm text-ink/50">
+                      No orders yet.
+                    </td>
+                  </tr>
+                )}
+                {ORDERS.slice(0, 5).map((o) => (
+                  <tr key={o.id} className={table.row}>
+                    <td className={`${table.td} font-semibold`}>{o.id}</td>
+                    <td className={table.td}>{o.customer}</td>
+                    <td className={`${table.td} tabular-nums`}>{formatNaira(orderTotal(o))}</td>
+                    <td className={table.td}>
+                      <Badge tone={STATUS_TONE[o.status]}>{o.status}</Badge>
+                    </td>
+                    <td className={`${table.td} text-ink/55`}>{formatDateTime(o.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </Card>
+
+        <div className="flex flex-col gap-6">
+          {/* Store status — live switch */}
+          <Card title="Online shop">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium">Show products on /shop</p>
+                <p className="mt-0.5 text-xs text-ink/55">Off shows &ldquo;Coming soon&rdquo;.</p>
+              </div>
+              <ShopSwitch on={showProducts} />
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t border-ink/10 pt-4">
+              <Badge tone={showProducts ? "green" : "grey"}>{showProducts ? "Shop is live" : "Coming soon"}</Badge>
+              <Link href="/shop" target="_blank" className={btn.ghost}>
+                Open shop ↗
+              </Link>
+            </div>
+            {!settingsStorageReady() && (
+              <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
+                Settings can&rsquo;t be saved yet — connect a database.
+              </p>
+            )}
+          </Card>
+
+          {/* Stock alerts */}
+          <Card
+            title="Stock alerts"
+            actions={
+              <Link href="/admin/products" className={btn.ghost}>
+                Manage
+              </Link>
+            }
+          >
+            {outOfStock.length === 0 ? (
+              <p className="text-sm text-ink/55">Everything is in stock.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {outOfStock.map((p) => (
+                  <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="truncate">{p.name}</span>
+                    <Badge tone="red">Out of stock</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
         </div>
-        <ul className="divide-y divide-ink/10">
-          {PRODUCTS.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-4 px-6 py-4 sm:px-8">
-              <div className="min-w-0">
-                <p className="truncate font-medium text-ink">{p.name}</p>
-                <p className="text-xs text-ink/55">
-                  {p.category} · {p.size}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-4 text-sm">
-                <span className="font-semibold tabular-nums">{formatNaira(p.price)}</span>
-                <span className={`w-20 text-right text-xs ${p.inStock ? "text-emerald-700" : "text-ink/45"}`}>
-                  {p.inStock ? "In stock" : "Out of stock"}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <p className="border-t border-ink/10 px-6 py-4 text-xs leading-relaxed text-ink/55 sm:px-8">
-          Products are edited in <code className="font-mono">src/lib/shop-data.ts</code> for now. Replace the demo list
-          with real stock, prices and safety information before switching the shop on publicly.
-        </p>
-      </section>
+      </div>
+
     </div>
   );
 }

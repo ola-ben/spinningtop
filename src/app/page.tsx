@@ -33,21 +33,21 @@ const PILLARS = [
   {
     no: "01",
     title: "Care Services",
-    desc: "Laundry, wet & dry cleaning, repairs, upholstery & rugs, and pest control.",
+    desc: "Laundry, cleaning, repairs & pest control.",
     href: "/services",
     image: IMAGES.pillarServices,
   },
   {
     no: "02",
     title: "Product Shop",
-    desc: "Laundry, hygiene and household products for individual and business buyers.",
+    desc: "Laundry & hygiene products.",
     href: "/shop",
     image: IMAGES.pillarShop,
   },
   {
     no: "03",
     title: "Training Academy",
-    desc: "Learning programmes in fabric care, service operations and related skills.",
+    desc: "Hands-on fabric care training.",
     href: "/academy",
     image: IMAGES.pillarAcademy,
   },
@@ -58,25 +58,25 @@ const PILLARS = [
 const HOW_STEPS = [
   {
     title: "Tell us what you need",
-    desc: "Bring your items to a branch or send us an enquiry describing the service you need.",
+    desc: "Visit a branch or message us.",
   },
   {
     title: "We inspect & quote",
-    desc: "We check each item and confirm the scope, price and timeline before any work begins.",
+    desc: "Price and timeline confirmed first.",
   },
   {
     title: "Collect when it’s ready",
-    desc: "Every job is quality-checked before handover, and we let you know early if anything changes.",
+    desc: "Quality-checked before handover.",
   },
 ];
 
-const SERVICES: { title: string; desc: string; icon: ServiceIconName }[] = [
-  { title: "Laundry", desc: "Everyday and household washable items cleaned and neatly finished.", icon: "laundry" },
-  { title: "Wet & Dry Cleaning", desc: "Professional care for suitable garments, textiles and delicate items.", icon: "cleaning" },
-  { title: "Tailor Repairs & Alterations", desc: "Repairs and fit adjustments that give your favourite items more life.", icon: "tailor" },
-  { title: "Shoe Repair / Cobbler", desc: "Care, selected repairs and restoration for appropriate footwear.", icon: "shoe" },
-  { title: "Upholstery & Rug Cleaning", desc: "Cleaning support for selected sofas, chairs, rugs and furnishings.", icon: "upholstery" },
-  { title: "Pest Control", desc: "Assessment-led pest management for residential or commercial premises.", icon: "pest" },
+const SERVICES: { title: string; icon: ServiceIconName }[] = [
+  { title: "Laundry", icon: "laundry" },
+  { title: "Wet & Dry Cleaning", icon: "cleaning" },
+  { title: "Tailor Repairs & Alterations", icon: "tailor" },
+  { title: "Shoe Repair / Cobbler", icon: "shoe" },
+  { title: "Upholstery & Rug Cleaning", icon: "upholstery" },
+  { title: "Pest Control", icon: "pest" },
 ];
 
 /* Structured data for search engines (schema.org). Main entity = Oluyole
@@ -155,7 +155,27 @@ export default function Home() {
         <section className="relative overflow-hidden bg-tint">
           {/* Geometric blocks — "clean geometric blocks" from the graphic language */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 select-none">
-            <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border-[28px] border-brand/[0.06] sm:h-[28rem] sm:w-[28rem]" />
+            {/* 1. Soft dot grid — strongest behind the photo, fading out toward the headline */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: "radial-gradient(rgba(0, 0, 254, 0.16) 1px, transparent 1.4px)",
+                backgroundSize: "22px 22px",
+                maskImage: "radial-gradient(ellipse 60% 70% at 75% 50%, #000 0%, transparent 75%)",
+                WebkitMaskImage: "radial-gradient(ellipse 60% 70% at 75% 50%, #000 0%, transparent 75%)",
+              }}
+            />
+            {/* 2. Thin concentric rings behind the photo — ripples / a spinning top in motion.
+                Centred under the photo: lower middle on mobile, right column on desktop. */}
+            <div className="absolute left-1/2 top-[72%] -translate-x-1/2 -translate-y-1/2 lg:left-[74%] lg:top-1/2">
+              {["h-[22rem] w-[22rem]", "h-[34rem] w-[34rem]", "h-[46rem] w-[46rem]", "h-[58rem] w-[58rem]"].map((size, i) => (
+                <div
+                  key={size}
+                  className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand ${size}`}
+                  style={{ opacity: 0.14 - i * 0.03 }}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-14 sm:px-6 md:gap-14 lg:grid-cols-12 lg:gap-10 lg:pb-24 lg:pt-16">
@@ -171,8 +191,7 @@ export default function Home() {
               </Reveal>
 
               <Reveal as="p" delay={200} className="mt-6 max-w-xl text-base leading-relaxed text-ink/70 md:text-lg">
-                Comprehensive garment and home care, laundry and hygiene products, and practical industry training —
-                from one trusted brand.
+                Garment &amp; home care, laundry products and training in Ibadan.
               </Reveal>
 
               <Reveal delay={300} className="mt-10 flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
@@ -255,9 +274,6 @@ export default function Home() {
                       </li>
                     ))}
                   </ol>
-                  <p className="mt-8 border-t border-paper/15 pt-6 text-sm leading-relaxed text-paper/80 sm:mt-6 sm:pt-5 lg:mt-4 lg:pt-4 lg:text-[13px]">
-                    Careful service. Clear communication. Everyday convenience.
-                  </p>
                 </div>
               </div>
             </Reveal>
@@ -344,7 +360,7 @@ export default function Home() {
               {HOW_STEPS.map((s, i) => (
                 <li
                   key={s.title}
-                  className="sticky top-[5.5rem] min-h-[13rem] border-t border-ink/10 bg-paper pb-10 pt-6 shadow-[0_-8px_16px_-14px_rgba(49,49,49,0.18)] first:shadow-none sm:static sm:min-h-0 sm:pb-0 sm:shadow-none"
+                  className="sticky top-[5.5rem] min-h-[10rem] border-t border-ink/10 bg-paper pb-10 pt-6 shadow-[0_-8px_16px_-14px_rgba(49,49,49,0.18)] first:shadow-none sm:static sm:min-h-0 sm:pb-0 sm:shadow-none"
                 >
                   <span className="grid h-7 w-7 place-items-center rounded-full bg-brand text-xs font-semibold text-paper">
                     {i + 1}
@@ -359,46 +375,54 @@ export default function Home() {
 
         {/* 3. SERVICES -------------------------------------------------- */}
         <section id="services" className="scroll-mt-20 border-t border-ink/10">
-          <Reveal className="mx-auto grid max-w-7xl gap-12 px-4 py-24 sm:px-6 lg:grid-cols-12">
-            <div className="lg:col-span-4">
-              <p className="eyebrow">Care services</p>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-display text-ink sm:text-4xl">
-                Everyday, garment &amp; home care.
-              </h2>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink/60">
-                Every item is inspected before we quote, and we&rsquo;ll always explain the scope and any limitations up
-                front.
-              </p>
-              <ExternalCta className={`${textLink} mt-8`}>
+          <Reveal className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+            {/* Header row: title left, action right */}
+            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+              <div>
+                <p className="eyebrow">Care services</p>
+                <h2 className="mt-4 font-display text-3xl font-semibold tracking-display text-ink sm:text-4xl">
+                  Everyday, garment &amp; home care.
+                </h2>
+              </div>
+              <ExternalCta className={textLink}>
                 Ask about availability
                 <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </ExternalCta>
-              <ImageSlot
-                image={IMAGES.services}
-                aspect="aspect-[16/10] lg:aspect-[4/5]"
-                sizes="(min-width: 1024px) 33vw, 100vw"
-                className="mt-10"
-              />
             </div>
 
-            <ul className="grid gap-x-10 sm:grid-cols-2 lg:col-span-8">
-              {/* Mobile: sticky stacking, same as "How it works". sm+: normal grid. */}
-              {SERVICES.map((s) => (
-                <li
-                  key={s.title}
-                  className="sticky top-[5.5rem] flex min-h-[9.5rem] gap-4 border-t border-ink/10 bg-paper py-6 shadow-[0_-8px_16px_-14px_rgba(49,49,49,0.18)] first:shadow-none sm:static sm:min-h-0 sm:gap-3 sm:shadow-none"
-                >
-                  {/* Service icon — full size on mobile, compact from tablet up */}
-                  <span className="grid h-9 w-9 shrink-0 place-items-center bg-tint text-brand sm:mt-px sm:h-6 sm:w-6">
-                    <ServiceIcon name={s.icon} className="h-[18px] w-[18px] sm:h-3.5 sm:w-3.5" />
-                  </span>
-                  <div className="min-w-0">
-                    <h3 className="font-display text-base font-semibold tracking-tight text-ink">{s.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-ink/60">{s.desc}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {/* lg: photo + 3×2 tiles at equal height. Below lg: tiles only (2 cols mobile, 3 cols tablet). */}
+            <div className="mt-10 grid gap-3 lg:grid-cols-12 lg:gap-6">
+              <div className="hidden lg:col-span-5 lg:block">
+                <ImageSlot
+                  image={IMAGES.services}
+                  aspect="h-full min-h-[22rem]"
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                />
+              </div>
+
+              {/* Mobile: compact centred category tiles (tint, icon on top, no arrow).
+                  sm+: outlined cards with icon top-left and an arrow. */}
+              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:col-span-7 lg:grid-rows-2">
+                {SERVICES.map((s) => (
+                  <li key={s.title}>
+                    <Link
+                      href={`/services/${s.icon}`}
+                      className="group flex h-full flex-col items-center justify-start gap-3 bg-tint px-3 pb-4 pt-5 text-center transition-all duration-300 active:scale-[0.98] sm:min-h-[8.5rem] sm:items-stretch sm:justify-between sm:gap-6 sm:border sm:border-ink/10 sm:bg-paper sm:p-5 sm:text-left sm:hover:-translate-y-0.5 sm:hover:border-brand sm:hover:shadow-lg sm:hover:shadow-brand/10"
+                    >
+                      <span className="grid h-12 w-12 place-items-center bg-paper text-ink shadow-sm shadow-ink/10 transition-colors duration-300 group-hover:bg-ink group-hover:text-paper sm:h-10 sm:w-10 sm:bg-tint sm:shadow-none">
+                        <ServiceIcon name={s.icon} className="h-[22px] w-[22px] sm:h-5 sm:w-5" />
+                      </span>
+                      <span className="flex min-h-[2.25rem] items-start justify-center gap-2 sm:min-h-0 sm:items-end sm:justify-between">
+                        <h3 className="font-display text-[13px] font-semibold leading-snug tracking-tight text-ink sm:text-base">
+                          {s.title}
+                        </h3>
+                        <ArrowIcon className="hidden h-4 w-4 shrink-0 text-ink/25 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-brand sm:block" />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </Reveal>
         </section>
 
@@ -416,14 +440,10 @@ export default function Home() {
               <h2 className="mt-4 font-display text-2xl font-semibold tracking-display text-ink sm:text-3xl">
                 Laundry &amp; hygiene essentials.
               </h2>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-ink/60">
-                Detergents, fabric-care agents, cleaning tools, disinfectants and household essentials — with clear usage
-                information, for homes and businesses.
-              </p>
-              <ExternalCta className={`${textLink} mt-8`}>
+              <Link href="/shop" className={`${textLink} mt-6`}>
                 Shop approved products
                 <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </ExternalCta>
+              </Link>
             </Reveal>
 
             <Reveal
@@ -439,13 +459,9 @@ export default function Home() {
               />
               <p className="eyebrow">Training Academy</p>
               <h2 className="mt-4 font-display text-2xl font-semibold tracking-display text-ink sm:text-3xl">
-                Learn the techniques behind professional care.
+                Learn professional fabric care.
               </h2>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-ink/60">
-                Structured learning and supervised practice in laundry operations, wet &amp; dry cleaning, stain
-                treatment, fabric care, customer service and safety.
-              </p>
-              <ExternalCta className={`${textLink} mt-8`}>
+              <ExternalCta className={`${textLink} mt-6`}>
                 Enquire about the next intake
                 <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </ExternalCta>
@@ -459,12 +475,9 @@ export default function Home() {
             <div>
               <p className="eyebrow">For organisations</p>
               <h2 className="mt-4 font-display text-2xl font-semibold tracking-display text-ink sm:text-3xl">
-                A clear service plan for your organisation.
+                Corporate laundry &amp; cleaning.
               </h2>
-              <p className="mt-4 text-sm leading-relaxed text-ink/60">
-                Hotels, schools, offices, healthcare facilities and property managers — tell us what you need and
-                we&rsquo;ll assess the work and prepare a clear quotation.
-              </p>
+              <p className="mt-4 text-sm text-ink/60">Hotels, schools, offices and healthcare.</p>
               <ExternalCta className="btn-ink mt-8">
                 Request a corporate quote <ArrowIcon />
               </ExternalCta>
@@ -521,7 +534,7 @@ export default function Home() {
                     </dl>
                   ) : (
                     <p className="mt-6 border-y border-ink/10 py-3 text-sm text-ink/55">
-                      Opening hours for this outlet — please enquire before visiting.
+                      Hours: please enquire before visiting.
                     </p>
                   )}
 
@@ -543,7 +556,7 @@ export default function Home() {
       </main>
 
       <SiteFooter />
-      <FloatingActions />
+      <FloatingActions landing />
     </div>
   );
 }

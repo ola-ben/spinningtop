@@ -20,11 +20,11 @@ export default function SiteHeader() {
   /* Lock page scroll + flag the body while the mobile menu is open
      (other floating UI hides itself via body[data-menu="open"]). */
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    document.documentElement.style.overflow = open ? "hidden" : "";
     if (open) document.body.dataset.menu = "open";
     else delete document.body.dataset.menu;
     return () => {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       delete document.body.dataset.menu;
     };
   }, [open]);
@@ -189,9 +189,6 @@ export default function SiteHeader() {
           >
             Request a quote →
           </a>
-          <p className="text-center font-mono text-[10px] uppercase tracking-widest text-paper/60">
-            Better care. Easier living. Brighter futures.
-          </p>
         </div>
       </div>
     </>

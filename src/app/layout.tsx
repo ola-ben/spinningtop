@@ -37,7 +37,6 @@ export const metadata: Metadata = {
     "laundry training academy",
   ],
   alternates: { canonical: "/" },
-  icons: { icon: "/spinning-top-logo.jpg" },
   openGraph: {
     title: SITE_NAME,
     description: "Professional care for clothes and spaces. Products and practical training.",

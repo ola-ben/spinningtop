@@ -1,13 +1,43 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatNaira, SUGGESTED_SEARCHES, type Product } from "@/lib/shop-data";
 import { SearchIcon } from "./ShopIcons";
+
+/** What the search box searches: products (default) or another catalogue such as services. */
+export type SearchScope = {
+  /** Listing page, e.g. "/shop" or "/services". Items open at `${basePath}/${id}`. */
+  basePath: string;
+  /** Plural noun for labels, e.g. "products". */
+  noun: string;
+  placeholder: string;
+  suggestions: string[];
+  items: { id: string; name: string; meta: string; price: string; haystack: string }[];
+};
+
+export const productScope = (products: Product[]): SearchScope => ({
+  basePath: "/shop",
+  noun: "products",
+  placeholder: "Search products and categories",
+  suggestions: SUGGESTED_SEARCHES,
+  items: products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    meta: `${p.category} · ${p.size}`,
+    price: formatNaira(p.price),
+    haystack: [p.name, p.category, p.description, p.size].join(" ").toLowerCase(),
+  })),
+});
 
 type Props = {
   query: string;
   onQuery: (q: string) => void;
   products: Product[];
+  /** Detail pages: searching goes to the listing page (?q=…) instead of filtering in place. */
+  navigate?: boolean;
+  /** Search another catalogue instead of products. */
+  scope?: SearchScope;
 };
 
 type Mode = "panel" | "modal" | null;
@@ -24,7 +54,9 @@ export const matchProducts = (products: Product[], q: string) => {
    md+    — focusing the bar lifts it into a white panel over a dimmed page.
    mobile — tapping the bar opens a full-screen search with a back arrow.
    Empty box shows suggestion chips; typing lists matching products. */
-export default function ShopSearch({ query, onQuery, products }: Props) {
+export default function ShopSearch({ query, onQuery, products, navigate = false, scope }: Props) {
+  const router = useRouter();
+  const sc = scope ?? productScope(products);
   const [mode, setMode] = useState<Mode>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const barInputRef = useRef<HTMLInputElement>(null);
@@ -33,9 +65,16 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
     setMode(null);
     barInputRef.current?.blur();
   };
-  const pick = (q: string) => {
+  /** Search for a term: filter in place on /shop, or go there from other pages. */
+  const searchFor = (q: string) => {
     onQuery(q);
     close();
+    if (navigate && q.trim()) router.push(`${sc.basePath}?q=${encodeURIComponent(q.trim())}`);
+  };
+  /** A suggestion opens that item's details page. */
+  const openItem = (id: string) => {
+    close();
+    router.push(`${sc.basePath}/${id}`);
   };
 
   const open = () => {
@@ -59,20 +98,20 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     if (mode === "modal") {
-      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
       document.body.dataset.menu = "open";
     }
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       delete document.body.dataset.menu;
     };
   }, [mode]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    close();
+    searchFor(query);
   };
 
   return (
@@ -88,7 +127,7 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
         {mode === "panel" && (
           <div className="absolute -inset-x-3 -top-3 rounded-3xl bg-paper pb-4 pt-[62px] shadow-2xl shadow-ink/20">
             <div className="border-t border-ink/10 px-4 pt-3">
-              <Suggestions query={query} products={products} onPick={pick} />
+              <Suggestions query={query} scope={sc} onTerm={searchFor} onItem={openItem} />
             </div>
           </div>
         )}
@@ -102,7 +141,7 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
         >
           <SearchIcon className="h-5 w-5 shrink-0 text-ink/60" />
           <label htmlFor="shop-search" className="sr-only">
-            Search products
+            Search {sc.noun}
           </label>
           <input
             ref={barInputRef}
@@ -117,7 +156,7 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
             onClick={() => {
               if (!mode) open();
             }}
-            placeholder="Search products and categories"
+            placeholder={sc.placeholder}
             className="min-w-0 flex-1 bg-transparent py-2 text-[15px] text-ink outline-none placeholder:text-ink/50"
           />
           <button
@@ -131,7 +170,7 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
 
       {/* Full-screen search (mobile) */}
       {mode === "modal" && (
-        <div role="dialog" aria-label="Search products" className="fixed inset-0 z-[110] flex flex-col bg-paper md:hidden">
+        <div role="dialog" aria-label={`Search ${sc.noun}`} className="fixed inset-0 z-[110] flex flex-col bg-paper md:hidden">
           <form onSubmit={submit} className="flex items-center gap-2 border-b border-ink/10 px-3 py-3">
             <button
               type="button"
@@ -150,16 +189,16 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
                 autoFocus
                 autoComplete="off"
                 enterKeyHint="search"
-                aria-label="Search products"
+                aria-label={`Search ${sc.noun}`}
                 value={query}
                 onChange={(e) => onQuery(e.target.value)}
-                placeholder="Search products and categories"
+                placeholder={sc.placeholder}
                 className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-ink outline-none placeholder:text-ink/50"
               />
             </div>
           </form>
           <div className="flex-1 overflow-y-auto px-4 pt-3">
-            <Suggestions query={query} products={products} onPick={pick} />
+            <Suggestions query={query} scope={sc} onTerm={searchFor} onItem={openItem} />
           </div>
         </div>
       )}
@@ -169,12 +208,14 @@ export default function ShopSearch({ query, onQuery, products }: Props) {
 
 function Suggestions({
   query,
-  products,
-  onPick,
+  scope,
+  onTerm,
+  onItem,
 }: {
   query: string;
-  products: Product[];
-  onPick: (q: string) => void;
+  scope: SearchScope;
+  onTerm: (q: string) => void;
+  onItem: (id: string) => void;
 }) {
   const q = query.trim();
 
@@ -183,11 +224,11 @@ function Suggestions({
       <>
         <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink/50">Suggested searches</p>
         <ul className="mt-3 flex flex-wrap gap-2">
-          {SUGGESTED_SEARCHES.map((s) => (
+          {scope.suggestions.map((s) => (
             <li key={s}>
               <button
                 type="button"
-                onClick={() => onPick(s)}
+                onClick={() => onTerm(s)}
                 className="cursor-pointer rounded-full bg-ink/[0.06] px-4 py-2 text-sm text-ink transition-colors hover:bg-tint hover:text-brand"
               >
                 {s}
@@ -199,29 +240,28 @@ function Suggestions({
     );
   }
 
-  const matches = matchProducts(products, q).slice(0, 6);
+  const needle = q.toLowerCase();
+  const matches = scope.items.filter((i) => i.haystack.includes(needle)).slice(0, 6);
 
   return (
     <>
       <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink/50">
-        {matches.length ? "Products" : `No products match “${q}”`}
+        {matches.length ? scope.noun : `No ${scope.noun} match “${q}”`}
       </p>
       {matches.length > 0 && (
         <ul className="-mx-2 mt-2">
-          {matches.map((p) => (
-            <li key={p.id}>
+          {matches.map((i) => (
+            <li key={i.id}>
               <button
                 type="button"
-                onClick={() => onPick(p.name)}
+                onClick={() => onItem(i.id)}
                 className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-tint"
               >
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium text-ink">{p.name}</span>
-                  <span className="block text-xs text-ink/55">
-                    {p.category} · {p.size}
-                  </span>
+                  <span className="block truncate text-sm font-medium text-ink">{i.name}</span>
+                  <span className="block text-xs text-ink/55">{i.meta}</span>
                 </span>
-                <span className="shrink-0 text-sm font-semibold tabular-nums">{formatNaira(p.price)}</span>
+                <span className="shrink-0 text-sm font-semibold tabular-nums">{i.price}</span>
               </button>
             </li>
           ))}

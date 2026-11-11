@@ -156,6 +156,16 @@ export const COMING_SOON = {
     description:
       "Service plans for hotels, schools, offices, healthcare facilities and property managers.",
   },
+  terms: {
+    eyebrow: "Legal",
+    title: "Terms of Service",
+    description: "The terms that apply when you use our website, products and services.",
+  },
+  privacy: {
+    eyebrow: "Legal",
+    title: "Privacy Policy",
+    description: "How we collect, use and protect the personal information you share with us.",
+  },
 } as const;
 
 export type ComingSoonPage = keyof typeof COMING_SOON;

@@ -40,14 +40,14 @@ export default function CartDrawer({
 
   useEffect(() => {
     if (!open) return;
-    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     document.body.dataset.menu = "open";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       delete document.body.dataset.menu;
       document.removeEventListener("keydown", onKey);
     };
@@ -180,18 +180,21 @@ export function Stepper({
   name,
   tab = 0,
   small = false,
+  full = !small,
 }: {
   id: string;
   qty: number;
   name: string;
   tab?: number;
   small?: boolean;
+  /** Stretch across the available width. */
+  full?: boolean;
 }) {
   const btn = `grid cursor-pointer place-items-center rounded-full bg-brand text-paper transition-colors hover:bg-brand-deep ${
     small ? "h-7 w-7" : "h-10 w-10"
   }`;
   return (
-    <div className={`flex items-center ${small ? "gap-3" : "w-full justify-between"}`}>
+    <div className={`flex items-center ${full ? "w-full justify-between" : "gap-3"}`}>
       <button type="button" tabIndex={tab} onClick={() => setQty(id, qty - 1)} aria-label={`Remove one ${name}`} className={btn}>
         <MinusIcon className={small ? "h-3.5 w-3.5" : "h-4 w-4"} />
       </button>

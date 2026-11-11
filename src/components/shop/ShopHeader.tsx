@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PHONE_DISPLAY, PHONE_E164, QUOTE_LINK, whatsappLink } from "@/lib/site";
 import { WhatsAppIcon } from "@/components/SocialIcon";
@@ -9,13 +10,15 @@ import {
   CartIcon,
   ChevronDownIcon,
   CloseIcon,
+  HeartIcon,
   HelpIcon,
   MenuIcon,
   PhoneIcon,
   PinIcon,
   UserIcon,
 } from "./ShopIcons";
-import ShopSearch from "./ShopSearch";
+import ShopSearch, { type SearchScope } from "./ShopSearch";
+import { useWishlist } from "@/lib/wishlist-store";
 import type { Product } from "@/lib/shop-data";
 
 type Props = {
@@ -24,6 +27,10 @@ type Props = {
   products: Product[];
   cartCount: number;
   onOpenCart: () => void;
+  /** Product pages: search navigates to /shop instead of filtering in place. */
+  navigate?: boolean;
+  /** Search another catalogue (e.g. services) instead of products. */
+  scope?: SearchScope;
 };
 
 type MenuName = "account" | "help" | null;
@@ -31,9 +38,10 @@ type MenuName = "account" | "help" | null;
 /* Shop-only header (replaces the site header on /shop):
    desktop — ☰ · logo · search · Account · Help · Cart
    mobile  — ☰ · logo · account · cart, with search on its own row. */
-export default function ShopHeader({ query, onQuery, products, cartCount, onOpenCart }: Props) {
+export default function ShopHeader({ query, onQuery, products, cartCount, onOpenCart, navigate, scope }: Props) {
   const [openMenu, setOpenMenu] = useState<MenuName>(null);
   const [drawer, setDrawer] = useState(false);
+  const pathname = usePathname();
   const barRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click or Escape.
@@ -56,14 +64,14 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
   // Lock scroll + hide floating buttons while the side menu is open.
   useEffect(() => {
     if (!drawer) return;
-    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     document.body.dataset.menu = "open";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setDrawer(false);
     };
     document.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       delete document.body.dataset.menu;
       document.removeEventListener("keydown", onKey);
     };
@@ -85,7 +93,7 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
               onClick={() => setDrawer(true)}
               aria-label="Open menu"
               aria-expanded={drawer}
-              className="-ml-2 grid h-10 w-10 cursor-pointer place-items-center rounded-full text-ink transition-colors hover:bg-ink/[0.05]"
+              className="-ml-2 hidden h-10 w-10 cursor-pointer place-items-center rounded-full text-ink transition-colors hover:bg-ink/[0.05] md:grid"
             >
               <MenuIcon />
             </button>
@@ -102,7 +110,7 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
           </div>
 
           {/* Search — own row on mobile, inline from md */}
-          <ShopSearch query={query} onQuery={onQuery} products={products} />
+          <ShopSearch query={query} onQuery={onQuery} products={products} navigate={navigate} scope={scope} />
 
           {/* Account · Help · Cart */}
           <div className="ml-auto flex shrink-0 items-center gap-0.5 md:ml-0 md:gap-2">
@@ -139,6 +147,8 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
               <HelpLinks />
             </Dropdown>
 
+            <WishlistLink />
+
             <button
               type="button"
               onClick={onOpenCart}
@@ -154,6 +164,17 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
                 )}
               </span>
               <span className="hidden text-[15px] font-semibold lg:inline">Cart</span>
+            </button>
+
+            {/* Mobile: menu button on the far right */}
+            <button
+              type="button"
+              onClick={() => setDrawer(true)}
+              aria-label="Open menu"
+              aria-expanded={drawer}
+              className="-mr-2 grid h-10 w-10 cursor-pointer place-items-center rounded-full text-ink transition-colors hover:bg-ink/[0.05] md:hidden"
+            >
+              <MenuIcon />
             </button>
           </div>
         </div>
@@ -175,8 +196,8 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
         />
         <nav
           aria-label="Main menu"
-          className={`absolute inset-y-0 left-0 flex w-[min(20rem,85vw)] flex-col overflow-y-auto bg-paper shadow-2xl transition-transform duration-300 ease-out ${
-            drawer ? "translate-x-0" : "-translate-x-full"
+          className={`absolute inset-y-0 right-0 flex md:left-0 md:right-auto w-[min(20rem,85vw)] flex-col overflow-y-auto bg-paper shadow-2xl transition-transform duration-300 ease-out ${
+            drawer ? "translate-x-0" : "translate-x-full md:-translate-x-full"
           }`}
         >
           <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
@@ -196,26 +217,31 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
           <ul className="text-[15px]">
             {[
               { href: "/", label: "Home" },
-              { href: "/shop", label: "Product shop", current: true },
+              { href: "/shop", label: "Product shop" },
+              { href: "/wishlist", label: "Wishlist" },
               { href: "/services", label: "Care services" },
               { href: "/academy", label: "Training Academy" },
               { href: "/corporate", label: "Corporate" },
               { href: "/#visit", label: "Visit us" },
-            ].map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  tabIndex={drawer ? 0 : -1}
-                  aria-current={l.current ? "page" : undefined}
-                  onClick={() => setDrawer(false)}
-                  className={`block px-5 py-3 transition-colors hover:bg-tint hover:text-brand ${
-                    l.current ? "font-semibold text-brand" : "text-ink"
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
+            ].map((l) => {
+              // Product pages count as "Product shop".
+              const current = l.href === "/shop" ? pathname.startsWith("/shop") : pathname === l.href;
+              return (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    tabIndex={drawer ? 0 : -1}
+                    aria-current={current ? "page" : undefined}
+                    onClick={() => setDrawer(false)}
+                    className={`block px-5 py-3 transition-colors hover:bg-tint hover:text-brand ${
+                      current ? "font-semibold text-brand" : "text-ink"
+                    }`}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           <p className="eyebrow mt-4 border-t border-ink/10 px-5 pb-2 pt-5">Need help?</p>
@@ -317,5 +343,27 @@ function HelpLinks({ tabbable = true, onNavigate }: { tabbable?: boolean; onNavi
         </Link>
       </li>
     </ul>
+  );
+}
+
+/** ♡ Wishlist link with a count of saved products. */
+function WishlistLink() {
+  const count = useWishlist().length;
+  return (
+    <Link
+      href="/wishlist"
+      aria-label={`Wishlist, ${count} saved`}
+      className="flex items-center gap-2 rounded-full p-2 text-ink transition-colors hover:text-brand lg:px-3"
+    >
+      <span className="relative">
+        <HeartIcon />
+        {count > 0 && (
+          <span className="absolute -right-2 -top-1.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-paper">
+            {count}
+          </span>
+        )}
+      </span>
+      <span className="hidden text-[15px] font-semibold lg:inline">Wishlist</span>
+    </Link>
   );
 }
