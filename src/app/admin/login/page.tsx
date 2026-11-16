@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import LoginForm from "./LoginForm";
@@ -19,11 +20,13 @@ export default function LoginPage() {
             <h1 className="font-display text-2xl font-semibold tracking-tight">Welcome back</h1>
             <p className="mt-1 text-sm text-ink/55">Sign in to manage your store.</p>
             <div className="mt-7">
-              <LoginForm />
+              <Suspense fallback={null}>
+                <LoginForm />
+              </Suspense>
             </div>
           </div>
           <p className="mt-6 text-center text-xs text-ink/50">
-            Need access? Ask the business owner to invite you from Team &amp; roles.
+            Need access? Ask the business owner to add your account in Supabase.
           </p>
         </div>
 

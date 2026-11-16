@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { clearWishlist, useWishlist } from "@/lib/wishlist-store";
 import type { Product } from "@/lib/shop-data";
+import { useLiveProducts } from "@/lib/live-catalogue";
 import ShopChrome from "./ShopChrome";
 import ProductCard from "./ProductCard";
 import { HeartIcon } from "./ShopIcons";
 
 /* /wishlist — products saved with the ♡ button (stored in this browser). */
-export default function WishlistView({ products }: { products: Product[] }) {
+export default function WishlistView({ products: initial }: { products: Product[] }) {
+  const { products } = useLiveProducts(initial);
   const [query, setQuery] = useState("");
   const ids = useWishlist();
   // Keep saved order (newest first); skip anything no longer in the catalogue.

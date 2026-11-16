@@ -4,19 +4,29 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import ShopChrome from "@/components/shop/ShopChrome";
-import { PRODUCTS } from "@/lib/shop-data";
+import type { Product } from "@/lib/shop-data";
+import { useLiveProducts, useLiveServices } from "@/lib/live-catalogue";
 import { matchServices, type Service } from "@/lib/services-data";
 import ServiceCard, { serviceScope } from "./ServiceCard";
 
 /* /services — same layout and behaviour as /shop: shop header with search,
    breadcrumb + count, compact grid. "Request a quote" replaces Add to cart. */
-export default function ServicesBrowser({ services }: { services: Service[] }) {
+export default function ServicesBrowser({
+  services: initialServices,
+  products: initialProducts,
+}: {
+  services: Service[];
+  products: Product[];
+}) {
+  // Build-time lists first, then the live lists from Supabase.
+  const { services } = useLiveServices(initialServices);
+  const { products } = useLiveProducts(initialProducts);
   const [query, setQuery] = useState("");
   const results = useMemo(() => matchServices(services, query), [services, query]);
   const scope = useMemo(() => serviceScope(services), [services]);
 
   return (
-    <ShopChrome products={PRODUCTS} query={query} onQuery={setQuery} scope={scope}>
+    <ShopChrome products={products} query={query} onQuery={setQuery} scope={scope}>
       <Suspense fallback={null}>
         <QueryFromUrl onQuery={setQuery} />
       </Suspense>

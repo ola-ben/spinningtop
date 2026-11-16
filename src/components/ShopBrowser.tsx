@@ -7,10 +7,13 @@ import ShopChrome from "@/components/shop/ShopChrome";
 import ProductCard from "@/components/shop/ProductCard";
 import { matchProducts } from "@/components/shop/ShopSearch";
 import type { Product } from "@/lib/shop-data";
+import { useLiveProducts } from "@/lib/live-catalogue";
 
 /* /shop: compact product grid. Cards show only what's needed to buy —
    photo, name, size, price, add to cart. Details live on /shop/[id]. */
-export default function ShopBrowser({ products }: { products: Product[] }) {
+export default function ShopBrowser({ products: initial }: { products: Product[] }) {
+  // Build-time list first, then the live list from Supabase.
+  const { products } = useLiveProducts(initial);
   const [query, setQuery] = useState("");
   const results = useMemo(() => matchProducts(products, query), [products, query]);
 

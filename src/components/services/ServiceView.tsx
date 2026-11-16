@@ -7,7 +7,7 @@ import ShopChrome from "@/components/shop/ShopChrome";
 import ProductRail from "@/components/shop/ProductRail";
 import { PhoneIcon } from "@/components/shop/ShopIcons";
 import { PHONE_DISPLAY, PHONE_E164 } from "@/lib/site";
-import { PRODUCTS } from "@/lib/shop-data";
+import type { Product } from "@/lib/shop-data";
 import { SERVICE_PRICE_LABEL, type Service } from "@/lib/services-data";
 import { QuoteButton, ServiceMini, serviceScope } from "./ServiceCard";
 
@@ -19,17 +19,19 @@ const STEPS = ["Inspect first", "Explain scope", "Confirm price", "Check the res
 export default function ServiceView({
   service: s,
   services,
+  products,
   others,
 }: {
   service: Service;
   services: Service[];
+  products: Product[];
   others: Service[];
 }) {
   const [query, setQuery] = useState("");
   const scope = useMemo(() => serviceScope(services), [services]);
 
   return (
-    <ShopChrome products={PRODUCTS} query={query} onQuery={setQuery} navigate scope={scope}>
+    <ShopChrome products={products} query={query} onQuery={setQuery} navigate scope={scope}>
       <main className="bg-ink/[0.03] md:pb-16">
         <div className="mx-auto max-w-7xl sm:px-6">
           <nav aria-label="Breadcrumb" className="px-4 py-3 text-xs text-ink/55 sm:px-0">

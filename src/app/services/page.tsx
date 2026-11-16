@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServicesBrowser from "@/components/services/ServicesBrowser";
 import SiteFooter from "@/components/SiteFooter";
 import FloatingActions from "@/components/FloatingActions";
-import { SERVICES } from "@/lib/services-data";
+import { getProducts, getServices } from "@/lib/catalogue";
 
 export const metadata: Metadata = {
   title: "Care Services",
@@ -11,10 +11,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/services" },
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const [services, products] = await Promise.all([getServices(), getProducts()]);
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <ServicesBrowser services={SERVICES} />
+      <ServicesBrowser services={services} products={products} />
       <SiteFooter />
       <FloatingActions quoteBar={false} />
     </div>

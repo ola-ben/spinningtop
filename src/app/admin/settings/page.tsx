@@ -1,7 +1,7 @@
-import { ShopSwitch } from "../AdminForms";
+import { ShopSwitch } from "@/components/admin/CatalogueForms";
 import { Card, Field, PageHeader, SettingRow, Toggle, btn, inputClass } from "@/components/admin/ui";
 import { LINK_HUB, PHONE_DISPLAY, SITE_DESCRIPTION, SITE_NAME, SOCIALS, WHATSAPP_NUMBER } from "@/lib/site";
-import { getShopSettings, settingsStorageReady } from "@/lib/shop-settings";
+import { getShopSettings } from "@/lib/shop-settings";
 
 export const metadata = { title: "Settings" };
 
@@ -71,7 +71,7 @@ export default async function SettingsPage() {
           <Card title="Store">
             <div className="divide-y divide-ink/10">
               <SettingRow title="Online shop" description="Show products on /shop. Off shows “Coming soon”. (Live)">
-                <ShopSwitch on={showProducts} />
+                <ShopSwitch initialOn={showProducts} />
               </SettingRow>
               <SettingRow title="Cart orders via WhatsApp" description="Customers send their cart as a WhatsApp message.">
                 <Toggle label="Cart orders via WhatsApp" defaultChecked />
@@ -83,11 +83,6 @@ export default async function SettingsPage() {
                 <Toggle label="Wishlist" defaultChecked />
               </SettingRow>
             </div>
-            {!settingsStorageReady() && (
-              <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-                The shop switch can&rsquo;t be saved yet — connect a database (Upstash Redis on Vercel).
-              </p>
-            )}
           </Card>
 
           <Card title="Notifications">

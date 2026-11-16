@@ -121,7 +121,10 @@ export default function ShopSearch({ query, onQuery, products, navigate = false,
 
       <div
         ref={wrapRef}
-        className={`relative order-last w-full md:order-none md:max-w-2xl md:flex-1 ${mode === "panel" ? "z-50" : ""}`}
+        className={`relative order-last w-full transition-transform duration-200 md:order-none md:max-w-2xl md:flex-1 ${
+          // md/lg: the open panel drops a little below the header edge so it sits clear of the top.
+          mode === "panel" ? "z-50 md:translate-y-5" : ""
+        }`}
       >
         {/* White panel that wraps the bar + suggestions (desktop) */}
         {mode === "panel" && (

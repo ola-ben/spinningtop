@@ -1,52 +1,34 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useActionState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PasswordInput from "@/components/admin/PasswordInput";
 import { btn, inputClass } from "@/components/admin/ui";
+import { signInAdmin } from "@/lib/admin-auth";
 
-/* UI only for now. When the backend lands, replace the body of onSubmit with
-   the real sign-in call (e.g. supabase.auth.signInWithPassword) and show its
-   error message in `error`. */
+/* Admin sign-in with a Supabase account (Authentication → Users) that is
+   listed in the admins table — see supabase/admin-access.sql.
+   After signing in you return to the admin page you were trying to open. */
 export default function LoginForm() {
   const router = useRouter();
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const email = String(data.get("email") ?? "").trim();
-    const password = String(data.get("password") ?? "");
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Enter a valid email address.");
-    if (password.length < 6) return setError("Password must be at least 6 characters.");
-    setError("");
-    setPending(true);
-    // No auth yet — go straight to the dashboard.
-    router.push("/admin");
-  }
+  const next = useSearchParams().get("next") ?? "";
+  const [error, action, pending] = useActionState<string | null, FormData>(async (_prev, formData) => {
+    const err = await signInAdmin(String(formData.get("email") ?? "").trim(), String(formData.get("password") ?? ""));
+    if (err) return err;
+    router.replace(next.startsWith("/admin") && !next.startsWith("/admin/login") ? next : "/admin/");
+    return null;
+  }, null);
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form action={action} className="flex flex-col gap-5">
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Email</span>
-        <input name="email" type="email" autoComplete="email" placeholder="you@spinningtop.ng" required className={inputClass} />
+        <input name="email" type="email" autoComplete="email" placeholder="admin@spinningtop.ng" required className={inputClass} />
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className="flex items-center justify-between text-sm font-medium">
-          Password
-          <Link href="/admin/login" className="text-xs font-semibold text-brand hover:underline">
-            Forgot password?
-          </Link>
-        </span>
+        <span className="text-sm font-medium">Password</span>
         <PasswordInput name="password" autoComplete="current-password" placeholder="Enter your password" required />
-      </label>
-
-      <label className="flex cursor-pointer items-center gap-2.5 text-sm text-ink/70">
-        <input type="checkbox" name="remember" className="h-4 w-4 accent-[var(--color-brand)]" />
-        Keep me signed in
       </label>
 
       {error && (

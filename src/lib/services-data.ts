@@ -6,7 +6,9 @@ import type { ServiceIconName } from "@/components/ServiceIcon";
    Photos are temporary Unsplash images until real ones are supplied. */
 
 export type Service = {
-  id: ServiceIconName;
+  /** URL slug: /services/[id]. */
+  id: string;
+  icon: ServiceIconName;
   name: string;
   category: "Garment care" | "Home care";
   summary: string;
@@ -19,6 +21,7 @@ export type Service = {
 export const SERVICES: Service[] = [
   {
     id: "laundry",
+    icon: "laundry",
     name: "Laundry",
     category: "Garment care",
     summary: "Everyday and household washable items, cleaned and neatly finished.",
@@ -28,6 +31,7 @@ export const SERVICES: Service[] = [
   },
   {
     id: "cleaning",
+    icon: "cleaning",
     name: "Wet & Dry Cleaning",
     category: "Garment care",
     summary: "Professional care for suitable garments, textiles and delicate items.",
@@ -37,6 +41,7 @@ export const SERVICES: Service[] = [
   },
   {
     id: "tailor",
+    icon: "tailor",
     name: "Tailor Repairs & Alterations",
     category: "Garment care",
     summary: "Repairs and fit adjustments that give your favourite items more life.",
@@ -46,6 +51,7 @@ export const SERVICES: Service[] = [
   },
   {
     id: "shoe",
+    icon: "shoe",
     name: "Shoe Repair / Cobbler",
     category: "Garment care",
     summary: "Care, selected repairs and restoration for appropriate footwear.",
@@ -55,6 +61,7 @@ export const SERVICES: Service[] = [
   },
   {
     id: "upholstery",
+    icon: "upholstery",
     name: "Upholstery & Rug Cleaning",
     category: "Home care",
     summary: "Cleaning for selected sofas, chairs, rugs and other suitable furnishings.",
@@ -64,6 +71,7 @@ export const SERVICES: Service[] = [
   },
   {
     id: "janitorial",
+    icon: "janitorial",
     name: "Janitorial Services",
     category: "Home care",
     summary: "Routine and one-off cleaning for offices, shops, schools and residential spaces.",
@@ -73,6 +81,7 @@ export const SERVICES: Service[] = [
   },
   {
     id: "pest",
+    icon: "pest",
     name: "Pest Control",
     category: "Home care",
     summary: "Assessment-led pest management for homes and commercial premises.",

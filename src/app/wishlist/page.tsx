@@ -3,7 +3,8 @@ import ComingSoon from "@/components/ComingSoon";
 import WishlistView from "@/components/shop/WishlistView";
 import SiteFooter from "@/components/SiteFooter";
 import FloatingActions from "@/components/FloatingActions";
-import { PRODUCTS } from "@/lib/shop-data";
+import { getProducts } from "@/lib/catalogue";
+import ShopGate from "@/components/shop/ShopGate";
 import { getShopSettings } from "@/lib/shop-settings";
 
 export const metadata: Metadata = {
@@ -13,14 +14,15 @@ export const metadata: Metadata = {
 
 export default async function WishlistPage() {
   // Follows the same admin switch as /shop.
-  const { showProducts } = await getShopSettings();
-  if (!showProducts) return <ComingSoon page="shop" />;
+  const [{ showProducts }, products] = await Promise.all([getShopSettings(), getProducts()]);
 
   return (
-    <div className="min-h-screen bg-paper text-ink">
-      <WishlistView products={PRODUCTS} />
-      <SiteFooter />
-      <FloatingActions quoteBar={false} />
-    </div>
+    <ShopGate initialOn={showProducts} off={<ComingSoon page="shop" />}>
+      <div className="min-h-screen bg-paper text-ink">
+        <WishlistView products={products} />
+        <SiteFooter />
+        <FloatingActions quoteBar={false} />
+      </div>
+    </ShopGate>
   );
 }

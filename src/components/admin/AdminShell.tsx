@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { signOutAdmin } from "@/lib/admin-auth";
 import { AdminIcon, type AdminIconName } from "./AdminIcons";
 
 type NavItem = { href: string; label: string; icon: AdminIconName; badge?: number };
@@ -87,11 +88,12 @@ function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => vo
 
 /** Bottom of the sidebar: backend status + link to the live site. */
 function SidebarFooter() {
+  const router = useRouter();
   return (
     <div className="mt-6 flex flex-col gap-2">
       <p className="flex items-center gap-2 px-3 text-xs text-ink/50">
-        <span className="h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
-        Backend not connected
+        <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+        Connected to Supabase
       </p>
       <Link
         href="/"
@@ -101,13 +103,21 @@ function SidebarFooter() {
         <AdminIcon name="external" className="h-5 w-5" />
         View website
       </Link>
-      <Link
-        href="/admin/login"
-        className="flex items-center gap-3 rounded-xl bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          await signOutAdmin();
+          router.replace("/admin/login/");
+        }}
       >
-        <AdminIcon name="logout" className="h-5 w-5" />
-        Log out
-      </Link>
+        <button
+          type="submit"
+          className="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
+        >
+          <AdminIcon name="logout" className="h-5 w-5" />
+          Log out
+        </button>
+      </form>
     </div>
   );
 }
@@ -133,7 +143,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   }, [open]);
 
   // The sign-in page has its own full-screen layout.
-  if (pathname === "/admin/login") return <div className="text-ink">{children}</div>;
+  if (pathname.replace(/\/$/, "") === "/admin/login") return <div className="text-ink">{children}</div>;
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] text-ink">
