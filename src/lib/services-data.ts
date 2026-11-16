@@ -63,6 +63,15 @@ export const SERVICES: Service[] = [
     image: { src: "/images/services/upholstery.jpg", credit: "Giorgio Trovato" },
   },
   {
+    id: "janitorial",
+    name: "Janitorial Services",
+    category: "Home care",
+    summary: "Routine and one-off cleaning for offices, shops, schools and residential spaces.",
+    includes: ["Site walkthrough", "Agreed cleaning schedule", "Floors, surfaces & washrooms", "Supervised quality checks"],
+    note: "Scope, frequency and price are agreed after a site visit; cleaning products and equipment are confirmed in the quote.",
+    image: { src: "/images/photos/detergent-bubbles.jpg", credit: "Julia Ly" },
+  },
+  {
     id: "pest",
     name: "Pest Control",
     category: "Home care",
@@ -73,7 +82,7 @@ export const SERVICES: Service[] = [
   },
 ];
 
-export const SERVICE_SUGGESTIONS = ["Laundry", "Dry cleaning", "Alterations", "Shoe repair", "Rug cleaning", "Pest control"];
+export const SERVICE_SUGGESTIONS = ["Laundry", "Dry cleaning", "Alterations", "Shoe repair", "Rug cleaning", "Janitorial", "Pest control"];
 
 /** Shown in place of a price — Brand Book: inspect first, confirm price. */
 export const SERVICE_PRICE_LABEL = "Price after inspection";

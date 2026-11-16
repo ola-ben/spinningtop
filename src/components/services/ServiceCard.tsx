@@ -29,11 +29,11 @@ export function QuoteButton({ service, size = "md" }: { service: Service; size?:
       href={whatsappLink(quoteMessage(service))}
       target="_blank"
       rel="noopener noreferrer"
-      className={`flex w-full items-center justify-center gap-2 rounded-full bg-brand font-bold text-paper shadow-md shadow-brand/15 transition-colors hover:bg-brand-deep ${
-        size === "sm" ? "py-2.5 text-[13px]" : "py-3.5 text-sm"
+      className={`flex w-full items-center justify-center rounded-full bg-brand text-paper shadow-md shadow-brand/15 transition-colors hover:bg-brand-deep ${
+        size === "sm" ? "gap-1.5 py-2 text-xs font-semibold" : "gap-2 py-3.5 text-sm font-bold"
       }`}
     >
-      <WhatsAppIcon className={size === "sm" ? "h-4 w-4" : "h-5 w-5"} />
+      <WhatsAppIcon className={size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5"} />
       Request a quote
     </a>
   );

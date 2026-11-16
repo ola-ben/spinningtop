@@ -4,13 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { NAV, QUOTE_LINK } from "@/lib/site";
+import { NAV } from "@/lib/site";
+import { useUser } from "@/lib/user-store";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const pathname = usePathname();
+  // Customer account: Sign in → /login, or My account once signed in (demo).
+  const user = useUser();
+  const account = user ? { href: "/account", label: "My account" } : { href: "/login", label: "Sign in" };
   const isHome = pathname === "/";
 
   /* A link is active when you're on its page, or (on the home page) scrolled to its section. */
@@ -109,14 +113,12 @@ export default function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <a
-              href={QUOTE_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={account.href}
               className="hidden rounded-full bg-brand px-6 py-2.5 text-xs font-bold text-paper shadow-lg shadow-brand/10 transition-colors hover:bg-brand-deep sm:inline-flex"
             >
-              Request a quote
-            </a>
+              {account.label}
+            </Link>
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -180,15 +182,14 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex flex-col gap-3 border-t border-paper/20 pt-6">
-          <a
-            href={QUOTE_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={account.href}
+            onClick={() => setOpen(false)}
             tabIndex={open ? 0 : -1}
             className="block w-full rounded-full bg-paper py-4 text-center text-sm font-bold text-brand transition-opacity hover:opacity-90"
           >
-            Request a quote →
-          </a>
+            {account.label} →
+          </Link>
         </div>
       </div>
     </>

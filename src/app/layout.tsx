@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import HashlessLinks from "@/components/HashlessLinks";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const inter = Inter({
@@ -15,7 +16,9 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-// The share image comes from app/opengraph-image.png (file convention).
+// Share preview image: public/og-image.jpg (small JPG at a clean URL for WhatsApp).
+const OG_ALT = "Spinning Top Drycleaners & Launderers — Better care. Easier living. Brighter futures.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -44,18 +47,26 @@ export const metadata: Metadata = {
     siteName: "Spinning Top",
     locale: "en_NG",
     type: "website",
+    // Small JPG at a clean URL (no ?hash) — WhatsApp skips large or query-string preview images.
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: OG_ALT }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
     description: "Professional care for clothes and spaces. Products and practical training.",
+    images: [{ url: "/og-image.jpg", alt: OG_ALT }],
   },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${plexMono.variable}`}>
-      <body className="min-h-screen bg-paper antialiased">{children}</body>
+    // data-scroll-behavior: keep smooth scrolling for in-page section links, but
+    // open every new page at the top instantly (no scroll-up animation).
+    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${plexMono.variable}`}>
+      <body className="min-h-screen bg-paper antialiased">
+        {children}
+        <HashlessLinks />
+      </body>
     </html>
   );
 }

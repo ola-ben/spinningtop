@@ -7,12 +7,13 @@ export const metadata = { title: "Customers" };
 export default function CustomersPage() {
   const business = CUSTOMERS.filter((c) => c.type === "Business").length;
   const spent = CUSTOMERS.reduce((sum, c) => sum + c.spent, 0);
+  const registered = CUSTOMERS.filter((c) => c.account).length;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Customers"
-        description="Everyone who has ordered or visited."
+        description="Website accounts and guests who ordered on WhatsApp or in store."
         actions={
           <>
             <button type="button" className={btn.secondary}>
@@ -27,15 +28,16 @@ export default function CustomersPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         <StatCard label="Total customers" value={String(CUSTOMERS.length)} />
-        <StatCard label="Business accounts" value={String(business)} />
+        <StatCard label="Website accounts" value={String(registered)} />
+        <StatCard label="Business customers" value={String(business)} />
         <StatCard label="Lifetime sales" value={formatNaira(spent)} />
-        <StatCard label="Average spend" value={formatNaira(CUSTOMERS.length ? Math.round(spent / CUSTOMERS.length) : 0)} />
       </div>
 
       <Card flush>
         <Toolbar>
           <SearchInput placeholder="Search name, phone or email" />
           <Select label="Type" options={["All types", "Individual", "Business"]} />
+          <Select label="Account" options={["All customers", "Website account", "Guest"]} />
         </Toolbar>
         <div className={table.wrap}>
           <table className={table.table}>
@@ -43,6 +45,7 @@ export default function CustomersPage() {
               <tr>
                 <th className={table.th}>Customer</th>
                 <th className={table.th}>Type</th>
+                <th className={table.th}>Account</th>
                 <th className={table.th}>Orders</th>
                 <th className={table.th}>Total spent</th>
               </tr>
@@ -50,7 +53,7 @@ export default function CustomersPage() {
             <tbody>
               {CUSTOMERS.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-sm text-ink/50">
+                  <td colSpan={5} className="px-5 py-12 text-center text-sm text-ink/50">
                     No customers yet.
                   </td>
                 </tr>
@@ -78,6 +81,9 @@ export default function CustomersPage() {
                   </td>
                   <td className={table.td}>
                     <Badge tone={c.type === "Business" ? "violet" : "grey"}>{c.type}</Badge>
+                  </td>
+                  <td className={table.td}>
+                    <Badge tone={c.account ? "blue" : "grey"}>{c.account ? "Website account" : "Guest"}</Badge>
                   </td>
                   <td className={`${table.td} tabular-nums`}>{c.orders}</td>
                   <td className={`${table.td} font-semibold tabular-nums`}>{formatNaira(c.spent)}</td>

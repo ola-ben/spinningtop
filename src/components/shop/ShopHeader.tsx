@@ -19,6 +19,7 @@ import {
 } from "./ShopIcons";
 import ShopSearch, { type SearchScope } from "./ShopSearch";
 import { useWishlist } from "@/lib/wishlist-store";
+import { signOut, useUser } from "@/lib/user-store";
 import type { Product } from "@/lib/shop-data";
 
 type Props = {
@@ -39,6 +40,7 @@ type MenuName = "account" | "help" | null;
    desktop — ☰ · logo · search · Account · Help · Cart
    mobile  — ☰ · logo · account · cart, with search on its own row. */
 export default function ShopHeader({ query, onQuery, products, cartCount, onOpenCart, navigate, scope }: Props) {
+  const user = useUser();
   const [openMenu, setOpenMenu] = useState<MenuName>(null);
   const [drawer, setDrawer] = useState(false);
   const pathname = usePathname();
@@ -119,21 +121,9 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
               open={openMenu === "account"}
               onToggle={() => toggle("account")}
               icon={<UserIcon />}
-              label="Account"
+              label={user ? `Hi, ${user.name.split(" ")[0]}` : "Account"}
             >
-              <p className="font-display text-sm font-semibold text-ink">Customer accounts are coming soon.</p>
-              <p className="mt-1.5 text-xs leading-relaxed text-ink/60">
-                For now, add products to your cart and send your order request to us on WhatsApp.
-              </p>
-              <a
-                href={whatsappLink("Hello Spinning Top, I have a question about ordering products.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-2.5 text-sm font-bold text-paper transition-colors hover:bg-brand-deep"
-              >
-                <WhatsAppIcon className="h-4 w-4" />
-                Order on WhatsApp
-              </a>
+              <AccountMenu onNavigate={() => toggle("account")} />
             </Dropdown>
 
             <Dropdown
@@ -262,6 +252,76 @@ export default function ShopHeader({ query, onQuery, products, cartCount, onOpen
           </div>
         </nav>
       </div>
+    </>
+  );
+}
+
+/** Account dropdown: Sign in / Create account, or the signed-in customer's links. */
+function AccountMenu({ onNavigate }: { onNavigate: () => void }) {
+  const user = useUser();
+  const item = "block rounded-lg px-3 py-2 text-sm text-ink transition-colors hover:bg-tint hover:text-brand";
+
+  if (!user) {
+    return (
+      <>
+        <p className="font-display text-sm font-semibold text-ink">Welcome to Spinning Top</p>
+        <p className="mt-1 text-xs leading-relaxed text-ink/60">Sign in to see your orders and saved details.</p>
+        <Link
+          href="/login"
+          onClick={onNavigate}
+          className="mt-4 flex w-full items-center justify-center rounded-full bg-brand py-2.5 text-sm font-bold text-paper transition-colors hover:bg-brand-deep"
+        >
+          Sign in
+        </Link>
+        <Link
+          href="/login"
+          onClick={onNavigate}
+          className="mt-2 flex w-full items-center justify-center rounded-full border border-ink/15 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink/35"
+        >
+          Create account
+        </Link>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <p className="truncate font-display text-sm font-semibold text-ink">Hi, {user.name.split(" ")[0]}</p>
+      <p className="truncate text-xs text-ink/55">{user.email}</p>
+      <ul className="-mx-3 mt-3 border-t border-ink/10 pt-2">
+        <li>
+          <Link href="/account" onClick={onNavigate} className={item}>
+            My account
+          </Link>
+        </li>
+        <li>
+          <Link href="/account/orders" onClick={onNavigate} className={item}>
+            Orders
+          </Link>
+        </li>
+        <li>
+          <Link href="/account/inbox" onClick={onNavigate} className={item}>
+            Inbox
+          </Link>
+        </li>
+        <li>
+          <Link href="/account/wishlist" onClick={onNavigate} className={item}>
+            Wishlist
+          </Link>
+        </li>
+        <li>
+          <button
+            type="button"
+            onClick={() => {
+              signOut();
+              onNavigate();
+            }}
+            className={`${item} w-full cursor-pointer text-left text-red-600 hover:bg-red-50 hover:text-red-700`}
+          >
+            Sign out
+          </button>
+        </li>
+      </ul>
     </>
   );
 }

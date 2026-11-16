@@ -35,7 +35,7 @@ export const SITE_URL =
 
 export const SITE_NAME = "Spinning Top Drycleaners & Launderers";
 export const SITE_DESCRIPTION =
-  "Laundry, wet & dry cleaning, tailor repairs, shoe repair, upholstery & rug cleaning, pest control, hygiene products and practical training — from one trusted brand.";
+  "Laundry, wet & dry cleaning, tailor repairs, shoe repair, upholstery & rug cleaning, janitorial services, pest control, hygiene products and practical training — from one trusted brand.";
 
 /* ---- Google rating ------------------------------------------------------
    From the business's Google listing (Nov 2026). Update when it changes.

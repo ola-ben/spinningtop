@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AdminIcon, type AdminIconName } from "./AdminIcons";
 
 /* Admin UI kit — plain, server-safe building blocks shared by every tab.
    Inputs are uncontrolled (defaultValue) so screens work as designs now and
@@ -19,7 +20,7 @@ export function PageHeader({
         <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-[1.7rem]">{title}</h1>
         {description && <p className="mt-1 text-sm text-ink/55">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="flex items-center gap-2 max-sm:w-full">{actions}</div>}
     </div>
   );
 }
@@ -41,14 +42,14 @@ export function Card({
   flush?: boolean;
 }) {
   return (
-    <section className={`rounded-2xl border border-ink/10 bg-paper ${className}`}>
+    <section className={`rounded-2xl bg-paper shadow-sm ${className}`}>
       {(title || actions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 px-5 py-4">
+        <div className={`flex flex-wrap items-center justify-between gap-3 px-5 pt-5 ${flush ? "pb-4" : "pb-0"}`}>
           <div className="min-w-0">
-            {title && <h2 className="font-display text-base font-semibold tracking-tight">{title}</h2>}
-            {description && <p className="mt-0.5 text-xs text-ink/55">{description}</p>}
+            {title && <h2 className="font-display text-lg font-semibold tracking-tight">{title}</h2>}
+            {description && <p className="mt-0.5 text-sm text-ink/55">{description}</p>}
           </div>
-          {actions && <div className="flex items-center gap-2">{actions}</div>}
+          {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
         </div>
       )}
       <div className={flush ? "" : "p-5"}>{children}</div>
@@ -56,34 +57,56 @@ export function Card({
   );
 }
 
+/** Key number: label + icon on top, big value, change chip, comparison line. */
 export function StatCard({
   label,
   value,
   hint,
   tone = "default",
+  icon,
+  change,
+  sub,
 }: {
   label: string;
   value: string;
   hint?: string;
   tone?: "default" | "good" | "warn";
+  icon?: AdminIconName;
+  /** Small chip next to the value, e.g. "0%". */
+  change?: string;
+  /** Muted line under the value, e.g. "Last month: 0". */
+  sub?: string;
 }) {
   const hintColor = tone === "good" ? "text-emerald-700" : tone === "warn" ? "text-amber-700" : "text-ink/50";
   return (
-    <div className="rounded-2xl border border-ink/10 bg-paper p-5">
-      <p className="text-xs font-medium text-ink/55">{label}</p>
-      <p className="mt-2 font-display text-2xl font-bold tabular-nums tracking-tight">{value}</p>
-      {hint && <p className={`mt-1 text-xs ${hintColor}`}>{hint}</p>}
+    <div className="flex flex-col rounded-2xl bg-paper p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm font-medium text-ink/65">{label}</p>
+        {icon && (
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink/10 text-ink/70">
+            <AdminIcon name={icon} className="h-5 w-5" />
+          </span>
+        )}
+      </div>
+      <div className={`flex flex-wrap items-center gap-2 ${icon ? "mt-1" : "mt-3"}`}>
+        <p className="font-display text-[1.75rem] font-semibold leading-none tabular-nums tracking-tight sm:text-[2rem]">{value}</p>
+        {change && (
+          <span className="rounded-md bg-ink/[0.05] px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-ink/55">{change}</span>
+        )}
+      </div>
+      {hint && <p className={`mt-2 text-xs ${hintColor}`}>{hint}</p>}
+      {sub && <p className="mt-auto pt-4 text-xs text-ink/50">{sub}</p>}
     </div>
   );
 }
 
 const BADGE_TONES = {
-  blue: "bg-brand/10 text-brand",
-  green: "bg-emerald-50 text-emerald-700",
-  amber: "bg-amber-50 text-amber-700",
-  red: "bg-red-50 text-red-700",
-  grey: "bg-ink/[0.06] text-ink/60",
-  violet: "bg-violet-50 text-violet-700",
+  blue: "border-brand/25 bg-brand/[0.07] text-brand",
+  green: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  amber: "border-amber-200 bg-amber-50 text-amber-700",
+  red: "border-red-200 bg-red-50 text-red-700",
+  grey: "border-ink/10 bg-ink/[0.04] text-ink/60",
+  violet: "border-violet-200 bg-violet-50 text-violet-700",
 } as const;
 
 export type BadgeTone = keyof typeof BADGE_TONES;
@@ -91,9 +114,8 @@ export type BadgeTone = keyof typeof BADGE_TONES;
 export function Badge({ tone = "grey", children }: { tone?: BadgeTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${BADGE_TONES[tone]}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${BADGE_TONES[tone]}`}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {children}
     </span>
   );
@@ -101,12 +123,15 @@ export function Badge({ tone = "grey", children }: { tone?: BadgeTone; children:
 
 /** Status → badge colour, shared by orders, courses, team. */
 export const STATUS_TONE: Record<string, BadgeTone> = {
-  New: "blue",
   Open: "blue",
-  Confirmed: "violet",
-  Ready: "amber",
+  Processing: "blue",
+  "Ready for pickup": "amber",
+  Delivered: "green",
+  Published: "green",
+  Pending: "amber",
+  Hidden: "grey",
+  Expired: "grey",
   Replied: "amber",
-  Collected: "green",
   Active: "green",
   Closed: "grey",
   Cancelled: "red",
@@ -175,16 +200,16 @@ export function SettingRow({ title, description, children }: { title: string; de
 
 /* Table styles — tables scroll sideways on small screens. */
 export const table = {
-  wrap: "overflow-x-auto",
-  table: "w-full min-w-[640px] text-left text-sm",
-  th: "whitespace-nowrap border-b border-ink/10 bg-ink/[0.02] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-ink/50",
-  td: "whitespace-nowrap border-b border-ink/[0.06] px-5 py-3.5 align-middle",
-  row: "transition-colors hover:bg-ink/[0.02]",
+  wrap: "overflow-x-auto px-3 pb-3",
+  table: "w-full min-w-[640px] border-separate border-spacing-0 text-left text-sm",
+  th: "whitespace-nowrap bg-[#f3f4f6] px-4 py-3 text-xs font-medium text-ink/55 first:rounded-l-xl last:rounded-r-xl",
+  td: "whitespace-nowrap border-b border-ink/[0.06] px-4 py-3.5 align-middle",
+  row: "transition-colors hover:bg-[#f9fafb]",
 };
 
 /** Toolbar above a table: search + filters. */
 export function Toolbar({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-center gap-2 border-b border-ink/10 px-5 py-3">{children}</div>;
+  return <div className="flex flex-wrap items-center gap-2 px-5 py-4">{children}</div>;
 }
 
 export function SearchInput({ placeholder }: { placeholder: string }) {
@@ -200,7 +225,7 @@ export function SearchInput({ placeholder }: { placeholder: string }) {
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z" />
       </svg>
-      <input type="search" placeholder={placeholder} aria-label={placeholder} className={`${inputClass} pl-9`} />
+      <input type="search" placeholder={placeholder} aria-label={placeholder} className={`${inputClass.replace("rounded-xl", "rounded-full")} pl-9`} />
     </div>
   );
 }
@@ -211,7 +236,7 @@ export function Select({ options, label, defaultValue }: { options: string[]; la
       aria-label={label}
       defaultValue={defaultValue}
       // Same look as inputs, but sized to its content so filters sit in a row.
-      className={`${inputClass.replace("w-full ", "")} w-auto cursor-pointer pr-8`}
+      className={`${inputClass.replace("w-full ", "").replace("rounded-xl", "rounded-full")} w-auto cursor-pointer pr-8`}
     >
       {options.map((o) => (
         <option key={o}>{o}</option>

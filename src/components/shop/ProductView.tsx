@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackViewed } from "@/lib/recent-store";
 import ImageSlot from "@/components/ImageSlot";
 import { WhatsAppIcon } from "@/components/SocialIcon";
 import { PHONE_DISPLAY, PHONE_E164, whatsappLink } from "@/lib/site";
@@ -24,6 +25,8 @@ export default function ProductView({
   related: Product[];
 }) {
   const [query, setQuery] = useState("");
+  // Feeds My account → Recently viewed.
+  useEffect(() => trackViewed(p.id), [p.id]);
 
   return (
     <ShopChrome products={products} query={query} onQuery={setQuery} navigate>

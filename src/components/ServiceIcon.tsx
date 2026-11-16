@@ -1,5 +1,5 @@
 /** Restrained line icons for each care service (Brand Book p.11: "restrained line icons"). */
-export type ServiceIconName = "laundry" | "cleaning" | "tailor" | "shoe" | "upholstery" | "pest";
+export type ServiceIconName = "laundry" | "cleaning" | "tailor" | "shoe" | "upholstery" | "pest" | "janitorial";
 
 const PATHS: Record<ServiceIconName, React.ReactNode> = {
   // Washing machine
@@ -39,6 +39,15 @@ const PATHS: Record<ServiceIconName, React.ReactNode> = {
       <path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3" />
       <path d="M3 13a2 2 0 0 1 4 0v1h10v-1a2 2 0 0 1 4 0v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4z" />
       <path d="M6 18v2M18 18v2" />
+    </>
+  ),
+  // Mop and bucket
+  janitorial: (
+    <>
+      <path d="M17 3 13 13" />
+      <path d="M10.5 12.5h5l1 3h-7z" />
+      <path d="M4 13h5l-.8 7H4.8z" />
+      <path d="M3.5 13h6.5" />
     </>
   ),
   // Shield with check

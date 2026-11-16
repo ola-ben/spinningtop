@@ -15,6 +15,7 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
       { label: "Tailoring & alterations", href: "/services/tailor" },
       { label: "Shoe repair", href: "/services/shoe" },
       { label: "Upholstery & rugs", href: "/services/upholstery" },
+      { label: "Janitorial", href: "/services/janitorial" },
       { label: "Pest control", href: "/services/pest" },
     ],
   },

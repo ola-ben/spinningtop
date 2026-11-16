@@ -11,42 +11,48 @@
    WhatsApp ordering — runs in the visitor's browser. */
 
 import { execSync } from "node:child_process";
-import { copyFileSync, existsSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.spinningtop.ng";
 const root = process.cwd();
 const outDir = path.join(root, "out");
 const zip = path.join(root, "spinningtop-static.zip");
-/* Parts that need a server (or route config that clashes with Cache Components)
-   are moved aside for this build only and always restored afterwards.
-   - /admin: folders starting with "_" are ignored by the App Router.
-   - robots.ts / sitemap.ts: written as plain files below instead. */
-const app = path.join(root, "src", "app");
-const PARKED = [
-  ["admin", "_admin-static-build"],
-  ["robots.ts", "robots.static-build.txt"],
-  ["sitemap.ts", "sitemap.static-build.txt"],
-].map(([from, to]) => [path.join(app, from), path.join(app, to)]);
+/* The build runs on a COPY of the project (in .static-build/), so the real
+   src/ is never changed — it works even while `npm run dev` is running.
+   In the copy, parts that need a server are removed:
+   - /admin (saves settings through a server)
+   - robots.ts / sitemap.ts (written as plain files below instead) */
+const work = path.join(root, ".static-build");
+const SERVER_ONLY = ["src/app/admin", "src/app/robots.ts", "src/app/sitemap.ts"];
+// Not copied: generated output, caches, git, and the heavy node_modules (shared via a link).
+const SKIP = new Set([".git", ".next", ".static-build", "deploy", "node_modules", "out", "spinningtop-static.zip", "spinningtop-cpanel.zip"]);
 
 const step = (msg) => console.log(`\n▸ ${msg}`);
 
 const shop = JSON.parse(readFileSync(path.join(root, "data", "shop-settings.json"), "utf8"));
 step(`Building static site for ${SITE_URL} (shop ${shop.showProducts ? "ON" : "OFF — Coming soon"})`);
 
-for (const [from, to] of PARKED) {
-  if (existsSync(to)) throw new Error(`Leftover ${to} — rename it back to ${from} first.`);
+rmSync(work, { recursive: true, force: true });
+mkdirSync(work);
+for (const entry of readdirSync(root)) {
+  if (SKIP.has(entry)) continue;
+  cpSync(path.join(root, entry), path.join(work, entry), { recursive: true });
 }
-for (const [from, to] of PARKED) renameSync(from, to);
+// node_modules is shared, not copied (a junction needs no admin rights on Windows).
+symlinkSync(path.join(root, "node_modules"), path.join(work, "node_modules"), "junction");
+for (const rel of SERVER_ONLY) rmSync(path.join(work, rel), { recursive: true, force: true });
+
 try {
-  rmSync(outDir, { recursive: true, force: true });
   execSync("npx next build", {
+    cwd: work,
     stdio: "inherit",
     env: { ...process.env, STATIC_EXPORT: "1", NEXT_PUBLIC_SITE_URL: SITE_URL, NODE_ENV: "production" },
   });
+  rmSync(outDir, { recursive: true, force: true });
+  renameSync(path.join(work, "out"), outDir);
 } finally {
-  // Always put everything back, even if the build fails.
-  for (const [from, to] of PARKED) if (existsSync(to)) renameSync(to, from);
+  rmSync(work, { recursive: true, force: true });
 }
 
 /* Prefetch data: the export saves segment files in folders

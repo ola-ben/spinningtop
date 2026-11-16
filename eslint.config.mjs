@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // cPanel package output (npm run package:cpanel).
+    "deploy/**",
+    ".static-build/**",
   ]),
 ]);
 

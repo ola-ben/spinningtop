@@ -1,7 +1,13 @@
-import ComingSoon, { comingSoonMetadata } from "@/components/ComingSoon";
+import type { Metadata } from "next";
+import LegalPage from "@/components/LegalPage";
+import { TERMS } from "@/lib/legal";
 
-export const metadata = comingSoonMetadata("terms");
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "The terms that apply to orders, bookings, purchases and training with Spinning Top Drycleaners & Launderers.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function Page() {
-  return <ComingSoon page="terms" />;
+  return <LegalPage doc={TERMS} other={{ href: "/privacy", label: "Privacy Policy" }} />;
 }

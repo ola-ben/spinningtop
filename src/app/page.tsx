@@ -76,6 +76,7 @@ const SERVICES: { title: string; icon: ServiceIconName }[] = [
   { title: "Tailor Repairs & Alterations", icon: "tailor" },
   { title: "Shoe Repair / Cobbler", icon: "shoe" },
   { title: "Upholstery & Rug Cleaning", icon: "upholstery" },
+  { title: "Janitorial Services", icon: "janitorial" },
   { title: "Pest Control", icon: "pest" },
 ];
 
@@ -136,6 +137,15 @@ function ExternalCta({ className, children }: { className: string; children: Rea
     </a>
   );
 }
+
+/** Service tiles: a last tile that would sit alone in its row stretches across it
+    (2 per row on phones, 3 per row from tablets up), so the grid never has a gap. */
+const tileSpan = (i: number, count: number) => {
+  if (i !== count - 1) return "";
+  const phone = count % 2 === 1 ? "col-span-2" : "";
+  const wide = count % 3 === 1 ? "sm:col-span-3" : count % 3 === 2 ? "sm:col-span-1" : "";
+  return [phone, wide || (phone ? "sm:col-span-1" : "")].filter(Boolean).join(" ");
+};
 
 /** Quiet text link used for section-level actions below the hero. */
 const textLink =
@@ -402,9 +412,9 @@ export default function Home() {
 
               {/* Mobile: compact centred category tiles (tint, icon on top, no arrow).
                   sm+: outlined cards with icon top-left and an arrow. */}
-              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:col-span-7 lg:grid-rows-2">
-                {SERVICES.map((s) => (
-                  <li key={s.title}>
+              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:col-span-7">
+                {SERVICES.map((s, i) => (
+                  <li key={s.title} className={tileSpan(i, SERVICES.length)}>
                     <Link
                       href={`/services/${s.icon}`}
                       className="group flex h-full flex-col items-center justify-start gap-3 bg-tint px-3 pb-4 pt-5 text-center transition-all duration-300 active:scale-[0.98] sm:min-h-[8.5rem] sm:items-stretch sm:justify-between sm:gap-6 sm:border sm:border-ink/10 sm:bg-paper sm:p-5 sm:text-left sm:hover:-translate-y-0.5 sm:hover:border-brand sm:hover:shadow-lg sm:hover:shadow-brand/10"
@@ -556,7 +566,7 @@ export default function Home() {
       </main>
 
       <SiteFooter />
-      <FloatingActions landing />
+      <FloatingActions landing quoteBar={false} />
     </div>
   );
 }
