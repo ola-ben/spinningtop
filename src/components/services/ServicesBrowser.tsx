@@ -8,9 +8,10 @@ import type { Product } from "@/lib/shop-data";
 import { useLiveProducts, useLiveServices } from "@/lib/live-catalogue";
 import { matchServices, type Service } from "@/lib/services-data";
 import ServiceCard, { serviceScope } from "./ServiceCard";
+import { BookingBar } from "./BookingControls";
 
 /* /services — same layout and behaviour as /shop: shop header with search,
-   breadcrumb + count, compact grid. "Request a quote" replaces Add to cart. */
+   breadcrumb + count, compact grid. "Select" picks services for a booking request. */
 export default function ServicesBrowser({
   services: initialServices,
   products: initialProducts,
@@ -32,7 +33,7 @@ export default function ServicesBrowser({
       </Suspense>
 
       <main className="min-h-[70vh] bg-ink/[0.03]">
-        <section className="mx-auto max-w-7xl px-4 pb-16 pt-3 sm:px-6">
+        <section className="mx-auto max-w-7xl px-4 pb-28 pt-3 sm:px-6">
           <h1 className="sr-only">Care services</h1>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink/55">
@@ -48,10 +49,22 @@ export default function ServicesBrowser({
               </ol>
             </nav>
             <p aria-live="polite">
-              {results.length} {results.length === 1 ? "service" : "services"}
-              {query.trim() && <> for &ldquo;{query.trim()}&rdquo;</>}
+              {query.trim() && <>Results for &ldquo;{query.trim()}&rdquo;</>}
             </p>
           </div>
+
+          <p className="mt-3 flex items-center gap-2.5 rounded-xl border border-ink/10 bg-paper px-4 py-3 text-sm text-ink/70">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0 text-ink" aria-hidden="true">
+              <rect x="3" y="3" width="8" height="8" rx="2" />
+              <path d="m5.5 7 1.5 1.5L9 5.5" />
+              <rect x="13" y="13" width="8" height="8" rx="2" />
+              <path d="m15.5 17 1.5 1.5 2-3" />
+              <path d="M13 7h8M3 17h8" />
+            </svg>
+            <span>
+              <strong className="font-semibold text-ink">Need more than one service?</strong> Select as many as you like, then tap <strong className="font-semibold text-ink">Book now</strong> to send one request.
+            </span>
+          </p>
 
           {results.length === 0 ? (
             <div className="mt-4 border border-ink/10 bg-paper px-6 py-16 text-center">
@@ -74,6 +87,7 @@ export default function ServicesBrowser({
             </ul>
           )}
         </section>
+        <BookingBar />
       </main>
     </ShopChrome>
   );

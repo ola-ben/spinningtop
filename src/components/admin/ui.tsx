@@ -123,6 +123,14 @@ export function Badge({ tone = "grey", children }: { tone?: BadgeTone; children:
 
 /** Status → badge colour, shared by orders, courses, team. */
 export const STATUS_TONE: Record<string, BadgeTone> = {
+  Received: "violet",
+  New: "violet",
+  Contacted: "blue",
+  Quoted: "amber",
+  Scheduled: "blue",
+  "In progress": "blue",
+  Completed: "green",
+  "Out for delivery": "amber",
   Open: "blue",
   Processing: "blue",
   "Ready for pickup": "amber",

@@ -5,8 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import ShopChrome from "@/components/shop/ShopChrome";
 import { signOut, useHydrated, useUser } from "@/lib/user-store";
-import { STORE_CREDIT } from "@/lib/account-demo";
-import { formatNaira, type Product } from "@/lib/shop-data";
+import type { Product } from "@/lib/shop-data";
 import { AccountIcon, type AccountIconName } from "./AccountIcons";
 
 type NavItem = { href: string; label: string; icon?: AccountIconName };
@@ -23,7 +22,6 @@ export const ACCOUNT_NAV: NavItem[] = [
 export const ACCOUNT_SETTINGS: NavItem[] = [
   { href: "/account/management", label: "Account Management" },
   { href: "/account/addresses", label: "Address Book" },
-  { href: "/account/newsletter", label: "Newsletter Preferences" },
   { href: "/account/close", label: "Close Account" },
 ];
 
@@ -129,10 +127,6 @@ function MobileMenu({ name, email }: { name: string; email: string }) {
         <p className="font-display text-lg font-semibold">Welcome, {name.split(" ")[0]}</p>
         <p className="truncate text-xs text-paper/80">{email}</p>
       </div>
-      <p className="flex items-center gap-3 bg-paper px-4 py-3.5 text-sm font-semibold text-brand">
-        <AccountIcon name="wallet" className="h-5 w-5" />
-        Store credit balance: {formatNaira(STORE_CREDIT)}
-      </p>
 
       <p className={heading}>My account</p>
       <ul>

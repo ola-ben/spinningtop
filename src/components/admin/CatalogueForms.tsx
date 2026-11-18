@@ -20,6 +20,7 @@ import type { ServiceIconName } from "@/components/ServiceIcon";
 import type { AdminProduct, AdminService } from "@/lib/catalogue-rows";
 import type { Product } from "@/lib/shop-data";
 import { Badge, Card, Field, PageHeader, SettingRow, btn, inputClass } from "./ui";
+import Busy from "@/components/Busy";
 
 /* Admin forms, lists and switches for products, services and the shop
    on/off setting. Everything is saved straight to Supabase from the browser
@@ -48,10 +49,10 @@ function SaveButtons({ cancelHref, isDraft }: { cancelHref: string; isDraft?: bo
         Cancel
       </Link>
       <button type="submit" name="intent" value="draft" disabled={pending} className={`${btn.secondary} disabled:opacity-60`}>
-        {pending && intent === "draft" ? "Saving…" : isDraft ? "Save draft" : "Save as draft (hide)"}
+        {pending && intent === "draft" ? <Busy text="Saving" /> : isDraft ? "Save draft" : "Save as draft (hide)"}
       </button>
       <button type="submit" name="intent" value="publish" disabled={pending} className={`${btn.primary} disabled:opacity-60`}>
-        {pending && intent === "publish" ? "Saving…" : "Publish"}
+        {pending && intent === "publish" ? <Busy text="Publishing" /> : "Publish"}
       </button>
     </>
   );
@@ -448,7 +449,7 @@ export function DeleteButton({
       }}
       className={`${btn.ghost} text-red-600 hover:bg-red-50 disabled:opacity-50`}
     >
-      {pending ? "Deleting…" : "Delete"}
+      {pending ? <Busy text="Deleting" /> : "Delete"}
     </button>
   );
 }

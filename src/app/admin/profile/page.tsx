@@ -55,7 +55,7 @@ export default function ProfilePage() {
                 <input defaultValue={USER.name} autoComplete="name" className={inputClass} />
               </Field>
               <Field label="Email" hint="Used to sign in.">
-                <input type="email" defaultValue={USER.email} autoComplete="email" className={inputClass} />
+                <input type="email" placeholder="Your email address" defaultValue={USER.email} autoComplete="email" className={inputClass} />
               </Field>
               <Field label="Phone">
                 <input type="tel" defaultValue={USER.phone} placeholder="0800 000 0000" autoComplete="tel" className={inputClass} />

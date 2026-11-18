@@ -51,7 +51,7 @@ export default function TeamPage() {
           <Card title="Invite someone">
             <form className="grid gap-4">
               <Field label="Email">
-                <input type="email" placeholder="name@example.com" className={inputClass} />
+                <input type="email" placeholder="Your email address" className={inputClass} />
               </Field>
               <Field label="Role">
                 <select className={`${inputClass} cursor-pointer`} defaultValue="Staff">

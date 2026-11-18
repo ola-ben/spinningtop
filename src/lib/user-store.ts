@@ -1,12 +1,18 @@
-import { useSyncExternalStore } from "react";
+"use client";
 
-/* Customer account — DEMO ONLY.
-   Any email + password "signs in": a demo profile is saved in this
-   browser's localStorage (same approach as cart and wishlist). Nothing is
-   checked or sent anywhere. Replace signIn / signOut / updateUser with the
-   real backend (e.g. Supabase Auth + a profiles table) when it's ready. */
+import { useEffect, useSyncExternalStore } from "react";
+import { db, supabaseReady } from "./supabase";
+
+/* Customer accounts — Supabase Auth with a 6-digit email code (no passwords)
+   + the `profiles` table
+   (supabase/customers.sql). Each customer can only read and change their own
+   profile; Supabase's Row Level Security enforces that.
+
+   The site shares one Supabase sign-in between customers and admins (it's the
+   same login system); admin rights come only from the `admins` table. */
 
 export type User = {
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -15,52 +21,84 @@ export type User = {
   newsletter?: "daily" | "weekly" | "none";
 };
 
-const KEY = "st_user_v1";
+type ProfileRow = { full_name: string; phone: string; address: string; newsletter: User["newsletter"] };
 
-let cache: User | null | undefined;
+/* ───────────────────────── store ───────────────────────── */
+
+let user: User | null = null;
+let ready = false; // true once we know whether someone is signed in
+let started = false;
 const listeners = new Set<() => void>();
 
-function load(): User | null {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(KEY) ?? "null");
-    return parsed && typeof parsed.email === "string" ? (parsed as User) : null;
-  } catch {
-    return null;
+const emit = () => listeners.forEach((l) => l());
+const set = (next: User | null) => {
+  user = next;
+  ready = true;
+  emit();
+};
+
+async function loadProfile(id: string, email: string, createdAt: string, metaName?: string) {
+  const { data } = await db().from("profiles").select("full_name, phone, address, newsletter").eq("id", id).maybeSingle();
+  let row = data as ProfileRow | null;
+  if (!row) {
+    // Accounts made before customers.sql ran (e.g. the admin) have no profile yet.
+    const created = await db()
+      .from("profiles")
+      .insert({ id, full_name: metaName ?? "" })
+      .select("full_name, phone, address, newsletter")
+      .maybeSingle();
+    row = (created.data as ProfileRow | null) ?? { full_name: metaName ?? "", phone: "", address: "", newsletter: "weekly" };
   }
+  set({
+    id,
+    email,
+    name: row.full_name || nameFromEmail(email),
+    phone: row.phone,
+    address: row.address,
+    newsletter: row.newsletter ?? "weekly",
+    memberSince: createdAt,
+  });
 }
 
-function getSnapshot() {
-  if (cache === undefined) cache = load();
-  return cache;
+function start() {
+  if (started || typeof window === "undefined") return;
+  started = true;
+  if (!supabaseReady()) {
+    set(null);
+    return;
+  }
+  db().auth.onAuthStateChange((_event, session) => {
+    // Run outside the auth callback (Supabase advises not awaiting inside it).
+    setTimeout(() => {
+      const u = session?.user;
+      if (!u) return set(null);
+      if (user?.id === u.id && ready) return; // token refresh — nothing changed
+      loadProfile(u.id, u.email ?? "", u.created_at, u.user_metadata?.full_name).catch(() => set(null));
+    }, 0);
+  });
 }
-
-const getServerSnapshot = () => null;
 
 function subscribe(callback: () => void) {
   listeners.add(callback);
-  const onStorage = (e: StorageEvent) => {
-    if (e.key === KEY) {
-      cache = undefined;
-      callback();
-    }
-  };
-  window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(callback);
-    window.removeEventListener("storage", onStorage);
   };
 }
 
-function commit(next: User | null) {
-  cache = next;
-  try {
-    if (next) localStorage.setItem(KEY, JSON.stringify(next));
-    else localStorage.removeItem(KEY);
-  } catch {
-    /* storage blocked — signed in for this visit only */
-  }
-  listeners.forEach((l) => l());
+/** The signed-in customer, or null (signed out, or still checking). */
+export function useUser() {
+  useEffect(start, []);
+  return useSyncExternalStore(subscribe, () => user, () => null);
 }
+
+/** false until the browser knows whether someone is signed in
+    (so pages don't flash "signed out" while Supabase is checked). */
+export function useHydrated() {
+  useEffect(start, []);
+  return useSyncExternalStore(subscribe, () => ready, () => false);
+}
+
+/* ───────────────────────── actions ───────────────────────── */
 
 /** "ada.obi@mail.com" → "Ada Obi" */
 const nameFromEmail = (email: string) =>
@@ -71,26 +109,73 @@ const nameFromEmail = (email: string) =>
     .map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
     .join(" ") || "Customer";
 
-/** Demo sign-in: accepts any email/password and fills in demo details. */
-export function signIn(email: string, name?: string) {
-  commit({
-    name: name?.trim() || nameFromEmail(email),
+const notConfigured = "Accounts aren't available right now.";
+
+const friendlyAuthError = (message: string) => {
+  if (/signups not allowed|user not found/i.test(message)) return "There's no account with this email yet. Choose \"Create account\" instead.";
+  if (/expired|invalid|token/i.test(message)) return "That code is wrong or has expired. Check the latest email, or send a new code.";
+  if (/rate limit|too many|security purposes|seconds/i.test(message)) return "Please wait a minute before asking for another code.";
+  if (/sending|smtp|mail/i.test(message)) return "We couldn't send the email right now. Please try again shortly.";
+  return message;
+};
+
+/** Code length set in Supabase (Authentication → Providers → Email → Email OTP Length). */
+export const CODE_LENGTH = 6;
+
+/**
+ * Emails a 6-digit sign-in code.
+ * - Sign in: `create` false — only works for existing accounts.
+ * - Create account: `create` true with the customer's name — makes the account
+ *   (or just signs in if the email already has one).
+ * Returns an error message, or null when the code was sent.
+ */
+export async function sendCode(email: string, opts: { create: boolean; name?: string }): Promise<string | null> {
+  if (!supabaseReady()) return notConfigured;
+  const { error } = await db().auth.signInWithOtp({
     email: email.trim().toLowerCase(),
-    phone: "0803 123 4567",
-    address: "12 Oluyole Estate, Ibadan, Oyo State",
-    memberSince: new Date().toISOString(),
+    options: {
+      shouldCreateUser: opts.create,
+      ...(opts.create && opts.name ? { data: { full_name: opts.name.trim() } } : {}),
+    },
   });
+  return error ? friendlyAuthError(error.message) : null;
 }
 
-export const signOut = () => commit(null);
-
-export function updateUser(patch: Partial<Omit<User, "memberSince">>) {
-  const current = getSnapshot();
-  if (current) commit({ ...current, ...patch });
+/** Checks the emailed code; signs the customer in when it's right. Returns an error message, or null. */
+export async function verifyCode(email: string, code: string): Promise<string | null> {
+  if (!supabaseReady()) return notConfigured;
+  const token = code.replace(/\D/g, "");
+  if (token.length !== CODE_LENGTH) return `Enter the ${CODE_LENGTH}-digit code from the email.`;
+  const { error } = await db().auth.verifyOtp({ email: email.trim().toLowerCase(), token, type: "email" });
+  return error ? friendlyAuthError(error.message) : null;
 }
 
-export function useUser() {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+export async function signOut() {
+  if (supabaseReady()) await db().auth.signOut();
+  set(null);
+}
+
+/** Saves profile changes. Returns an error message, or null. */
+export async function updateUser(patch: Partial<Pick<User, "name" | "phone" | "address" | "newsletter">>): Promise<string | null> {
+  if (!user) return "You're signed out. Please sign in again.";
+  const row: Record<string, string> = {};
+  if (patch.name !== undefined) row.full_name = patch.name;
+  if (patch.phone !== undefined) row.phone = patch.phone;
+  if (patch.address !== undefined) row.address = patch.address;
+  if (patch.newsletter !== undefined) row.newsletter = patch.newsletter;
+  const { error } = await db().from("profiles").update(row).eq("id", user.id);
+  if (error) return "Could not save. Please try again.";
+  set({ ...user, ...patch });
+  return null;
+}
+
+/** Permanently deletes the signed-in customer's account. Returns an error message, or null. */
+export async function closeAccount(): Promise<string | null> {
+  const { error } = await db().rpc("delete_my_account");
+  if (error) return /admin/i.test(error.message) ? "Admin accounts can't be closed here." : "Could not close the account. Please try again.";
+  await db().auth.signOut();
+  set(null);
+  return null;
 }
 
 export const initials = (name: string) =>
@@ -100,13 +185,3 @@ export const initials = (name: string) =>
     .slice(0, 2)
     .map((w) => w[0].toUpperCase())
     .join("") || "?";
-
-const noop = () => () => {};
-/** false during server render / hydration, true once the browser has taken over
-    (so pages don't flash "signed out" before localStorage is read). */
-export const useHydrated = () =>
-  useSyncExternalStore(
-    noop,
-    () => true,
-    () => false,
-  );

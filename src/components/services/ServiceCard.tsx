@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import ImageSlot from "@/components/ImageSlot";
-import { WhatsAppIcon } from "@/components/SocialIcon";
+import { BookingToggle } from "./BookingControls";
 import type { SearchScope } from "@/components/shop/ShopSearch";
-import { whatsappLink } from "@/lib/site";
-import { SERVICE_PRICE_LABEL, SERVICE_SUGGESTIONS, quoteMessage, type Service } from "@/lib/services-data";
+import { SERVICE_PRICE_LABEL, SERVICE_SUGGESTIONS, type Service } from "@/lib/services-data";
 
 /** Header search scope for the services pages. */
 export const serviceScope = (services: Service[]): SearchScope => ({
@@ -22,24 +21,7 @@ export const serviceScope = (services: Service[]): SearchScope => ({
   })),
 });
 
-/** "Request a quote" — the services equivalent of Add to cart. */
-export function QuoteButton({ service, size = "md" }: { service: Service; size?: "sm" | "md" }) {
-  return (
-    <a
-      href={whatsappLink(quoteMessage(service))}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`flex w-full items-center justify-center rounded-full bg-brand text-paper shadow-md shadow-brand/15 transition-colors hover:bg-brand-deep ${
-        size === "sm" ? "gap-1.5 py-2 text-xs font-semibold" : "gap-2 py-3.5 text-sm font-bold"
-      }`}
-    >
-      <WhatsAppIcon className={size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5"} />
-      Request a quote
-    </a>
-  );
-}
-
-/** Grid card: photo, name, category, price note, request a quote. */
+/** Grid card: photo, name, category, price note, select for booking. */
 export default function ServiceCard({ service: s }: { service: Service }) {
   return (
     <div className="flex h-full flex-col bg-paper transition-shadow hover:shadow-lg hover:shadow-ink/10">
@@ -58,7 +40,7 @@ export default function ServiceCard({ service: s }: { service: Service }) {
         </div>
       </Link>
       <div className="p-3 pt-2 sm:p-4 sm:pt-3">
-        <QuoteButton service={s} size="sm" />
+        <BookingToggle id={s.id} size="sm" />
       </div>
     </div>
   );

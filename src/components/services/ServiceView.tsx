@@ -9,7 +9,8 @@ import { PhoneIcon } from "@/components/shop/ShopIcons";
 import { PHONE_DISPLAY, PHONE_E164 } from "@/lib/site";
 import type { Product } from "@/lib/shop-data";
 import { SERVICE_PRICE_LABEL, type Service } from "@/lib/services-data";
-import { QuoteButton, ServiceMini, serviceScope } from "./ServiceCard";
+import { ServiceMini, serviceScope } from "./ServiceCard";
+import { BookingBar, BookingToggle } from "./BookingControls";
 
 const STEPS = ["Inspect first", "Explain scope", "Confirm price", "Check the result"];
 
@@ -79,7 +80,7 @@ export default function ServiceView({
 
               {/* md+: inline buttons. Mobile uses the sticky bottom bar. */}
               <div className="mt-8 hidden flex-col gap-3 border-t border-ink/10 pt-6 md:flex">
-                <QuoteButton service={s} />
+                <BookingToggle id={s.id} />
                 <a
                   href={`tel:${PHONE_E164}`}
                   className="flex w-full items-center justify-center gap-2 rounded-full border border-ink/20 py-3.5 text-sm font-bold text-ink transition-colors hover:border-ink/40 hover:bg-ink/[0.04]"
@@ -99,7 +100,7 @@ export default function ServiceView({
                 <ul className="grid gap-1.5 sm:grid-cols-2">
                   {s.includes.map((i) => (
                     <li key={i} className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-brand" aria-hidden="true" />
+                      <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-ink" aria-hidden="true" />
                       {i}
                     </li>
                   ))}
@@ -108,8 +109,8 @@ export default function ServiceView({
               <Row label="How it works">
                 <ol className="flex flex-wrap gap-2">
                   {STEPS.map((step, i) => (
-                    <li key={step} className="inline-flex items-center gap-2 rounded-full bg-tint px-3 py-1.5 text-xs font-medium text-ink">
-                      <span className="grid h-5 w-5 place-items-center rounded-full bg-brand text-[10px] font-bold text-paper">{i + 1}</span>
+                    <li key={step} className="inline-flex items-center gap-2 rounded-full bg-ink/[0.05] px-3 py-1.5 text-xs font-medium text-ink">
+                      <span className="grid h-5 w-5 place-items-center rounded-full bg-ink text-[10px] font-bold text-paper">{i + 1}</span>
                       {step}
                     </li>
                   ))}
@@ -129,7 +130,7 @@ export default function ServiceView({
           )}
         </div>
 
-        {/* Mobile bar: call + request a quote — sticky until the footer */}
+        {/* Mobile bar: call + add to booking — sticky until the footer */}
         <div className="sticky bottom-0 z-30 mt-4 flex items-center gap-3 border-t border-ink/10 bg-paper px-4 py-3 shadow-[0_-4px_16px_rgba(49,49,49,0.08)] md:hidden">
           <a
             href={`tel:${PHONE_E164}`}
@@ -139,9 +140,10 @@ export default function ServiceView({
             <PhoneIcon className="h-5 w-5" />
           </a>
           <div className="min-w-0 flex-1">
-            <QuoteButton service={s} />
+            <BookingToggle id={s.id} />
           </div>
         </div>
+        <BookingBar aboveMobileBar />
       </main>
     </ShopChrome>
   );

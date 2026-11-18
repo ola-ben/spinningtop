@@ -34,7 +34,7 @@ export default async function SettingsPage() {
                 <input defaultValue={WHATSAPP_NUMBER} className={inputClass} />
               </Field>
               <Field label="Email">
-                <input type="email" placeholder="hello@spinningtop.ng" className={inputClass} />
+                <input type="email" placeholder="Your email address" className={inputClass} />
               </Field>
               <Field label="Link hub">
                 <input defaultValue={LINK_HUB} className={inputClass} />

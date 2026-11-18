@@ -41,8 +41,7 @@ export default function ShopBrowser({ products: initial }: { products: Product[]
               </ol>
             </nav>
             <p aria-live="polite">
-              {results.length} {results.length === 1 ? "product" : "products"}
-              {query.trim() && <> for &ldquo;{query.trim()}&rdquo;</>}
+              {query.trim() && <>Results for &ldquo;{query.trim()}&rdquo;</>}
             </p>
           </div>
 

@@ -4,7 +4,10 @@ import Link from "next/link";
 import { ShopBadge, ShopSwitch, useAdminProducts } from "@/components/admin/CatalogueForms";
 import { AdminIcon } from "@/components/admin/AdminIcons";
 import { Badge, Card, STATUS_TONE, SearchInput, StatCard, btn, table } from "@/components/admin/ui";
-import { CUSTOMERS, ORDERS, formatDateTime, orderTotal } from "@/lib/admin-demo";
+import { useAdminOrders } from "@/lib/admin-orders";
+import { useAdminBookings } from "@/lib/admin-bookings";
+import { formatOrderDate, orderCount, type Order } from "@/lib/order-data";
+import { useAdminCustomers } from "@/lib/admin-customers";
 import { isOpenOrder } from "@/lib/orders";
 import { formatNaira, type Product } from "@/lib/shop-data";
 
@@ -17,18 +20,18 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const compact = (n: number) => (n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n));
 
 /** Delivered sales per weekday (Mon → Sun) from the orders list. */
-function salesByWeekday() {
+function salesByWeekday(orders: Order[]) {
   const totals = DAYS.map(() => 0);
-  for (const o of ORDERS) {
+  for (const o of orders) {
     if (o.status !== "Delivered") continue;
     const day = (new Date(o.createdAt).getDay() + 6) % 7; // Mon = 0
-    totals[day] += orderTotal(o);
+    totals[day] += o.subtotal;
   }
   return totals;
 }
 
-function RevenueChart() {
-  const values = salesByWeekday();
+function RevenueChart({ orders }: { orders: Order[] }) {
+  const values = salesByWeekday(orders);
   const max = Math.max(...values);
   const best = values.indexOf(max);
   const ticks = [1, 0.75, 0.5, 0.25, 0].map((f) => (max ? compact(Math.round(max * f)) : f === 0 ? "0" : ""));
@@ -82,9 +85,12 @@ function RevenueChart() {
 
 export default function Dashboard({ initialProducts, initialShopOn }: { initialProducts: Product[]; initialShopOn: boolean }) {
   const { products } = useAdminProducts(initialProducts);
-  const collected = ORDERS.filter((o) => o.status === "Delivered");
-  const revenue = collected.reduce((sum, o) => sum + orderTotal(o), 0);
-  const openOrders = ORDERS.filter((o) => isOpenOrder(o.status));
+  const { customers, newCount, joinedThisWeek } = useAdminCustomers();
+  const { orders } = useAdminOrders();
+  const { newCount: newBookings } = useAdminBookings();
+  const collected = orders.filter((o) => o.status === "Delivered");
+  const revenue = collected.reduce((sum, o) => sum + o.subtotal, 0);
+  const openOrders = orders.filter((o) => isOpenOrder(o.status));
   const outOfStock = products.filter((p) => !p.inStock);
   const inStock = products.length - outOfStock.length;
   const inStockPct = products.length ? Math.round((inStock / products.length) * 100) : 0;
@@ -105,11 +111,35 @@ export default function Dashboard({ initialProducts, initialShopOn }: { initialP
         </div>
       </div>
 
+      {newBookings > 0 && (
+        <Link
+          href="/admin/orders?view=bookings"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-brand/20 bg-tint px-5 py-3.5 text-sm transition-colors hover:border-brand/40"
+        >
+          <span className="flex items-center gap-2.5">
+            <AdminIcon name="calendar" className="h-5 w-5 text-brand" />
+            <span>
+              <strong className="font-semibold">
+                {newBookings} new booking {newBookings === 1 ? "request" : "requests"}
+              </strong>{" "}
+              waiting for you to contact the customer.
+            </span>
+          </span>
+          <span className="shrink-0 font-semibold text-brand">View →</span>
+        </Link>
+      )}
+
       {/* Key numbers */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4 xl:gap-5">
         <StatCard label="Total sales" icon="wallet" value={formatNaira(revenue)} change="0%" sub="Last week: ₦0" />
-        <StatCard label="Orders" icon="orders" value={String(ORDERS.length)} change="0%" sub={`${openOrders.length} open to confirm`} />
-        <StatCard label="Customers" icon="customers" value={String(CUSTOMERS.length)} change="0%" sub={`${CUSTOMERS.filter((c) => c.type === "Business").length} business accounts`} />
+        <StatCard label="Orders" icon="orders" value={String(orders.length)} change="0%" sub={`${openOrders.length} open to confirm`} />
+        <StatCard
+          label="Customers"
+          icon="customers"
+          value={String(customers.length)}
+          change={newCount ? `+${newCount} new` : undefined}
+          sub={`${joinedThisWeek} joined this week`}
+        />
         <StatCard label="Products in stock" icon="box" value={`${inStock}/${products.length}`} sub={`${outOfStock.length} out of stock`} />
       </div>
 
@@ -126,7 +156,7 @@ export default function Dashboard({ initialProducts, initialShopOn }: { initialP
           }
         >
           <div className="pt-2">
-            <RevenueChart />
+            <RevenueChart orders={orders} />
           </div>
         </Card>
 
@@ -211,32 +241,32 @@ export default function Dashboard({ initialProducts, initialShopOn }: { initialP
               </tr>
             </thead>
             <tbody>
-              {ORDERS.slice(0, 6).map((o) => (
+              {orders.slice(0, 6).map((o) => (
                 <tr key={o.id} className={table.row}>
                   <td className={table.td}>
                     <input type="checkbox" aria-label={`Select ${o.id}`} className="h-4 w-4 accent-[var(--color-brand)]" />
                   </td>
                   <td className={`${table.td} font-medium`}>#{o.id}</td>
-                  <td className={`${table.td} text-ink/60`}>{formatDateTime(o.createdAt)}</td>
-                  <td className={table.td}>{o.customer}</td>
+                  <td className={`${table.td} text-ink/60`}>{formatOrderDate(o.createdAt)}</td>
+                  <td className={table.td}>{o.customerName}</td>
                   <td className={`${table.td} text-ink/60`}>{o.channel}</td>
                   <td className={table.td}>
-                    <Badge tone={STATUS_TONE[o.status]}>{o.status}</Badge>
+                    <Badge tone={STATUS_TONE[o.status] ?? "grey"}>{o.status}</Badge>
                   </td>
-                  <td className={`${table.td} text-ink/60`}>{o.items.reduce((n, i) => n + i.qty, 0)} items</td>
-                  <td className={`${table.td} font-medium tabular-nums`}>{formatNaira(orderTotal(o))}</td>
+                  <td className={`${table.td} text-ink/60`}>{orderCount(o)} items</td>
+                  <td className={`${table.td} font-medium tabular-nums`}>{formatNaira(o.subtotal)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {/* Empty state sits outside the table so it stays centred on phones */}
-          {ORDERS.length === 0 && (
+          {orders.length === 0 && (
             <div className="px-4 py-12 text-center">
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f3f4f6] text-ink/45">
                 <AdminIcon name="orders" className="h-6 w-6" />
               </span>
               <p className="mt-3 text-sm font-medium">No orders yet</p>
-              <p className="mt-0.5 text-xs text-ink/50">WhatsApp orders will show here once the backend is connected.</p>
+              <p className="mt-0.5 text-xs text-ink/50">Orders placed on the website will show here.</p>
             </div>
           )}
         </div>

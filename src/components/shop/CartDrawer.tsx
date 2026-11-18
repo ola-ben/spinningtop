@@ -1,9 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import ImageSlot from "@/components/ImageSlot";
-import { WhatsAppIcon } from "@/components/SocialIcon";
-import { whatsappLink } from "@/lib/site";
 import { clearCart, setQty, type Cart } from "@/lib/cart-store";
 import { formatNaira, type Product } from "@/lib/shop-data";
 import { CloseIcon, MinusIcon, PlusIcon, TrashIcon } from "./ShopIcons";
@@ -14,15 +13,8 @@ export function cartLines(cart: Cart, products: Product[]): Line[] {
   return products.filter((p) => cart[p.id] > 0).map((p) => ({ product: p, qty: cart[p.id] }));
 }
 
-function orderMessage(lines: Line[], total: number) {
-  const items = lines
-    .map(({ product: p, qty }) => `• ${qty} × ${p.name} (${p.size}) — ${formatNaira(p.price * qty)}`)
-    .join("\n");
-  return `Hello Spinning Top, I'd like to order:\n\n${items}\n\nEstimated total: ${formatNaira(total)}\n\nPlease confirm availability and how to pay/collect. Thank you.`;
-}
-
-/* Slide-in cart. "Checkout" is an order request on WhatsApp — the team
-   confirms stock, final price and payment/collection there. */
+/* Slide-in cart. "Checkout" goes to /checkout (signed-in customers place a
+   tracked order). */
 export default function CartDrawer({
   open,
   onClose,
@@ -92,7 +84,7 @@ export default function CartDrawer({
         {lines.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
             <p className="font-display text-lg font-semibold">Your cart is empty.</p>
-            <p className="mt-2 text-sm text-ink/60">Add products, then send your order request to us on WhatsApp.</p>
+            <p className="mt-2 text-sm text-ink/60">Add products, then check out.</p>
             <button
               type="button"
               onClick={onClose}
@@ -144,19 +136,16 @@ export default function CartDrawer({
                 <span className="font-display text-xl font-bold tabular-nums">{formatNaira(total)}</span>
               </div>
               <p className="mt-2 text-xs leading-relaxed text-ink/55">
-                No payment is taken on this website. We&rsquo;ll confirm availability, final price and payment or
-                collection with you on WhatsApp.
+                Payment is online. Track your order in your account.
               </p>
-              <a
-                href={whatsappLink(orderMessage(lines, total))}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/checkout/"
+                onClick={onClose}
                 tabIndex={tab}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-3.5 text-sm font-bold text-paper transition-colors hover:bg-brand-deep"
               >
-                <WhatsAppIcon className="h-5 w-5" />
-                Send order on WhatsApp
-              </a>
+                Checkout
+              </Link>
               <button
                 type="button"
                 onClick={clearCart}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import PasswordInput from "@/components/admin/PasswordInput";
 import { btn, inputClass } from "@/components/admin/ui";
 import { signInAdmin } from "@/lib/admin-auth";
+import Busy from "@/components/Busy";
 
 /* Admin sign-in with a Supabase account (Authentication → Users) that is
    listed in the admins table — see supabase/admin-access.sql.
@@ -23,7 +24,7 @@ export default function LoginForm() {
     <form action={action} className="flex flex-col gap-5">
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Email</span>
-        <input name="email" type="email" autoComplete="email" placeholder="admin@spinningtop.ng" required className={inputClass} />
+        <input name="email" type="email" autoComplete="email" placeholder="Your email address" required className={inputClass} />
       </label>
 
       <label className="flex flex-col gap-1.5">
@@ -38,7 +39,7 @@ export default function LoginForm() {
       )}
 
       <button type="submit" disabled={pending} className={`${btn.primary} w-full py-3 disabled:cursor-wait disabled:opacity-70`}>
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? <Busy text="Signing in" /> : "Sign in"}
       </button>
     </form>
   );

@@ -3,20 +3,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type ReactNode } from "react";
-import PasswordInput from "@/components/admin/PasswordInput";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import AddToCart from "@/components/shop/AddToCart";
-import { DEMO_MESSAGES, DEMO_ORDERS, DEMO_VOUCHERS, STORE_CREDIT, type DemoOrder, type OrderStatus } from "@/lib/account-demo";
+import { DEMO_MESSAGES, DEMO_ORDERS, DEMO_VOUCHERS } from "@/lib/account-demo";
+import { cancelOrder, formatOrderDate, listOrders, type Order } from "@/lib/order-data";
+import { STATUS_HELP, type OrderStatus } from "@/lib/orders";
 import { useRecentlyViewed, clearViewed } from "@/lib/recent-store";
 import { PRODUCTS, formatNaira, type Product } from "@/lib/shop-data";
-import { signOut, updateUser, useUser, type User } from "@/lib/user-store";
+import { closeAccount, updateUser, useUser, type User } from "@/lib/user-store";
 import { toggleWishlist, useWishlist } from "@/lib/wishlist-store";
 import { AccountPanel } from "./AccountShell";
 import { AccountIcon, type AccountIconName } from "./AccountIcons";
+import Busy from "@/components/Busy";
 
-/* The pages inside /account. All DEMO: data comes from account-demo.ts and
-   this browser's storage; buttons that would call the backend just update
-   local state. */
+/* The pages inside /account. Profile, address and
+   close account are saved in Supabase (src/lib/user-store.ts). Orders, inbox,
+   reviews and vouchers come from account-demo.ts (empty until orders are
+   built in Phase 3); wishlist and recently viewed are stored in this browser. */
 
 const byId = (id: string) => PRODUCTS.find((p) => p.id === id);
 
@@ -31,7 +34,7 @@ const linkBtn = "cursor-pointer text-sm font-semibold text-brand hover:underline
 
 /* Placeholder while signed out / before hydration — AccountShell keeps the
    page hidden until a real user is available. */
-const NO_USER: User = { name: "", email: "", phone: "", address: "", memberSince: "" };
+const NO_USER: User = { id: "", name: "", email: "", phone: "", address: "", memberSince: "" };
 
 function useMe(): User {
   return useUser() ?? NO_USER;
@@ -48,9 +51,11 @@ function Thumb({ product, size = "h-20 w-20 sm:h-24 sm:w-24" }: { product?: Prod
 }
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
-  Delivered: "bg-emerald-600",
-  "Ready for pickup": "bg-amber-500",
+  Received: "bg-sky-600",
   Processing: "bg-brand",
+  "Ready for pickup": "bg-amber-500",
+  "Out for delivery": "bg-amber-500",
+  Delivered: "bg-emerald-600",
   Cancelled: "bg-ink/50",
 };
 
@@ -141,18 +146,6 @@ export function AccountOverview() {
           <p className="text-ink/60">{me.address || "No address yet"}</p>
           <p className="text-ink/60">{me.phone}</p>
         </Box>
-        <Box title="Store credit">
-          <p className="flex items-center gap-2 font-semibold text-brand">
-            <AccountIcon name="wallet" className="h-5 w-5" />
-            Store credit balance: {formatNaira(STORE_CREDIT)}
-          </p>
-        </Box>
-        <Box title="Newsletter preferences">
-          <p>Manage your email updates on offers and new products.</p>
-          <Link href="/account/newsletter" className={`${linkBtn} mt-4 inline-block`}>
-            Edit newsletter preferences
-          </Link>
-        </Box>
       </div>
     </AccountPanel>
   );
@@ -160,17 +153,20 @@ export function AccountOverview() {
 
 /* ── Orders ───────────────────────────────────────────────────────────── */
 
-const orderTotal = (o: DemoOrder) => o.items.reduce((sum, i) => sum + (byId(i.productId)?.price ?? 0) * i.qty, 0);
-
-function OrderRow({ order }: { order: DemoOrder }) {
-  const [open, setOpen] = useState(false);
-  const first = byId(order.items[0].productId);
+function OrderRow({ order, highlight, onChanged }: { order: Order; highlight: boolean; onChanged: () => void }) {
+  const [open, setOpen] = useState(highlight);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const first = order.items[0];
   const more = order.items.length - 1;
+  const where = order.fulfilment === "pickup" ? `Pickup — ${order.outlet}` : `Delivery — ${order.deliveryAddress}`;
 
   return (
-    <li className="rounded-md border border-ink/10 p-3 sm:p-4">
+    <li className={`rounded-md border p-3 sm:p-4 ${highlight ? "border-brand ring-2 ring-brand/15" : "border-ink/10"}`}>
       <div className="flex gap-3 sm:gap-4">
-        <Thumb product={first} />
+        <span className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-md bg-ink/[0.04] sm:h-24 sm:w-24">
+          {first?.image && <Image src={first.image} alt={first.name} fill sizes="96px" className="object-cover" />}
+        </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <p className="line-clamp-2 text-sm sm:text-[15px]">
@@ -185,7 +181,7 @@ function OrderRow({ order }: { order: DemoOrder }) {
           <div className="mt-3">
             <StatusBadge status={order.status} />
           </div>
-          <p className="mt-1 text-sm font-semibold">On {formatDate(order.date)}</p>
+          <p className="mt-1 text-sm font-semibold">Placed {formatOrderDate(order.createdAt)}</p>
           <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className={`${linkBtn} mt-2 sm:hidden`}>
             {open ? "Hide details" : "See details"}
           </button>
@@ -194,25 +190,72 @@ function OrderRow({ order }: { order: DemoOrder }) {
 
       {open && (
         <div className="mt-4 border-t border-ink/10 pt-4 text-sm">
-          <ul className="flex flex-col gap-2">
-            {order.items.map((i) => {
-              const p = byId(i.productId);
-              return (
-                <li key={i.productId} className="flex items-center gap-3">
-                  <Thumb product={p} size="h-10 w-10" />
-                  <Link href={`/shop/${i.productId}`} className="min-w-0 flex-1 truncate hover:text-brand">
-                    {p?.name}
+          <p className="text-ink/70">{STATUS_HELP[order.status]}</p>
+
+          {/* Timeline */}
+          <ol className="mt-4 flex flex-col gap-3 border-l-2 border-ink/10 pl-4">
+            {order.history.map((h, i) => (
+              <li key={`${h.at}-${i}`} className="relative">
+                <span
+                  className={`absolute -left-[1.4rem] top-1 h-3 w-3 rounded-full border-2 border-paper ${
+                    i === order.history.length - 1 ? "bg-brand" : "bg-ink/25"
+                  }`}
+                />
+                <p className="font-medium">{h.status}</p>
+                <p className="text-xs text-ink/50">
+                  {formatOrderDate(h.at)}
+                  {h.note && <> · {h.note}</>}
+                </p>
+              </li>
+            ))}
+          </ol>
+
+          <ul className="mt-5 flex flex-col gap-2">
+            {order.items.map((i, k) => (
+              <li key={`${i.productId}-${k}`} className="flex items-center gap-3">
+                <span className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-md bg-ink/[0.04]">
+                  {i.image && <Image src={i.image} alt="" fill sizes="40px" className="object-cover" />}
+                </span>
+                {i.productId ? (
+                  <Link href={`/shop/${i.productId}/`} className="min-w-0 flex-1 truncate hover:text-brand">
+                    {i.name}
                   </Link>
-                  <span className="text-ink/55">×{i.qty}</span>
-                  <span className="w-20 text-right tabular-nums">{formatNaira((p?.price ?? 0) * i.qty)}</span>
-                </li>
-              );
-            })}
+                ) : (
+                  <span className="min-w-0 flex-1 truncate">{i.name}</span>
+                )}
+                <span className="text-ink/55">×{i.qty}</span>
+                <span className="w-20 text-right tabular-nums">{formatNaira(i.unitPrice * i.qty)}</span>
+              </li>
+            ))}
           </ul>
           <div className="mt-3 flex flex-wrap justify-between gap-2 border-t border-ink/10 pt-3">
-            <span className="text-ink/55">{order.fulfilment}</span>
-            <span className="font-semibold tabular-nums">Total {formatNaira(orderTotal(order))}</span>
+            <span className="text-ink/55">{where}</span>
+            <span className="font-semibold tabular-nums">Total {formatNaira(order.subtotal)}</span>
           </div>
+          <p className="mt-1 text-xs text-ink/50">
+            Payment: {order.paymentStatus === "paid" ? "Paid ✓" : order.paymentStatus === "refunded" ? "Refunded" : "Awaiting online payment"}
+          </p>
+
+          {order.status === "Received" && (
+            <div className="mt-4">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  if (!window.confirm(`Cancel order ${order.id}?`)) return;
+                  setBusy(true);
+                  const err = await cancelOrder(order.id);
+                  setBusy(false);
+                  if (err) return setError(err);
+                  onChanged();
+                }}
+                className="cursor-pointer text-sm font-semibold text-red-600 hover:underline disabled:opacity-50"
+              >
+                {busy ? <Busy text="Cancelling" /> : "Cancel order"}
+              </button>
+              {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
+            </div>
+          )}
         </div>
       )}
     </li>
@@ -221,24 +264,52 @@ function OrderRow({ order }: { order: DemoOrder }) {
 
 export function AccountOrders() {
   const [tab, setTab] = useState<"open" | "closed">("open");
-  const open = DEMO_ORDERS.filter((o) => o.status !== "Cancelled");
-  const closed = DEMO_ORDERS.filter((o) => o.status === "Cancelled");
-  const list = tab === "open" ? open : closed;
+  const [orders, setOrders] = useState<Order[] | null>(null);
+  const [error, setError] = useState("");
+  const [placed] = useState(() => (typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("placed")));
+  const me = useUser();
+
+  const load = useCallback(() => {
+    listOrders()
+      .then((list) => {
+        setOrders(list);
+        setError("");
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load your orders."));
+  }, []);
+
+  useEffect(() => {
+    if (me) load();
+  }, [me, load]);
+
+  const all = orders ?? [];
+  const active = all.filter((o) => o.status !== "Cancelled");
+  const cancelled = all.filter((o) => o.status === "Cancelled");
+  const list = tab === "open" ? active : cancelled;
 
   return (
     <AccountPanel title="Orders">
+      {placed && (
+        <p role="status" className="mb-4 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <strong className="font-semibold">Thank you! Order {placed} has been placed.</strong> We&rsquo;ll confirm it shortly — you can follow
+          its progress here.
+        </p>
+      )}
       <Tabs
         value={tab}
         onChange={setTab}
         tabs={[
-          { id: "open", label: `Ongoing/Delivered (${open.length})` },
-          { id: "closed", label: `Cancelled (${closed.length})` },
+          { id: "open", label: `Ongoing/Delivered (${active.length})` },
+          { id: "closed", label: `Cancelled (${cancelled.length})` },
         ]}
       />
-      {list.length ? (
+      {error && <p className="mb-4 rounded-md bg-red-50 px-3.5 py-2.5 text-sm text-red-700">{error}</p>}
+      {orders === null && !error ? (
+        <p className="py-14 text-center text-sm text-ink/50">Loading your orders…</p>
+      ) : list.length ? (
         <ul className="flex flex-col gap-3">
           {list.map((o) => (
-            <OrderRow key={o.id} order={o} />
+            <OrderRow key={o.id} order={o} highlight={o.id === placed} onChanged={load} />
           ))}
         </ul>
       ) : (
@@ -514,6 +585,14 @@ function Saved({ show }: { show: boolean }) {
   return show ? <span className="text-sm font-medium text-emerald-700">Saved ✓</span> : null;
 }
 
+function FormError({ error }: { error: string }) {
+  return error ? (
+    <p role="alert" className="rounded-md bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+      {error}
+    </p>
+  ) : null;
+}
+
 function useFlash() {
   const [on, setOn] = useState(false);
   return [
@@ -528,13 +607,17 @@ function useFlash() {
 export function AccountManagement() {
   const me = useMe();
   const [saved, flash] = useFlash();
-  const [pwSaved, flashPw] = useFlash();
+  const [detailsError, setDetailsError] = useState("");
+  const [busy, setBusy] = useState<"" | "details">("");
 
-  function onDetails(e: FormEvent<HTMLFormElement>) {
+  async function onDetails(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const d = new FormData(e.currentTarget);
-    updateUser({ name: String(d.get("name") ?? "").trim() || me.name, phone: String(d.get("phone") ?? "").trim() });
-    flash();
+    setBusy("details");
+    const err = await updateUser({ name: String(d.get("name") ?? "").trim() || me.name, phone: String(d.get("phone") ?? "").trim() });
+    setBusy("");
+    setDetailsError(err ?? "");
+    if (!err) flash();
   }
 
   return (
@@ -554,38 +637,23 @@ export function AccountManagement() {
             <span className="font-medium">Phone</span>
             <input name="phone" type="tel" defaultValue={me.phone} autoComplete="tel" className={input} />
           </label>
+          <FormError error={detailsError} />
           <div className="flex items-center gap-3">
-            <button type="submit" className={primaryBtn}>
-              Save
+            <button type="submit" disabled={busy === "details"} className={primaryBtn}>
+              {busy === "details" ? <Busy text="Saving" /> : "Save"}
             </button>
             <Saved show={saved} />
           </div>
         </form>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.currentTarget.reset();
-            flashPw();
-          }}
-          className="flex flex-col gap-4 rounded-md border border-ink/10 p-4"
-        >
-          <h2 className="text-xs font-semibold uppercase tracking-wide">Change password</h2>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium">Current password</span>
-            <PasswordInput name="current" autoComplete="current-password" />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium">New password</span>
-            <PasswordInput name="new" autoComplete="new-password" />
-          </label>
-          <div className="flex items-center gap-3">
-            <button type="submit" className={primaryBtn}>
-              Update password
-            </button>
-            <Saved show={pwSaved} />
-          </div>
-        </form>
+        <div className="flex flex-col gap-3 rounded-md border border-ink/10 p-4 text-sm">
+          <h2 className="text-xs font-semibold uppercase tracking-wide">Signing in</h2>
+          <p className="text-ink/70">
+            There&rsquo;s no password to remember. Each time you sign in, we email a 6-digit code to{" "}
+            <strong className="font-semibold text-ink">{me.email}</strong>.
+          </p>
+          <p className="text-ink/55">Keep access to this email address — it&rsquo;s how you get into your account.</p>
+        </div>
       </div>
     </AccountPanel>
   );
@@ -594,12 +662,17 @@ export function AccountManagement() {
 export function AccountAddresses() {
   const me = useMe();
   const [editing, setEditing] = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function onSave(e: FormEvent<HTMLFormElement>) {
+  async function onSave(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const d = new FormData(e.currentTarget);
-    updateUser({ address: String(d.get("address") ?? "").trim(), phone: String(d.get("phone") ?? "").trim() });
-    setEditing(false);
+    setBusy(true);
+    const err = await updateUser({ address: String(d.get("address") ?? "").trim(), phone: String(d.get("phone") ?? "").trim() });
+    setBusy(false);
+    setError(err ?? "");
+    if (!err) setEditing(false);
   }
 
   return (
@@ -614,9 +687,10 @@ export function AccountAddresses() {
             <span className="font-medium">Phone</span>
             <input name="phone" type="tel" defaultValue={me.phone} autoComplete="tel" className={input} />
           </label>
+          <FormError error={error} />
           <div className="flex items-center gap-4">
-            <button type="submit" className={primaryBtn}>
-              Save address
+            <button type="submit" disabled={busy} className={primaryBtn}>
+              {busy ? <Busy text="Saving" /> : "Save address"}
             </button>
             <button type="button" onClick={() => setEditing(false)} className={linkBtn}>
               Cancel
@@ -643,50 +717,11 @@ export function AccountAddresses() {
   );
 }
 
-export function AccountNewsletter() {
-  const me = useMe();
-  const [saved, flash] = useFlash();
-  const options = [
-    { id: "daily", label: "I want to receive daily newsletters" },
-    { id: "weekly", label: "I want to receive weekly newsletters" },
-    { id: "none", label: "I don't want to receive newsletters" },
-  ] as const;
-
-  return (
-    <AccountPanel title="Newsletter Preferences">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const v = new FormData(e.currentTarget).get("newsletter") as User["newsletter"];
-          updateUser({ newsletter: v });
-          flash();
-        }}
-        className="flex max-w-lg flex-col gap-4"
-      >
-        <p className="text-sm text-ink/65">Choose how often you&rsquo;d like to hear about offers and new products.</p>
-        <fieldset className="flex flex-col gap-3">
-          <legend className="sr-only">Newsletter frequency</legend>
-          {options.map((o) => (
-            <label key={o.id} className="flex cursor-pointer items-center gap-3 rounded-md border border-ink/10 px-4 py-3 text-sm has-[:checked]:border-brand has-[:checked]:bg-tint">
-              <input type="radio" name="newsletter" value={o.id} defaultChecked={(me.newsletter ?? "weekly") === o.id} className="h-4 w-4 accent-[var(--color-brand)]" />
-              {o.label}
-            </label>
-          ))}
-        </fieldset>
-        <div className="flex items-center gap-3">
-          <button type="submit" className={primaryBtn}>
-            Save
-          </button>
-          <Saved show={saved} />
-        </div>
-      </form>
-    </AccountPanel>
-  );
-}
-
 export function AccountClose() {
   const router = useRouter();
   const [agree, setAgree] = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   return (
     <AccountPanel title="Close Account">
@@ -710,17 +745,22 @@ export function AccountClose() {
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-red-600" />
           I understand my account and its data will be deleted.
         </label>
+        <FormError error={error} />
         <div>
           <button
             type="button"
-            disabled={!agree}
-            onClick={() => {
-              signOut();
+            disabled={!agree || busy}
+            onClick={async () => {
+              if (!window.confirm("Permanently delete your Spinning Top account?")) return;
+              setBusy(true);
+              const err = await closeAccount();
+              setBusy(false);
+              if (err) return setError(err);
               router.push("/");
             }}
             className="cursor-pointer rounded-md bg-red-600 px-5 py-2.5 text-sm font-semibold text-paper transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Close my account
+            {busy ? <Busy text="Closing account" /> : "Close my account"}
           </button>
         </div>
       </div>

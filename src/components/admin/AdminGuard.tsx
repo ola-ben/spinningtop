@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { signOutAdmin, useAdminSession } from "@/lib/admin-auth";
+import { useAdminSession } from "@/lib/admin-auth";
 
 /* Shows /admin only to signed-in admins; everyone else goes to /admin/login.
    (Supabase itself blocks any change from non-admins — this just keeps the
@@ -15,7 +15,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLogin || status === "loading" || status === "admin") return;
-    if (status === "not-admin") void signOutAdmin();
+    // A signed-in customer (not an admin) stays signed in to their account.
     router.replace(`/admin/login/?next=${encodeURIComponent(pathname)}`);
   }, [isLogin, status, pathname, router]);
 

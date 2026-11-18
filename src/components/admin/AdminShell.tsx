@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { signOutAdmin } from "@/lib/admin-auth";
+import { useAdminCustomers } from "@/lib/admin-customers";
+import { useAdminOrders } from "@/lib/admin-orders";
+import { useAdminBookings } from "@/lib/admin-bookings";
 import { AdminIcon, type AdminIconName } from "./AdminIcons";
 
 type NavItem = { href: string; label: string; icon: AdminIconName; badge?: number };
@@ -44,6 +47,18 @@ const isActive = (pathname: string, href: string) =>
   href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
 
 function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  // New website sign-ups since the admin last opened Customers.
+  const { newCount } = useAdminCustomers();
+  // Website orders waiting to be confirmed.
+  const { toConfirm } = useAdminOrders();
+  // Plus service booking requests nobody has contacted yet (same Orders page).
+  const { newCount: newBookings } = useAdminBookings();
+  const badgeFor = (item: NavItem) =>
+    item.href === "/admin/customers"
+      ? newCount
+      : item.href === "/admin/orders"
+        ? toConfirm + newBookings
+        : item.badge;
   return (
     <nav aria-label="Admin" className="flex flex-col gap-5">
       {ADMIN_NAV.map((section) => (
@@ -66,13 +81,13 @@ function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => vo
                   >
                     <AdminIcon name={item.icon} className="h-5 w-5 shrink-0" />
                     <span className="flex-1">{item.label}</span>
-                    {item.badge ? (
+                    {badgeFor(item) ? (
                       <span
                         className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-bold ${
                           active ? "bg-paper text-brand" : "bg-brand/10 text-brand"
                         }`}
                       >
-                        {item.badge}
+                        {badgeFor(item)}
                       </span>
                     ) : null}
                   </Link>
