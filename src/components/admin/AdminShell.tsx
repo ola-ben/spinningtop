@@ -48,11 +48,22 @@ const isActive = (pathname: string, href: string) =>
 
 function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   // New website sign-ups since the admin last opened Customers.
-  const { newCount } = useAdminCustomers();
+  const { newCount: newSignUps, customers, seenAt, seenReady } = useAdminCustomers();
   // Website orders waiting to be confirmed.
   const { toConfirm } = useAdminOrders();
   // Plus service booking requests nobody has contacted yet (same Orders page).
-  const { newCount: newBookings } = useAdminBookings();
+  const { newCount: newBookings, bookings } = useAdminBookings();
+  // Plus guests (booking form, no account) whose first booking came after your last visit.
+  const accountEmails = new Set(customers.map((c) => c.email.toLowerCase()));
+  const firstBooking = new Map<string, number>();
+  for (const b of bookings) {
+    const email = b.email.toLowerCase();
+    if (accountEmails.has(email)) continue;
+    const at = Date.parse(b.createdAt);
+    firstBooking.set(email, Math.min(firstBooking.get(email) ?? at, at));
+  }
+  const newGuests = seenReady ? [...firstBooking.values()].filter((at) => at > seenAt).length : 0;
+  const newCount = newSignUps + newGuests;
   const badgeFor = (item: NavItem) =>
     item.href === "/admin/customers"
       ? newCount

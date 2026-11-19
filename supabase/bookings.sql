@@ -76,7 +76,10 @@ declare
   new_id  text;
 begin
   if length(trim(coalesce(p_full_name, ''))) < 2 then raise exception 'Enter your full name.'; end if;
-  if length(regexp_replace(coalesce(p_phone, ''), '\D', '', 'g')) < 10 then raise exception 'Enter a valid phone number.'; end if;
+  -- Nigerian mobile numbers only (same rule as the booking form).
+  if regexp_replace(coalesce(p_phone, ''), '[\s-]', '', 'g') !~ '^(\+?234|0)[789][01][0-9]{8}$' then
+    raise exception 'Enter a valid Nigerian phone number, e.g. 0803 123 4567.';
+  end if;
   if v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then raise exception 'Enter a valid email address.'; end if;
   if length(trim(coalesce(p_area, ''))) < 2 then raise exception 'Enter your location or area.'; end if;
   if p_logistics not in ('pickup_delivery', 'drop_off', 'either') then raise exception 'Choose a pickup or drop-off option.'; end if;

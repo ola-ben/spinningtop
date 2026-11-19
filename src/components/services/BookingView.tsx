@@ -21,6 +21,12 @@ import Busy from "@/components/Busy";
 
 const NOTES_MAX = 2000;
 
+/* Nigerian mobile numbers only: 0803 123 4567, +234 803 123 4567 or 2348031234567
+   (spaces and dashes allowed). Same rule as create_booking() in supabase/bookings.sql. */
+const PHONE_PATTERN = String.raw`[\s\-]*(\+?234|0)[\s\-]*[789][01]([\s\-]*[0-9]){8}[\s\-]*`;
+const PHONE_HELP = "Enter a valid Nigerian phone number, e.g. 0803 123 4567 or +234 803 123 4567.";
+const isNigerianPhone = (v: string) => /^(\+?234|0)[789][01]\d{8}$/.test(v.replace(/[\s-]/g, ""));
+
 type Photo = { file: File; url: string };
 
 /* /book — booking request form for one or more services. No sign-in needed;
@@ -95,7 +101,7 @@ export default function BookingView({ services: initialServices, products: initi
     const area = get("area");
 
     if (fullName.length < 2) return setError("Enter your full name.");
-    if (phone.replace(/\D/g, "").length < 10) return setError("Enter a phone number we can call or WhatsApp.");
+    if (!isNigerianPhone(phone)) return setError(PHONE_HELP);
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setError("Enter a valid email address.");
     if (area.length < 2) return setError("Enter your location or area.");
     if (picked.length === 0) return setError("Choose at least one service.");
@@ -147,21 +153,33 @@ export default function BookingView({ services: initialServices, products: initi
     body = <div className="h-[50vh]" aria-busy="true" />;
   } else {
     body = (
-      <form key={user?.id ?? "guest"} onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+      <form key={user?.id ?? "guest"} onSubmit={onSubmit} className="flex flex-col gap-4">
         <Card>
           <h2 className="font-display text-lg font-semibold">Your details</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label="Full name" icon={<UserIcon />}>
-              <input name="name" autoComplete="name" defaultValue={user?.name ?? ""} placeholder="Your full name" className={inputCls} />
+              <input name="name" required minLength={2} autoComplete="name" defaultValue={user?.name ?? ""} placeholder="Your full name" className={inputCls} />
             </Field>
             <Field label="Phone number" hint="WhatsApp number preferably" icon={<PhoneIcon />}>
-              <input name="phone" type="tel" autoComplete="tel" defaultValue={user?.phone ?? ""} placeholder="080…" className={inputCls} />
+              <input
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                required
+                pattern={PHONE_PATTERN}
+                title={PHONE_HELP}
+                maxLength={18}
+                autoComplete="tel"
+                defaultValue={user?.phone ?? ""}
+                placeholder="Your contact number"
+                className={inputCls}
+              />
             </Field>
             <Field label="Email" icon={<MailIcon />}>
-              <input name="email" type="email" autoComplete="email" defaultValue={user?.email ?? ""} placeholder="Your email address" className={inputCls} />
+              <input name="email" type="email" required autoComplete="email" defaultValue={user?.email ?? ""} placeholder="Your email address" className={inputCls} />
             </Field>
             <Field label="Location / Address (Area)" icon={<PinIcon />}>
-              <input name="area" autoComplete="street-address" defaultValue={user?.address ?? ""} placeholder="e.g. Oluyole, Ibadan" className={inputCls} />
+              <input name="area" required minLength={2} autoComplete="street-address" defaultValue={user?.address ?? ""} placeholder="e.g. Oluyole, Ibadan" className={inputCls} />
             </Field>
           </div>
         </Card>
@@ -197,7 +215,7 @@ export default function BookingView({ services: initialServices, products: initi
               const on = logistics === o.value;
               return (
                 <label key={o.value} className={`${optionCls} ${on ? optionOn : optionOff}`}>
-                  <input type="radio" name="logistics" checked={on} onChange={() => setLogistics(o.value)} className="h-4 w-4 accent-brand" />
+                  <input type="radio" name="logistics" required checked={on} onChange={() => setLogistics(o.value)} className="h-4 w-4 accent-brand" />
                   <span className="text-ink">{LOGISTICS_ICONS[o.value]}</span>
                   {o.label}
                 </label>

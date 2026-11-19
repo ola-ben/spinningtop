@@ -114,6 +114,10 @@ export function useAdminCustomers() {
     error: s.error,
     /** Signed up since the admin last opened Customers (everyone, on first visit). */
     isNew: (c: AdminCustomer) => Date.parse(c.joined) > seen,
+    /** When the admin last opened Customers (ms; 0 = never). */
+    seenAt: seen,
+    /** True until the "last seen" time has been read from this browser. */
+    seenReady: s.lastSeen !== null,
     newCount: customers.filter((c) => Date.parse(c.joined) > seen).length,
     /** Signed up in the 7 days before the list was loaded. */
     joinedThisWeek: customers.filter((c) => s.loadedAt - Date.parse(c.joined) < 7 * 24 * 60 * 60 * 1000).length,

@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useAdminBookings } from "@/lib/admin-bookings";
 import { markCustomersSeen, readSeen, useAdminCustomers, type AdminCustomer } from "@/lib/admin-customers";
 import { Badge, Card, PageHeader, StatCard, Toolbar, btn, inputClass, table } from "./ui";
 import Busy from "@/components/Busy";
@@ -25,20 +27,59 @@ const toWhatsApp = (phone: string) => {
   return d.startsWith("0") ? `234${d.slice(1)}` : d;
 };
 
+/** A row on this page: a website account, or a guest who only sent bookings. */
+type Person = AdminCustomer & { guest: boolean; bookings: number };
+
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+
 export default function CustomersScreen() {
-  const { customers, loading, error, reload, joinedThisWeek: thisWeek } = useAdminCustomers();
+  const { customers: accounts, loading: accountsLoading, error, reload } = useAdminCustomers();
+  const { bookings, loading: bookingsLoading, reload: reloadBookings } = useAdminBookings();
+  const loading = accountsLoading || bookingsLoading;
   const [query, setQuery] = useState("");
   // Who counts as "new" is fixed when the page opens, so the labels stay put while you look.
   const [newSince] = useState(() => readSeen());
+  const [openedAt] = useState(() => Date.now());
   const [refreshing, setRefreshing] = useState(false);
 
   // Opening this page marks everyone as seen (clears the sidebar badge).
   useEffect(() => {
-    if (!loading) markCustomersSeen();
-  }, [loading, customers.length]);
+    if (!accountsLoading) markCustomersSeen();
+  }, [accountsLoading, accounts.length]);
 
-  const isNew = (c: AdminCustomer) => !newSince || Date.parse(c.joined) > Date.parse(newSince);
+  // Accounts + guests from the booking form, matched by email (one row per person).
+  const customers = useMemo<Person[]>(() => {
+    const byEmail = new Map<string, typeof bookings>();
+    for (const b of bookings) {
+      const key = b.email.toLowerCase();
+      byEmail.set(key, [...(byEmail.get(key) ?? []), b]);
+    }
+    const rows: Person[] = accounts.map((c) => ({ ...c, guest: false, bookings: byEmail.get(c.email.toLowerCase())?.length ?? 0 }));
+    const known = new Set(accounts.map((c) => c.email.toLowerCase()));
+    for (const [email, list] of byEmail) {
+      if (known.has(email)) continue;
+      const latest = list[0]; // bookings are newest first
+      const first = list[list.length - 1];
+      rows.push({
+        id: `guest:${email}`,
+        name: latest.fullName,
+        email: latest.email,
+        phone: latest.phone,
+        address: latest.area,
+        newsletter: "none",
+        joined: first.createdAt,
+        lastSignIn: null,
+        guest: true,
+        bookings: list.length,
+      });
+    }
+    return rows.sort((a, b) => b.joined.localeCompare(a.joined));
+  }, [accounts, bookings]);
+
+  const isNew = (c: Person) => !c.guest && (!newSince || Date.parse(c.joined) > Date.parse(newSince));
   const withPhone = customers.filter((c) => c.phone.trim()).length;
+  const guests = customers.filter((c) => c.guest).length;
+  const thisWeek = customers.filter((c) => openedAt - Date.parse(c.joined) < WEEK).length;
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -50,14 +91,14 @@ export default function CustomersScreen() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Customers"
-        description="Everyone with a website account, newest first."
+        description="Everyone with a website account, plus guests who sent a booking request — newest first."
         actions={
           <button
             type="button"
             disabled={refreshing}
             onClick={async () => {
               setRefreshing(true);
-              await reload();
+              await Promise.all([reload(), reloadBookings()]);
               setRefreshing(false);
             }}
             className={`${btn.secondary} disabled:opacity-60`}
@@ -74,7 +115,12 @@ export default function CustomersScreen() {
       )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:gap-4">
-        <StatCard label="Total customers" icon="customers" value={loading ? "…" : String(customers.length)} />
+        <StatCard
+          label="Total customers"
+          icon="customers"
+          value={loading ? "…" : String(customers.length)}
+          sub={guests ? `${customers.length - guests} with accounts · ${guests} ${guests === 1 ? "guest" : "guests"}` : undefined}
+        />
         <StatCard label="New this week" value={loading ? "…" : String(thisWeek)} tone={thisWeek ? "good" : "default"} />
         <StatCard label="Added a phone number" value={loading ? "…" : String(withPhone)} />
       </div>
@@ -97,8 +143,10 @@ export default function CustomersScreen() {
             <thead>
               <tr>
                 <th className={table.th}>Customer</th>
+                <th className={table.th}>Type</th>
                 <th className={table.th}>Phone</th>
-                <th className={table.th}>Delivery address</th>
+                <th className={table.th}>Address / area</th>
+                <th className={table.th}>Bookings</th>
                 <th className={table.th}>Joined</th>
                 <th className={table.th}>Last sign-in</th>
               </tr>
@@ -106,15 +154,15 @@ export default function CustomersScreen() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-sm text-ink/50">
+                  <td colSpan={7} className="px-5 py-12 text-center text-sm text-ink/50">
                     Loading customers…
                   </td>
                 </tr>
               )}
               {!loading && shown.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-12 text-center text-sm text-ink/50">
-                    {query ? "No customers match your search." : "No customers yet. New website sign-ups will appear here."}
+                  <td colSpan={7} className="px-5 py-12 text-center text-sm text-ink/50">
+                    {query ? "No customers match your search." : "No customers yet. New website sign-ups and booking requests will appear here."}
                   </td>
                 </tr>
               )}
@@ -137,6 +185,9 @@ export default function CustomersScreen() {
                     </div>
                   </td>
                   <td className={table.td}>
+                    {c.guest ? <Badge tone="amber">Guest</Badge> : <Badge tone="green">Account</Badge>}
+                  </td>
+                  <td className={table.td}>
                     {c.phone ? (
                       <a
                         href={`https://wa.me/${toWhatsApp(c.phone)}?text=${encodeURIComponent(`Hello ${c.name.split(" ")[0] || ""}, this is Spinning Top.`)}`}
@@ -154,8 +205,17 @@ export default function CustomersScreen() {
                   <td className={`${table.td} max-w-[16rem] truncate text-ink/65`} title={c.address}>
                     {c.address || <span className="text-ink/40">—</span>}
                   </td>
+                  <td className={`${table.td} tabular-nums`}>
+                    {c.bookings ? (
+                      <Link href="/admin/orders?view=bookings" className="font-semibold text-brand hover:underline">
+                        {c.bookings}
+                      </Link>
+                    ) : (
+                      <span className="text-ink/40">0</span>
+                    )}
+                  </td>
                   <td className={`${table.td} tabular-nums`}>{formatDate(c.joined)}</td>
-                  <td className={`${table.td} tabular-nums text-ink/60`}>{formatDate(c.lastSignIn)}</td>
+                  <td className={`${table.td} tabular-nums text-ink/60`}>{c.guest ? <span className="text-ink/40">No account</span> : formatDate(c.lastSignIn)}</td>
                 </tr>
               ))}
             </tbody>
