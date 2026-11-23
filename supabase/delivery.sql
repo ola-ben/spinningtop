@@ -5,7 +5,7 @@
 --
 -- How it works
 --   • The admin adds areas + prices on Admin → Delivery (team members whose
---     role has "settings.manage").
+--     role has "delivery.manage" — the "Delivery" tick on Team & roles).
 --   • At checkout, a customer choosing delivery picks an area; the fee is
 --     taken from this table INSIDE the database (place_order), never the browser.
 --   • Kwik is shown as "coming soon" until their API is connected.
@@ -38,12 +38,12 @@ create policy "Anyone reads active delivery areas"
 drop policy if exists "Team reads all delivery areas" on public.delivery_zones;
 create policy "Team reads all delivery areas"
   on public.delivery_zones for select to authenticated
-  using ((select public.admin_can('settings.manage')));
+  using ((select public.admin_can('delivery.manage')));
 
 drop policy if exists "Team manages delivery areas" on public.delivery_zones;
 create policy "Team manages delivery areas"
   on public.delivery_zones for all to authenticated
-  using ((select public.admin_can('settings.manage'))) with check ((select public.admin_can('settings.manage')));
+  using ((select public.admin_can('delivery.manage'))) with check ((select public.admin_can('delivery.manage')));
 
 grant select on public.delivery_zones to anon, authenticated;
 grant insert, update, delete on public.delivery_zones to authenticated;

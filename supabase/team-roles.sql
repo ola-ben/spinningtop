@@ -20,7 +20,8 @@
 --   services.view / services.edit / services.delete
 --   reviews.view, vouchers.view, messages.view, academy.view
 --   dashboard.sales  see sales totals on the dashboard
---   settings.manage  shop on/off, delivery areas and site settings
+--   delivery.manage  delivery areas and prices (Admin → Delivery)
+--   settings.manage  shop on/off and site settings
 -- Owners can do everything, and only owners manage the team.
 
 -- ───────────────────────── invites ─────────────────────────
@@ -56,7 +57,7 @@ as $$
     'products.view', 'products.edit', 'products.delete',
     'services.view', 'services.edit', 'services.delete',
     'reviews.view', 'vouchers.view', 'messages.view', 'academy.view',
-    'dashboard.sales', 'settings.manage'
+    'dashboard.sales', 'settings.manage', 'delivery.manage'
   ]::text[];
 $$;
 

@@ -38,8 +38,9 @@ export const PERMISSION_GROUPS: { label: string; items: { key: Permission; label
   { label: "Vouchers", items: [{ key: "vouchers.view", label: "View" }] },
   { label: "Messages", items: [{ key: "messages.view", label: "View" }] },
   { label: "Academy", items: [{ key: "academy.view", label: "View" }] },
+  { label: "Delivery", items: [{ key: "delivery.manage", label: "Manage areas & prices" }] },
   { label: "Dashboard", items: [{ key: "dashboard.sales", label: "See sales totals" }] },
-  { label: "Settings", items: [{ key: "settings.manage", label: "Shop on/off, delivery areas & settings" }] },
+  { label: "Settings", items: [{ key: "settings.manage", label: "Shop on/off & settings" }] },
 ];
 
 /** Ticking one of these also ticks the "View" it depends on (and unticking View clears them). */

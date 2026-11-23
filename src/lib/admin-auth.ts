@@ -32,7 +32,8 @@ export type Permission =
   | "messages.view"
   | "academy.view"
   | "dashboard.sales"
-  | "settings.manage";
+  | "settings.manage"
+  | "delivery.manage";
 
 /** "owner" = only Owners (e.g. managing the team). */
 export type Access = Permission | "owner";
@@ -123,7 +124,7 @@ const ROUTES: [string, Access][] = [
   ["/admin/academy", "academy.view"],
   ["/admin/team", "owner"],
   ["/admin/settings", "settings.manage"],
-  ["/admin/delivery", "settings.manage"],
+  ["/admin/delivery", "delivery.manage"],
 ];
 
 export function routeAccess(pathname: string): Access | null {
