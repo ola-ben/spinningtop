@@ -230,7 +230,10 @@ function OrderRow({ order, highlight, onChanged }: { order: Order; highlight: bo
           </ul>
           <div className="mt-3 flex flex-wrap justify-between gap-2 border-t border-ink/10 pt-3">
             <span className="text-ink/55">{where}</span>
-            <span className="font-semibold tabular-nums">Total {formatNaira(order.subtotal)}</span>
+            <span className="font-semibold tabular-nums">
+              {order.deliveryFee > 0 && <span className="mr-2 font-normal text-ink/55">Delivery {formatNaira(order.deliveryFee)}</span>}
+              Total {formatNaira(order.total)}
+            </span>
           </div>
           <p className="mt-1 text-xs text-ink/50">
             Payment: {order.paymentStatus === "paid" ? "Paid ✓" : order.paymentStatus === "refunded" ? "Refunded" : "Awaiting online payment"}

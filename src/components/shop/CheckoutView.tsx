@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import ImageSlot from "@/components/ImageSlot";
 import { clearCart, useCart } from "@/lib/cart-store";
 import { useLiveProducts } from "@/lib/live-catalogue";
 import { placeOrder } from "@/lib/order-data";
 import { formatNaira, type Product } from "@/lib/shop-data";
 import { BRANCHES } from "@/lib/site";
+import { COURIERS, useDeliveryZones } from "@/lib/delivery";
 import { useHydrated, useUser } from "@/lib/user-store";
 import { cartLines } from "./CartDrawer";
 import ShopChrome from "./ShopChrome";
@@ -29,10 +30,22 @@ export default function CheckoutView({ products: initial }: { products: Product[
   const user = useUser();
   const ready = useHydrated();
   const lines = cartLines(cart, products);
-  const total = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0);
+  const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0);
   const outOfStock = lines.filter((l) => !l.product.inStock);
 
   const [fulfilment, setFulfilment] = useState<"pickup" | "delivery">("pickup");
+  // Delivery: Holt (fixed price per area, set in Admin → Delivery). Kwik is coming soon.
+  const { zones, loading: zonesLoading } = useDeliveryZones();
+  const [zoneId, setZoneId] = useState("");
+  const zone = zones.find((z) => z.id === zoneId && z.active) ?? null;
+  const deliveryFee = fulfilment === "delivery" && zone ? zone.price : 0;
+  const total = subtotal + deliveryFee;
+  const [toast, setToast] = useState("");
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 2500);
+    return () => clearTimeout(t);
+  }, [toast]);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -45,6 +58,7 @@ export default function CheckoutView({ products: initial }: { products: Product[
     const address = String(d.get("address") ?? "").trim();
     if (!name) return setError("Enter your name.");
     if (phone.replace(/\D/g, "").length < 10) return setError("Enter a phone number we can call or WhatsApp.");
+    if (fulfilment === "delivery" && !zone) return setError("Choose your delivery area.");
     if (fulfilment === "delivery" && !address) return setError("Enter the delivery address.");
     if (outOfStock.length) return setError("Remove the out-of-stock items from your cart first.");
 
@@ -55,6 +69,7 @@ export default function CheckoutView({ products: initial }: { products: Product[
       fulfilment,
       outlet,
       deliveryAddress: address,
+      deliveryZoneId: zone?.id ?? null,
       phone,
       name,
       note: String(d.get("note") ?? "").trim(),
@@ -127,7 +142,7 @@ export default function CheckoutView({ products: initial }: { products: Product[
                   <span>
                     <span className="block text-sm font-semibold">{f === "pickup" ? "Pick up" : "Delivery"}</span>
                     <span className="block text-xs text-ink/55">
-                      {f === "pickup" ? "Collect from one of our outlets" : "Delivered to your address — fee confirmed by our team"}
+                      {f === "pickup" ? "Collect from one of our outlets" : "Delivered to your address by our delivery partner"}
                     </span>
                   </span>
                 </label>
@@ -145,16 +160,70 @@ export default function CheckoutView({ products: initial }: { products: Product[
                 </select>
               </Field>
             ) : (
-              <Field label="Delivery address" className="mt-4">
-                <textarea
-                  name="address"
-                  rows={3}
-                  defaultValue={user.address}
-                  autoComplete="street-address"
-                  placeholder="House number, street, area, city"
-                  className={`${input} resize-none`}
-                />
-              </Field>
+              <>
+                <p className="mb-2 mt-4 text-sm font-medium">Delivery company</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {COURIERS.map((c) =>
+                    c.comingSoon ? (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setToast(`${c.name} delivery is coming soon. Please choose ${COURIERS[0].name} for now.`)}
+                        className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-ink/15 p-4 text-left opacity-70 transition-opacity hover:opacity-100"
+                      >
+                        <span>
+                          <span className="block text-sm font-semibold">{c.name}</span>
+                          <span className="block text-xs text-ink/55">Live prices by distance</span>
+                        </span>
+                        <span className="shrink-0 rounded-full bg-ink/[0.06] px-2.5 py-0.5 text-[11px] font-semibold text-ink/60">Coming soon</span>
+                      </button>
+                    ) : (
+                      <label
+                        key={c.id}
+                        className="flex cursor-pointer items-start gap-3 rounded-xl border border-ink/15 p-4 has-[:checked]:border-brand has-[:checked]:bg-tint"
+                      >
+                        <input type="radio" name="courier" value={c.id} checked readOnly className="mt-0.5 h-4 w-4 accent-[var(--color-brand)]" />
+                        <span>
+                          <span className="block text-sm font-semibold">{c.name}</span>
+                          <span className="block text-xs text-ink/55">{c.note}</span>
+                        </span>
+                      </label>
+                    ),
+                  )}
+                </div>
+
+                <Field label="Delivery area" className="mt-4">
+                  <select
+                    name="zone"
+                    value={zoneId}
+                    onChange={(e) => setZoneId(e.target.value)}
+                    disabled={zonesLoading}
+                    className={`${input} cursor-pointer disabled:cursor-wait`}
+                  >
+                    <option value="" disabled>
+                      {zonesLoading ? "Loading areas" : zones.length ? "Choose your area" : "No delivery areas yet — choose pickup"}
+                    </option>
+                    {zones
+                      .filter((z) => z.active)
+                      .map((z) => (
+                        <option key={z.id} value={z.id}>
+                          {z.area} — {formatNaira(z.price)}
+                        </option>
+                      ))}
+                  </select>
+                </Field>
+                <p className="mt-1.5 text-xs text-ink/50">Area not listed? Choose pickup, or WhatsApp us and we&rsquo;ll help.</p>
+                <Field label="Delivery address" className="mt-4">
+                  <textarea
+                    name="address"
+                    rows={3}
+                    defaultValue={user.address}
+                    autoComplete="street-address"
+                    placeholder="House number, street, area, city"
+                    className={`${input} resize-none`}
+                  />
+                </Field>
+              </>
             )}
           </Section>
 
@@ -181,11 +250,22 @@ export default function CheckoutView({ products: initial }: { products: Product[
               </li>
             ))}
           </ul>
+          {fulfilment === "delivery" && (
+            <div className="mt-4 flex flex-col gap-1.5 border-t border-ink/10 pt-4 text-sm">
+              <div className="flex justify-between gap-3">
+                <span className="text-ink/65">Subtotal</span>
+                <span className="tabular-nums">{formatNaira(subtotal)}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-ink/65">Delivery{zone ? ` · Holt · ${zone.area}` : ""}</span>
+                <span className="tabular-nums">{zone ? formatNaira(zone.price) : "Choose area"}</span>
+              </div>
+            </div>
+          )}
           <div className="mt-4 flex items-baseline justify-between border-t border-ink/10 pt-4">
             <span className="text-sm text-ink/65">Total</span>
             <span className="font-display text-xl font-bold tabular-nums">{formatNaira(total)}</span>
           </div>
-          {fulfilment === "delivery" && <p className="mt-1 text-xs text-ink/50">Delivery fee (if any) is confirmed before we send it out.</p>}
 
           <div className="mt-4 rounded-xl bg-tint px-3.5 py-3 text-xs leading-relaxed text-ink/70">
             <strong className="font-semibold text-ink">Payment:</strong> online. Secure online payment is coming soon; we will contact you to complete payment.
@@ -214,6 +294,14 @@ export default function CheckoutView({ products: initial }: { products: Product[
 
   return (
     <ShopChrome products={products} query={query} onQuery={setQuery} navigate>
+      {toast && (
+        <div
+          role="status"
+          className="fixed inset-x-4 bottom-6 z-50 mx-auto max-w-sm rounded-2xl bg-ink px-4 py-3 text-center text-sm font-medium text-paper shadow-lg"
+        >
+          {toast}
+        </div>
+      )}
       <main className="min-h-[70vh] bg-ink/[0.04]">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
           <h1 className="mb-5 font-display text-2xl font-semibold tracking-tight">Checkout</h1>

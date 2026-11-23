@@ -41,10 +41,7 @@ create policy "Customers can update their own profile"
   on public.profiles for update to authenticated
   using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
-drop policy if exists "Admins can read all profiles" on public.profiles;
-create policy "Admins can read all profiles"
-  on public.profiles for select to authenticated
-  using ((select public.is_admin()));
+-- The team's read access ("customers.view") is set in customers-admin.sql.
 
 grant select, insert, update on public.profiles to authenticated;
 

@@ -30,7 +30,14 @@ export type Order = {
   customerNote: string;
   status: OrderStatus;
   paymentStatus: "unpaid" | "paid" | "refunded";
+  /** Items only. */
   subtotal: number;
+  /** Delivery company ("holt"), area and fee — empty / 0 for pickup. */
+  deliveryCourier: string;
+  deliveryArea: string;
+  deliveryFee: number;
+  /** Items + delivery: what the customer pays. */
+  total: number;
   channel: string;
   adminNote: string;
   createdAt: string;
@@ -51,6 +58,9 @@ type Row = {
   status: OrderStatus;
   payment_status: Order["paymentStatus"];
   subtotal: number;
+  delivery_courier?: string;
+  delivery_area?: string;
+  delivery_fee?: number;
   channel: string;
   admin_note: string;
   created_at: string;
@@ -73,6 +83,10 @@ const toOrder = (r: Row): Order => ({
   status: r.status,
   paymentStatus: r.payment_status,
   subtotal: r.subtotal,
+  deliveryCourier: r.delivery_courier ?? "",
+  deliveryArea: r.delivery_area ?? "",
+  deliveryFee: r.delivery_fee ?? 0,
+  total: r.subtotal + (r.delivery_fee ?? 0),
   channel: r.channel,
   adminNote: r.admin_note,
   createdAt: r.created_at,
@@ -107,6 +121,8 @@ export type NewOrder = {
   fulfilment: "pickup" | "delivery";
   outlet: string;
   deliveryAddress: string;
+  /** Delivery area picked at checkout (delivery_zones id) — the fee is charged from it. */
+  deliveryZoneId: string | null;
   phone: string;
   name: string;
   note: string;
@@ -123,6 +139,7 @@ export async function placeOrder(o: NewOrder): Promise<{ id?: string; error?: st
     p_phone: o.phone,
     p_customer_name: o.name,
     p_customer_note: o.note,
+    p_delivery_zone: o.fulfilment === "delivery" ? o.deliveryZoneId : null,
   });
   if (error) return { error: friendly(error.message) };
   return { id: data as string };

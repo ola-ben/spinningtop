@@ -6,6 +6,12 @@
 -- can't read. This copies each customer's email into public.profiles (kept in sync
 -- automatically), so the admin's Customers screen can show it.
 -- Customers still only see their own profile, and can't change their email copy.
+-- The team sees customers when their role has "customers.view" (Team & roles).
+
+drop policy if exists "Admins can read all profiles" on public.profiles;
+create policy "Admins can read all profiles"
+  on public.profiles for select to authenticated
+  using ((select public.admin_can('customers.view')));
 
 alter table public.profiles add column if not exists email text not null default '';
 
@@ -58,7 +64,7 @@ grant insert (id, full_name) on public.profiles to authenticated;
 create index if not exists profiles_created_at_idx on public.profiles (created_at desc);
 
 -- Customer list for the admin (newest first). Admin accounts are left out.
--- Returns nothing unless the caller is an admin.
+-- Returns nothing unless the caller's role has customers.view.
 create or replace function public.admin_list_customers()
 returns table (
   id uuid,
@@ -78,7 +84,7 @@ as $$
   select p.id, p.full_name, p.email, p.phone, p.address, p.newsletter, p.created_at, u.last_sign_in_at
   from public.profiles p
   join auth.users u on u.id = p.id
-  where (select public.is_admin())
+  where (select public.admin_can('customers.view'))
     and not exists (select 1 from public.admins a where a.user_id = p.id)
   order by p.created_at desc;
 $$;

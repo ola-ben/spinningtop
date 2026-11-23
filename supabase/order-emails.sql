@@ -34,6 +34,9 @@ begin
     'delivery_address', o.delivery_address,
     'payment_status', o.payment_status,
     'subtotal', o.subtotal,
+    'delivery_courier', o.delivery_courier,
+    'delivery_area', o.delivery_area,
+    'delivery_fee', o.delivery_fee,
     'note', coalesce((select h.note from order_status_history h
                       where h.order_id = o.id order by h.created_at desc, h.id desc limit 1), ''),
     'items', coalesce((select jsonb_agg(jsonb_build_object(

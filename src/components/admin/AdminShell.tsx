@@ -4,16 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { signOutAdmin } from "@/lib/admin-auth";
+import { routeAccess, signOutAdmin, useAdminSession } from "@/lib/admin-auth";
 import { useAdminCustomers } from "@/lib/admin-customers";
 import { useAdminOrders } from "@/lib/admin-orders";
 import { useAdminBookings } from "@/lib/admin-bookings";
 import { AdminIcon, type AdminIconName } from "./AdminIcons";
+import { PageGate } from "./AdminGuard";
 
 type NavItem = { href: string; label: string; icon: AdminIconName; badge?: number };
 
 /* Every admin tab, grouped. Each is its own route under /admin so the
-   backend can be wired one screen at a time. */
+   backend can be wired one screen at a time. Tabs a worker's role doesn't
+   include are hidden (see routeAccess in src/lib/admin-auth.ts). */
 export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
   { group: "Menu", items: [{ href: "/admin", label: "Dashboard", icon: "dashboard" }] },
   {
@@ -21,6 +23,7 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/products", label: "Products", icon: "products" },
       { href: "/admin/orders", label: "Orders", icon: "orders" },
+      { href: "/admin/delivery", label: "Delivery", icon: "delivery" },
       { href: "/admin/customers", label: "Customers", icon: "customers" },
       { href: "/admin/reviews", label: "Reviews", icon: "reviews" },
       { href: "/admin/vouchers", label: "Vouchers", icon: "vouchers" },
@@ -47,12 +50,16 @@ const isActive = (pathname: string, href: string) =>
   href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
 
 function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  const { can } = useAdminSession();
+  const allowed = (item: NavItem) => {
+    const need = routeAccess(item.href);
+    return !need || can(need);
+  };
   // New website sign-ups since the admin last opened Customers.
   const { newCount: newSignUps, customers, seenAt, seenReady } = useAdminCustomers();
-  // Website orders waiting to be confirmed.
-  const { toConfirm } = useAdminOrders();
-  // Plus service booking requests nobody has contacted yet (same Orders page).
-  const { newCount: newBookings, bookings } = useAdminBookings();
+  // New website orders + service bookings since you last opened each list (Orders page).
+  const { unseen: newOrders } = useAdminOrders();
+  const { unseen: newBookings, bookings } = useAdminBookings();
   // Plus guests (booking form, no account) whose first booking came after your last visit.
   const accountEmails = new Set(customers.map((c) => c.email.toLowerCase()));
   const firstBooking = new Map<string, number>();
@@ -68,46 +75,50 @@ function Nav({ pathname, onNavigate }: { pathname: string; onNavigate?: () => vo
     item.href === "/admin/customers"
       ? newCount
       : item.href === "/admin/orders"
-        ? toConfirm + newBookings
+        ? newOrders + newBookings
         : item.badge;
   return (
     <nav aria-label="Admin" className="flex flex-col gap-5">
-      {ADMIN_NAV.map((section) => (
-        <div key={section.group}>
-          <p className="px-3 pb-1.5 text-xs font-medium text-ink/45">{section.group}</p>
-          <ul className="flex flex-col gap-1">
-            {section.items.map((item) => {
-              const active = isActive(pathname, item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    aria-current={active ? "page" : undefined}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-                      active
-                        ? "bg-brand font-semibold text-paper shadow-md shadow-brand/20"
-                        : "font-medium text-ink/75 hover:bg-[#f3f4f6] hover:text-ink"
-                    }`}
-                  >
-                    <AdminIcon name={item.icon} className="h-5 w-5 shrink-0" />
-                    <span className="flex-1">{item.label}</span>
-                    {badgeFor(item) ? (
-                      <span
-                        className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-bold ${
-                          active ? "bg-paper text-brand" : "bg-brand/10 text-brand"
-                        }`}
-                      >
-                        {badgeFor(item)}
-                      </span>
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+      {ADMIN_NAV.map((section) => {
+        const items = section.items.filter(allowed);
+        if (!items.length) return null;
+        return (
+          <div key={section.group}>
+            <p className="px-3 pb-1.5 text-xs font-medium text-ink/45">{section.group}</p>
+            <ul className="flex flex-col gap-1">
+              {items.map((item) => {
+                const active = isActive(pathname, item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                        active
+                          ? "bg-brand font-semibold text-paper shadow-md shadow-brand/20"
+                          : "font-medium text-ink/75 hover:bg-[#f3f4f6] hover:text-ink"
+                      }`}
+                    >
+                      <AdminIcon name={item.icon} className="h-5 w-5 shrink-0" />
+                      <span className="flex-1">{item.label}</span>
+                      {badgeFor(item) ? (
+                        <span
+                          className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-bold ${
+                            active ? "bg-paper text-brand" : "bg-brand/10 text-brand"
+                          }`}
+                        >
+                          {badgeFor(item)}
+                        </span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </nav>
   );
 }
@@ -153,6 +164,7 @@ const roundBtn =
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { can, role } = useAdminSession();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -202,9 +214,11 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             <button type="button" aria-label="Notifications" className={roundBtn}>
               <AdminIcon name="bell" className="h-5 w-5" />
             </button>
-            <Link href="/admin/settings" aria-label="Help & settings" className={`${roundBtn} hidden sm:grid`}>
-              <AdminIcon name="help" className="h-5 w-5" />
-            </Link>
+            {can("settings.manage") && (
+              <Link href="/admin/settings" aria-label="Help & settings" className={`${roundBtn} hidden sm:grid`}>
+                <AdminIcon name="help" className="h-5 w-5" />
+              </Link>
+            )}
             <Link
               href="/admin/profile"
               aria-label="My profile"
@@ -217,7 +231,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               </span>
               <span className="hidden leading-tight sm:block">
                 <span className="block text-sm font-semibold">Spinning Top</span>
-                <span className="block text-[11px] text-ink/50">Admin</span>
+                <span className="block text-[11px] text-ink/50">{role || "Admin"}</span>
               </span>
               <AdminIcon name="chevron" className="hidden h-4 w-4 -rotate-90 text-ink/45 sm:block" />
             </Link>
@@ -268,7 +282,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        <main className="mx-auto min-w-0 max-w-[1400px] flex-1 pt-2">{children}</main>
+        <main className="mx-auto min-w-0 max-w-[1400px] flex-1 pt-2">
+          <PageGate>{children}</PageGate>
+        </main>
       </div>
     </div>
   );

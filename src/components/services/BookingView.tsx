@@ -16,6 +16,7 @@ import { useLiveProducts, useLiveServices } from "@/lib/live-catalogue";
 import type { Product } from "@/lib/shop-data";
 import type { Service } from "@/lib/services-data";
 import { useHydrated, useUser } from "@/lib/user-store";
+import { BRANCHES } from "@/lib/site";
 import { serviceScope } from "./ServiceCard";
 import Busy from "@/components/Busy";
 
@@ -41,6 +42,7 @@ export default function BookingView({ services: initialServices, products: initi
   const ready = useHydrated();
 
   const [logistics, setLogistics] = useState<Logistics | "">("");
+  const [outlet, setOutlet] = useState("");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [notes, setNotes] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -106,6 +108,7 @@ export default function BookingView({ services: initialServices, products: initi
     if (area.length < 2) return setError("Enter your location or area.");
     if (picked.length === 0) return setError("Choose at least one service.");
     if (!logistics) return setError("Choose a pickup or drop-off option.");
+    if (logistics === "drop_off" && !outlet) return setError("Choose the outlet you will drop off at.");
 
     setError("");
     setPending(true);
@@ -116,6 +119,7 @@ export default function BookingView({ services: initialServices, products: initi
       area,
       services: picked.map((s) => s.id),
       logistics,
+      outlet,
       notes: notes.trim(),
       photos: photos.map((p) => p.file),
     });
@@ -214,11 +218,40 @@ export default function BookingView({ services: initialServices, products: initi
             {LOGISTICS_OPTIONS.map((o) => {
               const on = logistics === o.value;
               return (
-                <label key={o.value} className={`${optionCls} ${on ? optionOn : optionOff}`}>
-                  <input type="radio" name="logistics" required checked={on} onChange={() => setLogistics(o.value)} className="h-4 w-4 accent-brand" />
-                  <span className="text-ink">{LOGISTICS_ICONS[o.value]}</span>
-                  {o.label}
-                </label>
+                <div key={o.value} className="grid gap-2">
+                  <label className={`${optionCls} ${on ? optionOn : optionOff}`}>
+                    <input type="radio" name="logistics" required checked={on} onChange={() => setLogistics(o.value)} className="h-4 w-4 accent-brand" />
+                    <span className="text-ink">{LOGISTICS_ICONS[o.value]}</span>
+                    {o.label}
+                  </label>
+                  {/* Drop-off: which outlet */}
+                  {o.value === "drop_off" && on && (
+                    <fieldset className="ml-7 grid gap-2">
+                      <legend className="mb-2 text-sm font-medium">
+                        Which outlet? <span className="text-red-600">*</span>
+                      </legend>
+                      {BRANCHES.map((b) => {
+                        const picked = outlet === b.name;
+                        return (
+                          <label key={b.id} className={`${optionCls} ${picked ? optionOn : optionOff}`}>
+                            <input
+                              type="radio"
+                              name="outlet"
+                              required
+                              checked={picked}
+                              onChange={() => setOutlet(b.name)}
+                              className="h-4 w-4 accent-brand"
+                            />
+                            <span>
+                              <span className="block">{b.name}</span>
+                              {b.addressLines.length > 2 && <span className="block text-xs font-normal text-ink/55">{b.addressLines[1]}</span>}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </fieldset>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -227,7 +260,7 @@ export default function BookingView({ services: initialServices, products: initi
         <Card>
           <h2 className="font-display text-lg font-semibold">Photos of your items</h2>
           <p className="mt-0.5 text-sm leading-relaxed text-ink/55">
-            Optional. A photo of the item(s) — e.g. laundry bags, furniture for cleaning — helps us plan the right vehicle and give a better quote. Up to {MAX_BOOKING_PHOTOS} images, 10 MB each.
+            A photo of the item(s) — e.g. laundry bags, furniture for cleaning — helps us plan the right vehicle and give a better quote. Up to {MAX_BOOKING_PHOTOS} images, 10 MB each.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {photos.map((p, i) => (

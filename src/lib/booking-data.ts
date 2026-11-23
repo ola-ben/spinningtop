@@ -3,7 +3,7 @@ import { db, supabaseReady } from "./supabase";
 /* Service booking requests (supabase/bookings.sql). No sign-in needed. */
 
 export const BOOKING_PHOTO_BUCKET = "booking-photos";
-export const MAX_BOOKING_PHOTOS = 3;
+export const MAX_BOOKING_PHOTOS = 4;
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
 export type Logistics = "pickup_delivery" | "drop_off" | "either";
@@ -20,6 +20,8 @@ export type NewBooking = {
   area: string;
   services: string[];
   logistics: Logistics;
+  /** Drop-off outlet name (BRANCHES in site.ts), when logistics is "drop_off". */
+  outlet: string;
   notes: string;
   photos: File[];
 };
@@ -59,6 +61,7 @@ export async function createBooking(b: NewBooking): Promise<{ id?: string; error
     p_logistics: b.logistics,
     p_notes: b.notes,
     p_photos: up.paths,
+    p_outlet: b.logistics === "drop_off" ? b.outlet : "",
   });
   // Messages raised by create_booking are already customer-friendly sentences.
   if (error) return { error: /^[A-Z][^\n]{5,120}\.$/.test(error.message) ? error.message : "Could not send your request. Please try again." };

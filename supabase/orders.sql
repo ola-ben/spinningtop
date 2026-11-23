@@ -1,6 +1,9 @@
 -- Spinning Top — Phase 3: orders + order tracking (no online payment yet).
 -- Run once in Supabase → SQL Editor → New query → paste → Run. Safe to run again.
--- Needs schema.sql, admin-access.sql and customers.sql first.
+-- Needs schema.sql, admin-access.sql and customers.sql first (and delivery.sql
+-- for delivery fees — run this file again after delivery.sql).
+-- Team access follows the permissions on each person's role (Team & roles):
+--   orders.view, orders.update, orders.cancel, orders.payment
 --
 -- How it works
 --   • A signed-in customer places an order with place_order(). Prices and stock
@@ -78,33 +81,36 @@ create policy "Customers read their own orders"
 drop policy if exists "Admins read all orders" on public.orders;
 create policy "Admins read all orders"
   on public.orders for select to authenticated
-  using ((select public.is_admin()));
+  using ((select public.admin_can('orders.view')));
 
 drop policy if exists "Admins edit orders" on public.orders;
 create policy "Admins edit orders"
   on public.orders for update to authenticated
-  using ((select public.is_admin())) with check ((select public.is_admin()));
+  using ((select public.admin_can('orders.update'))) with check ((select public.admin_can('orders.update')));
 
 drop policy if exists "Read items of visible orders" on public.order_items;
 create policy "Read items of visible orders"
   on public.order_items for select to authenticated
   using (exists (select 1 from public.orders o where o.id = order_id
-                 and (o.user_id = (select auth.uid()) or (select public.is_admin()))));
+                 and (o.user_id = (select auth.uid()) or (select public.admin_can('orders.view')))));
 
 drop policy if exists "Read history of visible orders" on public.order_status_history;
 create policy "Read history of visible orders"
   on public.order_status_history for select to authenticated
   using (exists (select 1 from public.orders o where o.id = order_id
-                 and (o.user_id = (select auth.uid()) or (select public.is_admin()))));
+                 and (o.user_id = (select auth.uid()) or (select public.admin_can('orders.view')))));
 
 -- Reads go through these policies; all writes go through the functions below.
 grant select on public.orders, public.order_items, public.order_status_history to authenticated;
-grant update (admin_note) on public.orders to authenticated;   -- admins only (policy above)
+grant update (admin_note) on public.orders to authenticated;   -- team with orders.update only (policy above)
 
 -- ───────────────────────── place an order (customers) ─────────────────────────
 -- items: [{"product_id": "liquid-detergent-2l", "qty": 2}, ...]
+-- p_delivery_zone: the delivery area picked at checkout (delivery.sql) — the
+-- fee comes from that table here, not from the browser.
 -- Returns the new order id, e.g. 'ST-1001'.
 drop function if exists public.place_order(jsonb, text, text, text, text, text, text);
+drop function if exists public.place_order(jsonb, text, text, text, text, text, text, uuid);
 create or replace function public.place_order(
   p_items            jsonb,
   p_fulfilment       text,
@@ -112,7 +118,8 @@ create or replace function public.place_order(
   p_delivery_address text,
   p_phone            text,
   p_customer_name    text,
-  p_customer_note    text default ''
+  p_customer_note    text default '',
+  p_delivery_zone    uuid default null
 )
 returns text
 language plpgsql
@@ -127,6 +134,9 @@ declare
   q         integer;
   total     integer := 0;
   n_lines   integer := 0;
+  v_courier text := '';
+  v_area    text := '';
+  v_fee     integer := 0;
 begin
   if uid is null then
     raise exception 'Please sign in to place an order.';
@@ -140,6 +150,13 @@ begin
   if p_fulfilment = 'delivery' and coalesce(trim(p_delivery_address), '') = '' then
     raise exception 'Enter a delivery address.';
   end if;
+  if p_fulfilment = 'delivery' then
+    select courier, area, price into v_courier, v_area, v_fee
+      from public.delivery_zones where id = p_delivery_zone and active;
+    if not found then
+      raise exception 'Choose your delivery area.';
+    end if;
+  end if;
   if coalesce(trim(p_phone), '') = '' then
     raise exception 'Enter a phone number so we can reach you.';
   end if;
@@ -150,7 +167,8 @@ begin
     raise exception 'Too many different items in one order.';
   end if;
 
-  insert into public.orders (user_id, customer_name, email, phone, fulfilment, outlet, delivery_address, customer_note)
+  insert into public.orders (user_id, customer_name, email, phone, fulfilment, outlet, delivery_address, customer_note,
+                             delivery_courier, delivery_area, delivery_fee)
   values (
     uid,
     left(coalesce(trim(p_customer_name), ''), 120),
@@ -159,7 +177,10 @@ begin
     p_fulfilment,
     case when p_fulfilment = 'pickup' then left(trim(p_outlet), 120) else '' end,
     case when p_fulfilment = 'delivery' then left(trim(p_delivery_address), 500) else '' end,
-    left(coalesce(trim(p_customer_note), ''), 1000)
+    left(coalesce(trim(p_customer_note), ''), 1000),
+    v_courier,
+    v_area,
+    v_fee
   )
   returning id into new_id;
 
@@ -196,8 +217,8 @@ begin
 end;
 $$;
 
-revoke all on function public.place_order(jsonb, text, text, text, text, text, text) from public, anon;
-grant execute on function public.place_order(jsonb, text, text, text, text, text, text) to authenticated;
+revoke all on function public.place_order(jsonb, text, text, text, text, text, text, uuid) from public, anon;
+grant execute on function public.place_order(jsonb, text, text, text, text, text, text, uuid) to authenticated;
 
 -- ───────────────────────── cancel (customers, before work starts) ─────────────────────────
 drop function if exists public.cancel_my_order(text);
@@ -230,8 +251,11 @@ security definer
 set search_path = ''
 as $$
 begin
-  if not (select public.is_admin()) then
-    raise exception 'Not allowed';
+  if not (select public.admin_can('orders.update')) then
+    raise exception 'Your role can''t change order status.';
+  end if;
+  if p_status = 'Cancelled' and not (select public.admin_can('orders.cancel')) then
+    raise exception 'Your role can''t cancel orders.';
   end if;
   if p_status not in ('Received', 'Processing', 'Ready for pickup', 'Out for delivery', 'Delivered', 'Cancelled') then
     raise exception 'Unknown status';
@@ -257,8 +281,8 @@ security definer
 set search_path = ''
 as $$
 begin
-  if not (select public.is_admin()) then
-    raise exception 'Not allowed';
+  if not (select public.admin_can('orders.payment')) then
+    raise exception 'Your role can''t change payment status.';
   end if;
   if p_payment_status not in ('unpaid', 'paid', 'refunded') then
     raise exception 'Unknown payment status';

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ServiceIcon from "@/components/ServiceIcon";
 import { getProduct, getService } from "@/lib/admin-catalogue";
+import { useAdminSession } from "@/lib/admin-auth";
 import type { AdminProduct, AdminService } from "@/lib/catalogue-rows";
 import { formatNaira } from "@/lib/shop-data";
 import { DeleteButton, ProductForm, ServiceForm, ServiceVisibleSwitch, StockSwitch, useAdminProducts, useAdminServices } from "./CatalogueForms";
@@ -29,6 +30,7 @@ const Loading = () => <p className="py-10 text-center text-sm text-ink/50">Loadi
 
 export function ProductsScreen() {
   const { products, loading, error, reload } = useAdminProducts();
+  const { can } = useAdminSession();
   const categories = ["All categories", ...new Set(products.map((p) => p.category))];
   const drafts = products.filter((p) => p.status === "draft").length;
 
@@ -42,9 +44,11 @@ export function ProductsScreen() {
             <button type="button" className={btn.secondary}>
               Export CSV
             </button>
-            <Link href="/admin/products/new/" className={btn.primary}>
-              + Add product
-            </Link>
+            {can("products.edit") && (
+              <Link href="/admin/products/new/" className={btn.primary}>
+                + Add product
+              </Link>
+            )}
           </>
         }
       />
@@ -92,7 +96,11 @@ export function ProductsScreen() {
                   <td className={`${table.td} text-ink/65`}>{p.category}</td>
                   <td className={`${table.td} font-semibold tabular-nums`}>{formatNaira(p.price)}</td>
                   <td className={table.td}>
-                    <StockSwitch product={p} onDone={reload} />
+                    {can("products.edit") ? (
+                      <StockSwitch product={p} onDone={reload} />
+                    ) : (
+                      <span className="text-ink/65">{p.inStock ? "Yes" : "No"}</span>
+                    )}
                   </td>
                   <td className={table.td}>
                     {p.status === "draft" ? (
@@ -102,15 +110,17 @@ export function ProductsScreen() {
                     )}
                   </td>
                   <td className={`${table.td} text-right`}>
-                    <Link href={`/admin/products/edit/?id=${encodeURIComponent(p.id)}`} className={btn.ghost}>
-                      Edit
-                    </Link>
+                    {can("products.edit") && (
+                      <Link href={`/admin/products/edit/?id=${encodeURIComponent(p.id)}`} className={btn.ghost}>
+                        Edit
+                      </Link>
+                    )}
                     {p.status === "published" && (
                       <Link href={`/shop/${p.id}/`} target="_blank" className={btn.ghost}>
                         View ↗
                       </Link>
                     )}
-                    <DeleteButton item={p} kind="product" onDone={reload} />
+                    {can("products.delete") && <DeleteButton item={p} kind="product" onDone={reload} />}
                   </td>
                 </tr>
               ))}
@@ -160,6 +170,7 @@ export function EditProductScreen() {
 
 export function ServicesScreen() {
   const { services, loading, error, reload } = useAdminServices();
+  const { can } = useAdminSession();
 
   return (
     <div className="flex flex-col gap-6">
@@ -167,9 +178,11 @@ export function ServicesScreen() {
         title="Services"
         description="Care services shown on the website. Turn off anything not currently offered."
         actions={
-          <Link href="/admin/services/new/" className={btn.primary}>
-            + Add service
-          </Link>
+          can("services.edit") && (
+            <Link href="/admin/services/new/" className={btn.primary}>
+              + Add service
+            </Link>
+          )
         }
       />
       <LoadError error={error} />
@@ -194,20 +207,26 @@ export function ServicesScreen() {
 
               <div className="mt-4 divide-y divide-ink/10">
                 <SettingRow title="Show on website">
-                  <ServiceVisibleSwitch service={s} onDone={reload} />
+                  {can("services.edit") ? (
+                    <ServiceVisibleSwitch service={s} onDone={reload} />
+                  ) : (
+                    <span className="text-sm text-ink/65">{visible ? "Yes" : "No"}</span>
+                  )}
                 </SettingRow>
               </div>
 
               <div className="mt-auto flex flex-wrap items-center gap-1 pt-4">
-                <Link href={`/admin/services/edit/?id=${encodeURIComponent(s.id)}`} className={btn.ghost}>
-                  Edit details →
-                </Link>
+                {can("services.edit") && (
+                  <Link href={`/admin/services/edit/?id=${encodeURIComponent(s.id)}`} className={btn.ghost}>
+                    Edit details →
+                  </Link>
+                )}
                 {visible && (
                   <Link href={`/services/${s.id}/`} target="_blank" className={btn.ghost}>
                     View ↗
                   </Link>
                 )}
-                <DeleteButton item={s} kind="service" onDone={reload} />
+                {can("services.delete") && <DeleteButton item={s} kind="service" onDone={reload} />}
               </div>
             </section>
           );

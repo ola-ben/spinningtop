@@ -26,7 +26,7 @@ export default function LoginPage() {
             </div>
           </div>
           <p className="mt-6 text-center text-xs text-ink/50">
-            Need access? Ask the business owner to add your account in Supabase.
+            Need access? Ask the owner to add your email on Team &amp; roles.
           </p>
         </div>
 

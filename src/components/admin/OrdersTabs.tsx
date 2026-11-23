@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { BOOKINGS_SEEN, ORDERS_SEEN, markSeen } from "@/lib/admin-seen";
 import { useAdminBookings } from "@/lib/admin-bookings";
 import { useAdminOrders } from "@/lib/admin-orders";
 import BookingsBoard from "./BookingsBoard";
@@ -13,12 +15,21 @@ export default function OrdersTabs() {
   const router = useRouter();
   const pathname = usePathname();
   const view = params.get("view") === "bookings" ? "bookings" : "products";
-  const { toConfirm } = useAdminOrders();
-  const { newCount } = useAdminBookings();
+  const { unseen: newOrders, orders, loading: ordersLoading } = useAdminOrders();
+  const { unseen: newBookings, bookings, loading: bookingsLoading } = useAdminBookings();
+
+  // Opening a tab marks its list as seen, so its badge clears (and stays clear
+  // while you're looking, even when new ones arrive).
+  useEffect(() => {
+    if (view === "products" && !ordersLoading) markSeen(ORDERS_SEEN);
+  }, [view, ordersLoading, orders.length]);
+  useEffect(() => {
+    if (view === "bookings" && !bookingsLoading) markSeen(BOOKINGS_SEEN);
+  }, [view, bookingsLoading, bookings.length]);
 
   const tabs = [
-    { key: "products", label: "Product orders", hint: "From the shop", badge: toConfirm },
-    { key: "bookings", label: "Service bookings", hint: "From the booking form", badge: newCount },
+    { key: "products", label: "Product orders", hint: "From the shop", badge: view === "products" ? 0 : newOrders },
+    { key: "bookings", label: "Service bookings", hint: "From the booking form", badge: view === "bookings" ? 0 : newBookings },
   ] as const;
 
   return (

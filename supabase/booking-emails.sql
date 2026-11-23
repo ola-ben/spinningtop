@@ -31,6 +31,7 @@ begin
     'area', b.area,
     'services', to_jsonb(b.service_names),
     'logistics', b.logistics,
+    'outlet', b.outlet,
     'customer_note', b.notes,
     'photo_count', coalesce(array_length(b.photos, 1), 0),
     'note', coalesce((select h.note from booking_status_history h

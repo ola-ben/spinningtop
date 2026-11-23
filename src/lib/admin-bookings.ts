@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { BOOKING_PHOTO_BUCKET, LOGISTICS_OPTIONS, type Logistics } from "./booking-data";
 import { db, supabaseReady } from "./supabase";
+import { BOOKINGS_SEEN, countUnseen, useSeenAt } from "./admin-seen";
 
 /* Service bookings for the admin (supabase/bookings.sql + bookings-admin.sql).
    Shared by the Bookings screen, the dashboard and the sidebar badge;
@@ -19,6 +20,7 @@ export type Booking = {
   area: string;
   serviceNames: string[];
   logistics: Logistics;
+  outlet: string;
   notes: string;
   photos: string[];
   status: BookingStatus;
@@ -35,6 +37,7 @@ type Row = {
   area: string;
   service_names: string[];
   logistics: Logistics;
+  outlet: string;
   notes: string;
   photos: string[];
   status: BookingStatus;
@@ -43,7 +46,8 @@ type Row = {
   booking_status_history: { status: BookingStatus; note: string; created_at: string }[];
 };
 
-export const logisticsLabel = (l: Logistics) => LOGISTICS_OPTIONS.find((o) => o.value === l)?.label ?? (l === "either" ? "Either is fine" : l);
+export const logisticsLabel = (l: Logistics, outlet = "") =>
+  l === "drop_off" && outlet ? `Drop-off at ${outlet}` : (LOGISTICS_OPTIONS.find((o) => o.value === l)?.label ?? (l === "either" ? "Either is fine" : l));
 
 const friendly = (m: string) =>
   /does not exist|schema cache/i.test(m)
@@ -65,6 +69,7 @@ async function listBookings(): Promise<Booking[]> {
     area: r.area,
     serviceNames: r.service_names ?? [],
     logistics: r.logistics,
+    outlet: r.outlet ?? "",
     notes: r.notes,
     photos: r.photos ?? [],
     status: r.status,
@@ -126,6 +131,7 @@ export function loadAdminBookings(force = false) {
 
 export function useAdminBookings() {
   const s = useSyncExternalStore(subscribe, () => state, () => SERVER);
+  const seenAt = useSeenAt(BOOKINGS_SEEN);
   useEffect(() => {
     void loadAdminBookings();
     if (!polling) {
@@ -142,6 +148,8 @@ export function useAdminBookings() {
     error: s.error,
     /** Requests nobody has contacted yet. */
     newCount: bookings.filter((b) => b.status === "New").length,
+    /** New requests since Service bookings was last opened (the badge). */
+    unseen: countUnseen(bookings, seenAt, (b) => b.createdAt, (b) => b.status === "New"),
     reload: () => loadAdminBookings(true),
   };
 }

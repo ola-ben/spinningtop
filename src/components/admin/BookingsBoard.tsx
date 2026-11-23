@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useAdminSession } from "@/lib/admin-auth";
 import {
   BOOKING_STATUSES,
   bookingPhotoUrls,
@@ -109,7 +110,7 @@ export default function BookingsBoard() {
                     <span className="line-clamp-2">{b.serviceNames.join(", ")}</span>
                   </td>
                   <td className={`${table.td} text-ink/65`}>{b.area}</td>
-                  <td className={`${table.td} text-ink/65`}>{logisticsLabel(b.logistics)}</td>
+                  <td className={`${table.td} text-ink/65`}>{logisticsLabel(b.logistics, b.outlet)}</td>
                   <td className={table.td}>
                     <Badge tone={STATUS_TONE[b.status] ?? "grey"}>{b.status}</Badge>
                   </td>
@@ -157,6 +158,9 @@ export default function BookingsBoard() {
 }
 
 function BookingDetails({ booking: b, onClose, onSaved }: { booking: Booking; onClose: () => void; onSaved: () => Promise<void> }) {
+  const { can } = useAdminSession();
+  const canUpdate = can("orders.update");
+  const canCancel = can("orders.cancel");
   const [status, setStatus] = useState<BookingStatus>(b.status);
   const [statusNote, setStatusNote] = useState("");
   const [note, setNote] = useState(b.adminNote);
@@ -214,7 +218,7 @@ function BookingDetails({ booking: b, onClose, onSaved }: { booking: Booking; on
 
         <section>
           <p className={label}>Pickup / drop-off</p>
-          <p className="mt-2 text-sm">{logisticsLabel(b.logistics)}</p>
+          <p className="mt-2 text-sm">{logisticsLabel(b.logistics, b.outlet)}</p>
           {b.notes && <p className="mt-2 whitespace-pre-line rounded-lg bg-tint px-3 py-2 text-sm text-ink/75">“{b.notes}”</p>}
         </section>
 
@@ -229,9 +233,17 @@ function BookingDetails({ booking: b, onClose, onSaved }: { booking: Booking; on
           <label className={label} htmlFor="booking-status">
             Status
           </label>
-          <select id="booking-status" value={status} onChange={(e) => setStatus(e.target.value as BookingStatus)} className={`${inputClass} mt-2 cursor-pointer`}>
+          <select
+            id="booking-status"
+            value={status}
+            disabled={!canUpdate}
+            onChange={(e) => setStatus(e.target.value as BookingStatus)}
+            className={`${inputClass} mt-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60`}
+          >
             {BOOKING_STATUSES.map((s) => (
-              <option key={s}>{s}</option>
+              <option key={s} disabled={s === "Cancelled" && !canCancel && b.status !== "Cancelled"}>
+                {s}
+              </option>
             ))}
           </select>
           {status !== b.status && (
@@ -263,7 +275,15 @@ function BookingDetails({ booking: b, onClose, onSaved }: { booking: Booking; on
           <label className={label} htmlFor="booking-note">
             Internal note
           </label>
-          <textarea id="booking-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} className={`${inputClass} mt-2`} placeholder="Visible to staff only" />
+          <textarea
+            id="booking-note"
+            rows={3}
+            value={note}
+            disabled={!canUpdate}
+            onChange={(e) => setNote(e.target.value)}
+            className={`${inputClass} mt-2 disabled:opacity-60`}
+            placeholder="Visible to staff only"
+          />
         </section>
 
         {message && (
@@ -285,9 +305,11 @@ function BookingDetails({ booking: b, onClose, onSaved }: { booking: Booking; on
         >
           WhatsApp
         </a>
-        <button type="button" disabled={!changed || busy} onClick={() => void save()} className={`${btn.primary} disabled:cursor-not-allowed disabled:opacity-50`}>
-          {busy ? <Busy text="Saving" /> : "Save"}
-        </button>
+        {canUpdate && (
+          <button type="button" disabled={!changed || busy} onClick={() => void save()} className={`${btn.primary} disabled:cursor-not-allowed disabled:opacity-50`}>
+            {busy ? <Busy text="Saving" /> : "Save"}
+          </button>
+        )}
       </div>
     </>
   );

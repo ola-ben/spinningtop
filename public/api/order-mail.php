@@ -36,6 +36,7 @@ $id = $h($o['id']);
 if (($o['type'] ?? '') === 'booking') {
   $logi = ['pickup_delivery' => 'Pickup & delivery', 'drop_off' => 'Drop-off at our location', 'either' => 'Either is fine'];
   $logistics = $logi[$o['logistics'] ?? ''] ?? '';
+  if (($o['logistics'] ?? '') === 'drop_off' && trim($o['outlet'] ?? '') !== '') $logistics = 'Drop-off at ' . trim($o['outlet']);
   $services = array_map('strval', (array) ($o['services'] ?? []));
   $servicesHtml = '<ul style="margin:0;padding-left:18px;">' .
     implode('', array_map(function ($s) use ($h) { return '<li style="margin:2px 0;">' . $h($s) . '</li>'; }, $services)) . '</ul>';
@@ -149,8 +150,19 @@ foreach (($o['items'] ?? []) as $it) {
     ' &times; ' . (int) $it['qty'] . '</td><td align="right" style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;color:#222;white-space:nowrap;">' .
     $naira($it['unit_price'] * $it['qty']) . '</td></tr>';
 }
+// Delivery (Holt, by area) — the fee was set by the database at checkout.
+$deliveryFee = (int) ($o['delivery_fee'] ?? 0);
+$deliveryArea = trim($o['delivery_area'] ?? '');
+$courier = ['holt' => 'Holt', 'kwik' => 'Kwik'][$o['delivery_courier'] ?? ''] ?? '';
+$orderTotal = (int) ($o['subtotal'] ?? 0) + $deliveryFee;
+if (($o['fulfilment'] ?? '') === 'delivery' && $deliveryArea !== '') {
+  $rows .= '<tr><td style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;color:#222;">Delivery' .
+    ($courier !== '' ? ' &middot; ' . $h($courier) : '') . ' &middot; ' . $h($deliveryArea) .
+    '</td><td align="right" style="padding:8px 0;border-bottom:1px solid #eee;font-size:14px;color:#222;white-space:nowrap;">' .
+    $naira($deliveryFee) . '</td></tr>';
+}
 $rows .= '<tr><td style="padding:10px 0;font-size:15px;font-weight:bold;">Total</td><td align="right" style="padding:10px 0;font-size:15px;font-weight:bold;">' .
-  $naira($o['subtotal'] ?? 0) . '</td></tr>';
+  $naira($orderTotal) . '</td></tr>';
 
 $track = $site . '/account/orders/';
 $html = <<<HTML
@@ -194,7 +206,8 @@ if ($o['status'] === 'Received' && !empty($config['admin_email'])) {
   $details = $line('Customer', $h($o['customer_name'] ?: '—')) .
     $line('Phone', $h($o['phone'] ?: '—')) .
     $line('Email', $h($o['email'])) .
-    $line($pickup ? 'Pickup at' : 'Deliver to', $pickup ? $h($o['outlet'] ?: '—') : $h($o['delivery_address'] ?: '—')) .
+    $line($pickup ? 'Pickup at' : 'Deliver to', $pickup ? $h($o['outlet'] ?: '—') : $h($o['delivery_address'] ?: '—') . ($deliveryArea !== '' ? ' (' . $h($deliveryArea) . ')' : '')) .
+    (!$pickup && $deliveryArea !== '' ? $line('Delivery by', $h($courier ?: 'Holt') . ' &middot; ' . $naira($deliveryFee)) : '') .
     $line('Payment', ($o['payment_status'] ?? '') === 'paid' ? 'Paid online' : 'Awaiting online payment') .
     ($custNote !== '' ? $line('Customer note', $h($custNote)) : '');
   $btn = function ($href, $label, $bg) {
@@ -202,7 +215,7 @@ if ($o['status'] === 'Received' && !empty($config['admin_email'])) {
       ';color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:bold;">' . $label . '</a>';
   };
   $buttons = $btn($site . '/admin/orders/', 'Open in admin', '#111') . ($wa ? $btn($wa, 'WhatsApp customer', '#25D366') : '');
-  $aSubject = 'New order ' . $o['id'] . ' - ' . html_entity_decode($naira($o['subtotal'] ?? 0));
+  $aSubject = 'New order ' . $o['id'] . ' - ' . html_entity_decode($naira($orderTotal));
   $aHtml = '<!doctype html><html><body style="margin:0;padding:24px 12px;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">' .
     '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;"><tr><td style="padding:26px 28px;">' .
     '<h1 style="margin:0 0 4px;font-size:20px;color:#111;">New order ' . $id . '</h1>' .

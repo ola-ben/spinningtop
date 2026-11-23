@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { listOrders, type Order } from "./order-data";
 import { supabaseReady } from "./supabase";
+import { ORDERS_SEEN, countUnseen, useSeenAt } from "./admin-seen";
 
 /* All orders for the admin (shared by Orders, the dashboard and the sidebar
    badge). Re-checked every minute while the admin is open, so new orders
@@ -48,6 +49,7 @@ function startPolling() {
 
 export function useAdminOrders() {
   const s = useSyncExternalStore(subscribe, () => state, () => SERVER);
+  const seenAt = useSeenAt(ORDERS_SEEN);
   useEffect(() => {
     void loadAdminOrders();
     startPolling();
@@ -59,6 +61,8 @@ export function useAdminOrders() {
     error: s.error,
     /** Orders waiting for the team to confirm them. */
     toConfirm: orders.filter((o) => o.status === "Received").length,
+    /** New orders since Product orders was last opened (the badge). */
+    unseen: countUnseen(orders, seenAt, (o) => o.createdAt, (o) => o.status === "Received"),
     reload: () => loadAdminOrders(true),
   };
 }

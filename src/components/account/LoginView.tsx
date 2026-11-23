@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent, type RefObject } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import SiteHeader from "@/components/SiteHeader";
-import { CODE_LENGTH, sendCode, useUser, verifyCode } from "@/lib/user-store";
+import CodeBoxes from "@/components/CodeBoxes";
+import { CODE_LENGTH, sendCode, signInWithGoogle, useUser, verifyCode } from "@/lib/user-store";
 import Busy from "@/components/Busy";
 
 const input =
@@ -30,6 +31,16 @@ export default function LoginView() {
   const [pending, setPending] = useState(false);
   const [wait, setWait] = useState(0);
   const [toast, setToast] = useState("");
+  const [googlePending, setGooglePending] = useState(false);
+  // The email form opens when "Continue with email" is clicked.
+  const [showEmail, setShowEmail] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const openEmail = () => {
+    setError("");
+    setShowEmail(true);
+    setTimeout(() => (signup ? nameRef : emailRef).current?.focus(), 50);
+  };
   const codeRef = useRef<HTMLInputElement>(null);
 
   // The "code sent" message hides itself after a few seconds.
@@ -45,6 +56,26 @@ export default function LoginView() {
     const next = new URLSearchParams(window.location.search).get("next") ?? "";
     router.replace(next.startsWith("/") && !next.startsWith("//") ? next : "/account/");
   }, [user, router]);
+
+  // Back from Google with a problem (e.g. cancelled): show it instead of failing silently.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1) || window.location.search);
+    const problem = params.get("error_description") ?? params.get("error");
+    if (!problem) return;
+    const t = setTimeout(() => setError(/denied|cancel/i.test(problem) ? "Google sign-in was cancelled." : problem.replace(/\+/g, " ")), 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  async function onGoogle() {
+    setError("");
+    setGooglePending(true);
+    const err = await signInWithGoogle(new URLSearchParams(window.location.search).get("next") ?? "");
+    // On success the browser goes to Google; only errors come back here.
+    if (err) {
+      setGooglePending(false);
+      setError(err);
+    }
+  }
 
   // Resend countdown.
   useEffect(() => {
@@ -138,59 +169,103 @@ export default function LoginView() {
                   ))}
                 </div>
 
-                <h1 className="mt-7 font-display text-2xl font-semibold tracking-tight">
-                  {signup ? "Create your account" : "Welcome back"}
-                </h1>
+                <h1 className="mt-7 font-display text-2xl font-semibold tracking-tight">{signup ? "Create your account" : "Welcome back"}</h1>
                 <p className="mt-1 text-sm text-ink/55">
                   {signup
-                    ? "Track orders, save your details and your wishlist. We'll email you a code — no password needed."
-                    : "Enter your email and we'll send you a 6-digit code to sign in."}
+                    ? "Track orders, save your details and your wishlist. No password needed."
+                    : showEmail
+                      ? "Enter your email and we'll send you a 6-digit code to sign in."
+                      : "Sign in to track your orders and check out faster."}
                 </p>
 
-                <form onSubmit={onEmail} noValidate className="mt-6 flex flex-col gap-4">
-                  {signup && (
-                    <label className="flex flex-col gap-1.5">
-                      <span className="text-sm font-medium">Full name</span>
-                      <input
-                        name="name"
-                        autoComplete="name"
-                        placeholder="e.g. Ada Okafor"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className={input}
-                      />
-                    </label>
+                <button
+                  type="button"
+                  onClick={() => void onGoogle()}
+                  disabled={googlePending}
+                  className="mt-6 flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-ink/15 bg-paper py-3 text-sm font-semibold text-ink transition-colors hover:border-ink/35 hover:bg-ink/[0.02] disabled:cursor-wait disabled:opacity-70"
+                >
+                  {googlePending ? (
+                    <Busy text="Opening Google" />
+                  ) : (
+                    <>
+                      <GoogleLogo />
+                      Continue with Google
+                    </>
                   )}
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium">Email</span>
-                    <input
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="Your email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={input}
-                    />
-                  </label>
+                </button>
 
-                  {error && (
-                    <p role="alert" className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
-                      {error}
-                    </p>
-                  )}
+                {!showEmail ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={openEmail}
+                      className="mt-3 flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-ink/15 bg-paper py-3 text-sm font-semibold text-ink transition-colors hover:border-ink/35 hover:bg-ink/[0.02]"
+                    >
+                      <MailIcon />
+                      Continue with email
+                    </button>
+                    {error && (
+                      <p role="alert" className="mt-4 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+                        {error}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="mt-5 flex items-center gap-3 text-xs text-ink/45" aria-hidden="true">
+                      <span className="h-px flex-1 bg-ink/10" />
+                      or with your email
+                      <span className="h-px flex-1 bg-ink/10" />
+                    </div>
 
-                  <button type="submit" disabled={pending} className={primary}>
-                    {pending ? <Busy text="Sending code" /> : "Email me a code"}
-                  </button>
-                </form>
+                    <form onSubmit={onEmail} noValidate className="mt-5 flex flex-col gap-4">
+                      {signup && (
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-sm font-medium">Full name</span>
+                          <input
+                            ref={nameRef}
+                            name="name"
+                            autoComplete="name"
+                            placeholder="e.g. Ada Okafor"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className={input}
+                          />
+                        </label>
+                      )}
+                      <label className="flex flex-col gap-1.5">
+                        <span className="text-sm font-medium">Email</span>
+                        <input
+                          ref={emailRef}
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          placeholder="Your email address"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className={input}
+                        />
+                      </label>
+
+                      {error && (
+                        <p role="alert" className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+                          {error}
+                        </p>
+                      )}
+
+                      <button type="submit" disabled={pending} className={primary}>
+                        {pending ? <Busy text="Sending code" /> : "Email me a code"}
+                      </button>
+                    </form>
+                  </>
+                )}
               </>
             ) : (
               <>
                 <h1 className="font-display text-2xl font-semibold tracking-tight">Check your email</h1>
                 <p className="mt-1 text-sm leading-relaxed text-ink/55">
-                  We sent a {CODE_LENGTH}-digit code to <strong className="font-semibold text-ink">{email.trim()}</strong>. It may take a
-                  minute to arrive — check spam too.
+                  We sent a {CODE_LENGTH}-digit code to <strong className="font-semibold text-ink">{email.trim()}</strong>. It may take a minute to
+                  arrive — check spam too.
                 </p>
 
                 <form onSubmit={onCode} noValidate className="mt-6 flex flex-col gap-4">
@@ -254,79 +329,27 @@ export default function LoginView() {
   }
 }
 
-/* One box per digit. Typing moves to the next box, Backspace goes back,
-   and pasting (or the phone's "fill code from email") fills every box. */
-function CodeBoxes({
-  value,
-  onChange,
-  disabled,
-  firstRef,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  disabled?: boolean;
-  firstRef: RefObject<HTMLInputElement | null>;
-}) {
-  const refs = useRef<(HTMLInputElement | null)[]>([]);
-  const focus = (i: number) => refs.current[Math.max(0, Math.min(CODE_LENGTH - 1, i))]?.focus();
-
-  // Puts digits in from box `at` (one typed digit, or a whole pasted code).
-  function fill(at: number, typed: string) {
-    const digits = typed.replace(/\D/g, "");
-    if (!digits) return;
-    // Changing one box that already has a digit: replace just that digit.
-    if (digits.length === 1 && at < value.length) {
-      onChange(value.slice(0, at) + digits + value.slice(at + 1));
-      focus(at + 1);
-      return;
-    }
-    const start = digits.length >= CODE_LENGTH ? 0 : Math.min(at, value.length); // no gaps
-    const next = (value.slice(0, start) + digits).slice(0, CODE_LENGTH);
-    onChange(next);
-    focus(next.length);
-  }
-
-  function onKeyDown(i: number, e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      if (value[i]) onChange(value.slice(0, i) + value.slice(i + 1));
-      else if (i > 0) {
-        onChange(value.slice(0, i - 1) + value.slice(i));
-        focus(i - 1);
-      }
-    } else if (e.key === "ArrowLeft") focus(i - 1);
-    else if (e.key === "ArrowRight") focus(i + 1);
-  }
-
+/** Envelope for "Continue with email" (neutral black, like the site's other icons). */
+function MailIcon() {
   return (
-    <div className="flex justify-between gap-2 sm:gap-3">
-      {Array.from({ length: CODE_LENGTH }, (_, i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            refs.current[i] = el;
-            if (i === 0) firstRef.current = el;
-          }}
-          type="text"
-          inputMode="numeric"
-          autoComplete={i === 0 ? "one-time-code" : "off"}
-          aria-label={`Digit ${i + 1}`}
-          disabled={disabled}
-          value={value[i] ?? ""}
-          onFocus={(e) => e.currentTarget.select()}
-          onChange={(e) => {
-            // If the box already had a digit and another was typed after it, keep the new one.
-            const v = e.target.value;
-            fill(i, value[i] && v.length === 2 && v.startsWith(value[i]) ? v.slice(1) : v);
-          }}
-          onKeyDown={(e) => onKeyDown(i, e)}
-          onPaste={(e: ClipboardEvent<HTMLInputElement>) => {
-            e.preventDefault();
-            fill(i, e.clipboardData.getData("text"));
-          }}
-          className="h-14 w-full min-w-0 rounded-xl border border-ink/15 bg-paper text-center font-mono text-2xl font-semibold text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:opacity-60 sm:h-16"
-        />
-      ))}
-    </div>
+    <svg viewBox="0 0 24 24" className="h-5 w-5 text-ink" fill="none" stroke="currentColor" strokeWidth={1.7} aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Google's "G" mark (shown in its own colours, as Google requires for sign-in buttons). */
+function GoogleLogo() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">
+      <path
+        fill="#FFC107"
+        d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
+      />
+      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
   );
 }

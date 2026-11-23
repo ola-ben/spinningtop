@@ -8,6 +8,7 @@ import { useAdminOrders } from "@/lib/admin-orders";
 import { useAdminBookings } from "@/lib/admin-bookings";
 import { formatOrderDate, orderCount, type Order } from "@/lib/order-data";
 import { useAdminCustomers } from "@/lib/admin-customers";
+import { useAdminSession } from "@/lib/admin-auth";
 import { isOpenOrder } from "@/lib/orders";
 import { formatNaira, type Product } from "@/lib/shop-data";
 
@@ -25,7 +26,7 @@ function salesByWeekday(orders: Order[]) {
   for (const o of orders) {
     if (o.status !== "Delivered") continue;
     const day = (new Date(o.createdAt).getDay() + 6) % 7; // Mon = 0
-    totals[day] += o.subtotal;
+    totals[day] += o.total;
   }
   return totals;
 }
@@ -88,8 +89,16 @@ export default function Dashboard({ initialProducts, initialShopOn }: { initialP
   const { customers, newCount, joinedThisWeek } = useAdminCustomers();
   const { orders } = useAdminOrders();
   const { newCount: newBookings } = useAdminBookings();
+  // Each part shows only if the signed-in worker's role includes it.
+  const { can } = useAdminSession();
+  const seeSales = can("dashboard.sales");
+  const seeOrders = can("orders.view");
+  const seeCustomers = can("customers.view");
+  const seeProducts = can("products.view");
+  const seeShop = can("settings.manage");
+  const stats = [seeSales, seeOrders, seeCustomers, seeProducts].filter(Boolean).length;
   const collected = orders.filter((o) => o.status === "Delivered");
-  const revenue = collected.reduce((sum, o) => sum + o.subtotal, 0);
+  const revenue = collected.reduce((sum, o) => sum + o.total, 0);
   const openOrders = orders.filter((o) => isOpenOrder(o.status));
   const outOfStock = products.filter((p) => !p.inStock);
   const inStock = products.length - outOfStock.length;
@@ -99,19 +108,21 @@ export default function Dashboard({ initialProducts, initialShopOn }: { initialP
     <div className="flex flex-col gap-5">
       {/* Title + period */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[1.9rem]">Sales overview</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[1.9rem]">{seeSales ? "Sales overview" : "Overview"}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full bg-paper px-4 py-2.5 text-sm font-medium text-ink/75 shadow-sm">
             <AdminIcon name="calendar" className="h-4 w-4" />
             Last 7 days
           </span>
-          <Link href="/admin/products/new" className={btn.primary}>
-            + Add product
-          </Link>
+          {can("products.edit") && (
+            <Link href="/admin/products/new" className={btn.primary}>
+              + Add product
+            </Link>
+          )}
         </div>
       </div>
 
-      {newBookings > 0 && (
+      {seeOrders && newBookings > 0 && (
         <Link
           href="/admin/orders?view=bookings"
           className="flex items-center justify-between gap-3 rounded-2xl border border-brand/20 bg-tint px-5 py-3.5 text-sm transition-colors hover:border-brand/40"
@@ -130,147 +141,177 @@ export default function Dashboard({ initialProducts, initialShopOn }: { initialP
       )}
 
       {/* Key numbers */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4 xl:gap-5">
-        <StatCard label="Total sales" icon="wallet" value={formatNaira(revenue)} change="0%" sub="Last week: ₦0" />
-        <StatCard label="Orders" icon="orders" value={String(orders.length)} change="0%" sub={`${openOrders.length} open to confirm`} />
-        <StatCard
-          label="Customers"
-          icon="customers"
-          value={String(customers.length)}
-          change={newCount ? `+${newCount} new` : undefined}
-          sub={`${joinedThisWeek} joined this week`}
-        />
-        <StatCard label="Products in stock" icon="box" value={`${inStock}/${products.length}`} sub={`${outOfStock.length} out of stock`} />
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-5">
-        {/* Revenue analytics */}
-        <Card
-          title="Revenue analytics"
-          className="xl:col-span-3"
-          actions={
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70">
-              This week
-              <AdminIcon name="chevron" className="h-3.5 w-3.5" />
-            </span>
-          }
-        >
-          <div className="pt-2">
-            <RevenueChart orders={orders} />
-          </div>
-        </Card>
-
-        {/* Online shop — live switch + stock */}
-        <Card title="Online shop" description="Show or hide products on /shop" className="xl:col-span-2">
-          <div className="mt-2 flex items-center justify-between gap-4 rounded-xl border border-ink/10 px-4 py-3">
-            <div className="min-w-0">
-              <ShopBadge initialOn={initialShopOn} />
-              <Link href="/shop" target="_blank" className="mt-1.5 flex items-center gap-1 text-xs font-medium text-brand hover:underline">
-                Open shop <AdminIcon name="external" className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-            <ShopSwitch initialOn={initialShopOn} />
-          </div>
-
-          <div className="mt-4 rounded-xl bg-[#f6f7f9] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold">Stock</p>
-              <div className="flex items-center gap-3 text-[11px] text-ink/60">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-brand" /> In stock
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-ink" /> Out
-                </span>
-              </div>
-            </div>
-            <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-ink" role="img" aria-label={`${inStockPct}% of products in stock`}>
-              <div className="h-full rounded-full bg-brand" style={{ width: `${inStockPct}%` }} />
-            </div>
-            <p className="mt-2 text-xs text-ink/55">
-              {inStock} of {products.length} products in stock
-            </p>
-            {outOfStock.length > 0 && (
-              <ul className="mt-3 flex flex-col gap-2 border-t border-ink/10 pt-3">
-                {outOfStock.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="truncate">{p.name}</span>
-                    <Badge tone="red">Out of stock</Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link href="/admin/products" className="mt-3 inline-block text-xs font-semibold text-brand hover:underline">
-              Manage products
-            </Link>
-          </div>
-        </Card>
-      </div>
-
-      {/* Recent orders */}
-      <Card
-        title="Recent orders"
-        flush
-        actions={
-          <>
-            <div className="min-w-0 flex-1 sm:w-56 sm:flex-none">
-              <SearchInput placeholder="Search" />
-            </div>
-            <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-ink/15 px-4 py-2.5 text-sm font-medium text-ink/75">
-              <AdminIcon name="sort" className="h-4 w-4" />
-              Sort by
-              <AdminIcon name="chevron" className="h-3.5 w-3.5" />
-            </span>
-          </>
-        }
-      >
-        <div className={table.wrap}>
-          <table className={table.table}>
-            <thead>
-              <tr>
-                <th className={`${table.th} w-10`}>
-                  <input type="checkbox" aria-label="Select all orders" className="h-4 w-4 accent-[var(--color-brand)]" />
-                </th>
-                <th className={table.th}>Order ID</th>
-                <th className={table.th}>Date</th>
-                <th className={table.th}>Customer</th>
-                <th className={table.th}>Channel</th>
-                <th className={table.th}>Status</th>
-                <th className={table.th}>Items</th>
-                <th className={table.th}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.slice(0, 6).map((o) => (
-                <tr key={o.id} className={table.row}>
-                  <td className={table.td}>
-                    <input type="checkbox" aria-label={`Select ${o.id}`} className="h-4 w-4 accent-[var(--color-brand)]" />
-                  </td>
-                  <td className={`${table.td} font-medium`}>#{o.id}</td>
-                  <td className={`${table.td} text-ink/60`}>{formatOrderDate(o.createdAt)}</td>
-                  <td className={table.td}>{o.customerName}</td>
-                  <td className={`${table.td} text-ink/60`}>{o.channel}</td>
-                  <td className={table.td}>
-                    <Badge tone={STATUS_TONE[o.status] ?? "grey"}>{o.status}</Badge>
-                  </td>
-                  <td className={`${table.td} text-ink/60`}>{orderCount(o)} items</td>
-                  <td className={`${table.td} font-medium tabular-nums`}>{formatNaira(o.subtotal)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {/* Empty state sits outside the table so it stays centred on phones */}
-          {orders.length === 0 && (
-            <div className="px-4 py-12 text-center">
-              <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f3f4f6] text-ink/45">
-                <AdminIcon name="orders" className="h-6 w-6" />
-              </span>
-              <p className="mt-3 text-sm font-medium">No orders yet</p>
-              <p className="mt-0.5 text-xs text-ink/50">Orders placed on the website will show here.</p>
-            </div>
+      {stats > 0 && (
+        <div className={`grid grid-cols-2 gap-3 xl:gap-5 ${stats >= 4 ? "xl:grid-cols-4" : stats === 3 ? "xl:grid-cols-3" : ""}`}>
+          {seeSales && <StatCard label="Total sales" icon="wallet" value={formatNaira(revenue)} change="0%" sub="Last week: ₦0" />}
+          {seeOrders && (
+            <StatCard label="Orders" icon="orders" value={String(orders.length)} change="0%" sub={`${openOrders.length} open to confirm`} />
+          )}
+          {seeCustomers && (
+            <StatCard
+              label="Customers"
+              icon="customers"
+              value={String(customers.length)}
+              change={newCount ? `+${newCount} new` : undefined}
+              sub={`${joinedThisWeek} joined this week`}
+            />
+          )}
+          {seeProducts && (
+            <StatCard label="Products in stock" icon="box" value={`${inStock}/${products.length}`} sub={`${outOfStock.length} out of stock`} />
           )}
         </div>
-      </Card>
+      )}
+
+      {(seeSales || seeShop || seeProducts) && (
+        <div className="grid gap-5 xl:grid-cols-5">
+          {/* Revenue analytics */}
+          {seeSales && (
+            <Card
+              title="Revenue analytics"
+              className={seeShop || seeProducts ? "xl:col-span-3" : "xl:col-span-5"}
+              actions={
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70">
+                  This week
+                  <AdminIcon name="chevron" className="h-3.5 w-3.5" />
+                </span>
+              }
+            >
+              <div className="pt-2">
+                <RevenueChart orders={orders} />
+              </div>
+            </Card>
+          )}
+
+          {/* Online shop — live switch + stock */}
+          {(seeShop || seeProducts) && (
+            <Card
+              title={seeShop ? "Online shop" : "Stock"}
+              description={seeShop ? "Show or hide products on /shop" : undefined}
+              className={seeSales ? "xl:col-span-2" : "xl:col-span-5"}
+            >
+              {seeShop && (
+                <div className="mt-2 flex items-center justify-between gap-4 rounded-xl border border-ink/10 px-4 py-3">
+                  <div className="min-w-0">
+                    <ShopBadge initialOn={initialShopOn} />
+                    <Link href="/shop" target="_blank" className="mt-1.5 flex items-center gap-1 text-xs font-medium text-brand hover:underline">
+                      Open shop <AdminIcon name="external" className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                  <ShopSwitch initialOn={initialShopOn} />
+                </div>
+              )}
+
+              {seeProducts && (
+                <div className={`${seeShop ? "mt-4" : ""} rounded-xl bg-[#f6f7f9] p-4`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold">Stock</p>
+                    <div className="flex items-center gap-3 text-[11px] text-ink/60">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-sm bg-brand" /> In stock
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-sm bg-ink" /> Out
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-ink" role="img" aria-label={`${inStockPct}% of products in stock`}>
+                    <div className="h-full rounded-full bg-brand" style={{ width: `${inStockPct}%` }} />
+                  </div>
+                  <p className="mt-2 text-xs text-ink/55">
+                    {inStock} of {products.length} products in stock
+                  </p>
+                  {outOfStock.length > 0 && (
+                    <ul className="mt-3 flex flex-col gap-2 border-t border-ink/10 pt-3">
+                      {outOfStock.map((p) => (
+                        <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                          <span className="truncate">{p.name}</span>
+                          <Badge tone="red">Out of stock</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <Link href="/admin/products" className="mt-3 inline-block text-xs font-semibold text-brand hover:underline">
+                    Manage products
+                  </Link>
+                </div>
+              )}
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Recent orders */}
+      {seeOrders && (
+        <Card
+          title="Recent orders"
+          flush
+          actions={
+            <>
+              <div className="min-w-0 flex-1 sm:w-56 sm:flex-none">
+                <SearchInput placeholder="Search" />
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-ink/15 px-4 py-2.5 text-sm font-medium text-ink/75">
+                <AdminIcon name="sort" className="h-4 w-4" />
+                Sort by
+                <AdminIcon name="chevron" className="h-3.5 w-3.5" />
+              </span>
+            </>
+          }
+        >
+          <div className={table.wrap}>
+            <table className={table.table}>
+              <thead>
+                <tr>
+                  <th className={`${table.th} w-10`}>
+                    <input type="checkbox" aria-label="Select all orders" className="h-4 w-4 accent-[var(--color-brand)]" />
+                  </th>
+                  <th className={table.th}>Order ID</th>
+                  <th className={table.th}>Date</th>
+                  <th className={table.th}>Customer</th>
+                  <th className={table.th}>Channel</th>
+                  <th className={table.th}>Status</th>
+                  <th className={table.th}>Items</th>
+                  <th className={table.th}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.slice(0, 6).map((o) => (
+                  <tr key={o.id} className={table.row}>
+                    <td className={table.td}>
+                      <input type="checkbox" aria-label={`Select ${o.id}`} className="h-4 w-4 accent-[var(--color-brand)]" />
+                    </td>
+                    <td className={`${table.td} font-medium`}>#{o.id}</td>
+                    <td className={`${table.td} text-ink/60`}>{formatOrderDate(o.createdAt)}</td>
+                    <td className={table.td}>{o.customerName}</td>
+                    <td className={`${table.td} text-ink/60`}>{o.channel}</td>
+                    <td className={table.td}>
+                      <Badge tone={STATUS_TONE[o.status] ?? "grey"}>{o.status}</Badge>
+                    </td>
+                    <td className={`${table.td} text-ink/60`}>{orderCount(o)} items</td>
+                    <td className={`${table.td} font-medium tabular-nums`}>{formatNaira(o.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Empty state sits outside the table so it stays centred on phones */}
+            {orders.length === 0 && (
+              <div className="px-4 py-12 text-center">
+                <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f3f4f6] text-ink/45">
+                  <AdminIcon name="orders" className="h-6 w-6" />
+                </span>
+                <p className="mt-3 text-sm font-medium">No orders yet</p>
+                <p className="mt-0.5 text-xs text-ink/50">Orders placed on the website will show here.</p>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {stats === 0 && !seeShop && (
+        <Card title={`Welcome`}>
+          <p className="text-sm text-ink/60">Use the menu on the left to open the parts of the admin your role includes.</p>
+        </Card>
+      )}
     </div>
   );
 }

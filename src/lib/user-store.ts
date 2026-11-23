@@ -119,6 +119,23 @@ const friendlyAuthError = (message: string) => {
   return message;
 };
 
+/**
+ * "Continue with Google" — goes to Google, then back to /login on this site,
+ * which sends the customer on to `next` (e.g. checkout) or My Account.
+ * Set up in Supabase → Authentication → Providers → Google.
+ * Returns an error message if it couldn't start (otherwise the page leaves).
+ */
+export async function signInWithGoogle(next = ""): Promise<string | null> {
+  if (!supabaseReady()) return notConfigured;
+  const back = new URL("/login/", window.location.origin);
+  if (next.startsWith("/") && !next.startsWith("//")) back.searchParams.set("next", next);
+  const { error } = await db().auth.signInWithOAuth({ provider: "google", options: { redirectTo: back.toString() } });
+  if (!error) return null;
+  return /provider is not enabled|unsupported provider/i.test(error.message)
+    ? "Google sign-in isn't switched on yet. Use your email instead."
+    : error.message;
+}
+
 /** Code length set in Supabase (Authentication → Providers → Email → Email OTP Length). */
 export const CODE_LENGTH = 6;
 

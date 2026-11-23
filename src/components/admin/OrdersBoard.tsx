@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useAdminOrders } from "@/lib/admin-orders";
 import { formatOrderDate, orderCount, setAdminNote, setOrderStatus, setPaymentStatus, type Order } from "@/lib/order-data";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/orders";
+import { useAdminSession } from "@/lib/admin-auth";
+import { courierName } from "@/lib/delivery";
 import { formatNaira } from "@/lib/shop-data";
 import { Badge, STATUS_TONE, Toolbar, btn, inputClass, table } from "./ui";
 import Busy from "@/components/Busy";
@@ -98,10 +100,10 @@ export default function OrdersBoard() {
                   </td>
                   <td className={`${table.td} text-ink/65`}>{orderCount(o)}</td>
                   <td className={`${table.td} font-semibold tabular-nums`}>
-                    {formatNaira(o.subtotal)}
+                    {formatNaira(o.total)}
                     {o.paymentStatus === "paid" && <span className="ml-1.5 text-xs font-semibold text-emerald-700">Paid</span>}
                   </td>
-                  <td className={`${table.td} text-ink/65`}>{o.fulfilment === "pickup" ? `Pickup · ${o.outlet}` : "Delivery"}</td>
+                  <td className={`${table.td} text-ink/65`}>{o.fulfilment === "pickup" ? `Pickup · ${o.outlet}` : o.deliveryArea ? `Delivery · ${o.deliveryArea}` : "Delivery"}</td>
                   <td className={table.td}>
                     <Badge tone={STATUS_TONE[o.status] ?? "grey"}>{o.status}</Badge>
                   </td>
@@ -144,6 +146,10 @@ export default function OrdersBoard() {
 }
 
 function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: () => void; onSaved: () => Promise<void> }) {
+  const { can } = useAdminSession();
+  const canUpdate = can("orders.update");
+  const canCancel = can("orders.cancel");
+  const canPay = can("orders.payment");
   const [status, setStatus] = useState<OrderStatus>(o.status);
   const [statusNote, setStatusNote] = useState("");
   const [paid, setPaid] = useState(o.paymentStatus === "paid");
@@ -207,9 +213,17 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
                 <span className="font-semibold tabular-nums">{formatNaira(i.qty * i.unitPrice)}</span>
               </li>
             ))}
+            {o.fulfilment === "delivery" && o.deliveryArea && (
+              <li className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                <span>
+                  Delivery · {courierName(o.deliveryCourier)} · {o.deliveryArea}
+                </span>
+                <span className="font-semibold tabular-nums">{formatNaira(o.deliveryFee)}</span>
+              </li>
+            )}
             <li className="flex items-center justify-between px-4 py-3 text-sm font-bold">
               <span>Total</span>
-              <span className="tabular-nums">{formatNaira(o.subtotal)}</span>
+              <span className="tabular-nums">{formatNaira(o.total)}</span>
             </li>
           </ul>
         </section>
@@ -218,9 +232,17 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
           <label className="text-xs font-semibold uppercase tracking-wide text-ink/45" htmlFor="order-status">
             Status
           </label>
-          <select id="order-status" value={status} onChange={(e) => setStatus(e.target.value as OrderStatus)} className={`${inputClass} mt-2 cursor-pointer`}>
+          <select
+            id="order-status"
+            value={status}
+            disabled={!canUpdate}
+            onChange={(e) => setStatus(e.target.value as OrderStatus)}
+            className={`${inputClass} mt-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60`}
+          >
             {ORDER_STATUSES.map((s) => (
-              <option key={s}>{s}</option>
+              <option key={s} disabled={s === "Cancelled" && !canCancel && o.status !== "Cancelled"}>
+                {s}
+              </option>
             ))}
           </select>
           {status !== o.status && (
@@ -239,7 +261,13 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
               <span className="block text-sm font-medium">Payment received</span>
               <span className="block text-xs text-ink/55">Tick when the customer has paid (cash, transfer or POS).</span>
             </span>
-            <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="h-5 w-5 accent-[var(--color-brand)]" />
+            <input
+              type="checkbox"
+              checked={paid}
+              disabled={!canPay}
+              onChange={(e) => setPaid(e.target.checked)}
+              className="h-5 w-5 accent-[var(--color-brand)] disabled:cursor-not-allowed"
+            />
           </label>
         </section>
 
@@ -262,7 +290,15 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
           <label className="text-xs font-semibold uppercase tracking-wide text-ink/45" htmlFor="order-note">
             Internal note
           </label>
-          <textarea id="order-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} className={`${inputClass} mt-2`} placeholder="Visible to staff only" />
+          <textarea
+            id="order-note"
+            rows={3}
+            value={note}
+            disabled={!canUpdate}
+            onChange={(e) => setNote(e.target.value)}
+            className={`${inputClass} mt-2 disabled:opacity-60`}
+            placeholder="Visible to staff only"
+          />
         </section>
 
         {message && (
@@ -281,9 +317,11 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
         >
           WhatsApp customer
         </a>
-        <button type="button" disabled={!changed || busy} onClick={() => void save()} className={`${btn.primary} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}>
-          {busy ? <Busy text="Saving" /> : "Save changes"}
-        </button>
+        {(canUpdate || canPay) && (
+          <button type="button" disabled={!changed || busy} onClick={() => void save()} className={`${btn.primary} flex-1 disabled:cursor-not-allowed disabled:opacity-50`}>
+            {busy ? <Busy text="Saving" /> : "Save changes"}
+          </button>
+        )}
       </div>
     </>
   );
