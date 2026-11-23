@@ -102,6 +102,9 @@ export default function OrdersBoard() {
                   <td className={`${table.td} font-semibold tabular-nums`}>
                     {formatNaira(o.total)}
                     {o.paymentStatus === "paid" && <span className="ml-1.5 text-xs font-semibold text-emerald-700">Paid</span>}
+                    {o.paymentStatus === "unpaid" && o.paymentMethod === "paystack" && o.status !== "Cancelled" && (
+                      <span className="ml-1.5 text-xs font-semibold text-amber-700">Awaiting payment</span>
+                    )}
                   </td>
                   <td className={`${table.td} text-ink/65`}>{o.fulfilment === "pickup" ? `Pickup · ${o.outlet}` : o.deliveryArea ? `Delivery · ${o.deliveryArea}` : "Delivery"}</td>
                   <td className={table.td}>
@@ -256,6 +259,18 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
         </section>
 
         <section>
+          {o.paymentReference && (
+            <p className="mb-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <span className="font-semibold">Paid online with Paystack</span>
+              {o.paidAt && <> · {formatOrderDate(o.paidAt)}</>}
+              <span className="mt-0.5 block break-all text-xs text-emerald-700/80">Reference: {o.paymentReference}</span>
+            </p>
+          )}
+          {o.paymentMethod === "paystack" && o.paymentStatus === "unpaid" && o.status !== "Cancelled" && (
+            <p className="mb-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              Waiting for the customer to pay online. Unpaid orders are cancelled automatically after 1 hour.
+            </p>
+          )}
           <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-ink/10 px-4 py-3">
             <span>
               <span className="block text-sm font-medium">Payment received</span>

@@ -2,8 +2,8 @@
    Text is copied word for word from the business's documents:
    - Spinning_Top_Updated_Terms_of_Service.docx
    - Spinning_Top_Updated_Privacy_Policy.pdf
-   [BRACKETED] fields are placeholders still to be completed by the business —
-   they are highlighted on the page until replaced here. */
+   Business details were filled in for publication (23 November 2026). Any
+   new [BRACKETED] text would be highlighted on the page as a placeholder. */
 
 export type LegalBlock = { type: "p"; text: string } | { type: "ul"; items: string[] };
 
@@ -24,21 +24,25 @@ const ul = (...items: string[]): LegalBlock => ({ type: "ul", items });
 
 export const LEGAL_TAGLINE = "Better Care. Easier Living. Brighter Futures.";
 
-const DRAFT_NOTE = "PUBLICATION DRAFT   •   Complete all [BRACKETED] fields and approve internal processes before posting online.";
+const LEGAL_ENTITY = "SPINNING TOP DRYCLEANERS AND LAUNDERERS LIMITED";
+const ADDRESS = "Estate, House of VKY, Extension, opposite Valencia School Junction, beside TAP Studio, Oluyole, Ibadan 223222, Oyo State, Nigeria";
+const EMAIL = "admin@spinningtop.ng";
+const PHONE = "+234 803 830 2674";
+const EFFECTIVE = "Effective date: 23 November 2026";
 
 /* ── Terms of Service ─────────────────────────────────────────────────── */
 
 export const TERMS: LegalDoc = {
   title: "Website Terms of Service",
   subtitle: "Customer transactions • services • product shop • training academy",
-  draftNote: DRAFT_NOTE,
-  meta: ["Website: www.spinningtop.ng", "Effective date: [INSERT PUBLICATION DATE]", "Version: 1.0"],
+  draftNote: "",
+  meta: ["Website: www.spinningtop.ng", EFFECTIVE, "Version: 1.0"],
   sections: [
     {
       heading: "1. About these Terms",
       blocks: [
         p(
-          'These Terms of Service ("Terms") govern access to www.spinningtop.ng (the "Website") and orders, bookings, purchases, training enrolments and other transactions with Spinning Top Drycleaners & Launderers ("Spinning Top", "we", "our" or "us"). The contracting supplier is [INSERT CAC-REGISTERED LEGAL ENTITY NAME], trading as Spinning Top Drycleaners & Launderers, with its principal business address at [INSERT ADDRESS].',
+          `These Terms of Service ("Terms") govern access to www.spinningtop.ng (the "Website") and orders, bookings, purchases, training enrolments and other transactions with Spinning Top Drycleaners & Launderers ("Spinning Top", "we", "our" or "us"). The contracting supplier is ${LEGAL_ENTITY}, trading as Spinning Top Drycleaners & Launderers, with its principal business address at ${ADDRESS}.`,
         ),
         p(
           "Please read these Terms and the applicable quotation, order confirmation, service description and any specific policy shown at checkout or enrolment. By placing an order that we accept, you agree to the terms applicable to that transaction. Merely browsing the Website does not create a service contract.",
@@ -175,7 +179,7 @@ export const TERMS: LegalDoc = {
       heading: "11. Complaints, lost items and defective services",
       blocks: [
         p(
-          "If an item is lost, damaged, returned incorrectly or processed defectively, or if any product or service causes concern, contact [INSERT CUSTOMER SUPPORT CHANNEL] with the order reference and available evidence. We will acknowledge the complaint, review inspection and order records, and communicate a reasoned response.",
+          `If an item is lost, damaged, returned incorrectly or processed defectively, or if any product or service causes concern, contact us by email at ${EMAIL} or by phone/WhatsApp on ${PHONE} with the order reference and available evidence. We will acknowledge the complaint, review inspection and order records, and communicate a reasoned response.`,
         ),
         p(
           "Where Spinning Top fails to meet applicable legal service standards, available remedies may include re-performance, correction, replacement, refund or other compensation as required by law and supported by the circumstances. We will not impose an arbitrary claims deadline that removes statutory rights.",
@@ -261,22 +265,22 @@ export const TERMS: LegalDoc = {
       "These Terms are governed by the applicable laws of the Federal Republic of Nigeria. We encourage good-faith complaint resolution in the first instance, but nothing in these Terms prevents a customer from contacting the Federal Competition and Consumer Protection Commission, another competent regulator or a court where legally entitled.",
     rows: [
       ["Trading name", "Spinning Top Drycleaners & Launderers"],
-      ["Registered legal entity", "[INSERT CAC-REGISTERED LEGAL NAME]"],
-      ["Principal address", "[INSERT PRINCIPAL BUSINESS ADDRESS]"],
-      ["Website", "https://spinningtop.ng"],
-      ["Customer service email", "[INSERT VERIFIED EMAIL]"],
-      ["Telephone / WhatsApp", "[INSERT VERIFIED NUMBER]"],
+      ["Registered legal entity", LEGAL_ENTITY],
+      ["Principal address", ADDRESS],
+      ["Website", "https://www.spinningtop.ng"],
+      ["Customer service email", EMAIL],
+      ["Telephone / WhatsApp", PHONE],
     ],
   },
 };
 
 /* ── Privacy Policy ───────────────────────────────────────────────────── */
 
-export const PRIVACY: LegalDoc = {
+const PRIVACY_SOURCE: LegalDoc = {
   title: "Website Privacy Policy",
   subtitle: "Personal data • bookings • payments • Academy • cookies and rights",
-  draftNote: DRAFT_NOTE,
-  meta: ["Website: www.spinningtop.ng", "Effective date: [INSERT PUBLICATION DATE]", "Version: 1.0"],
+  draftNote: "",
+  meta: ["Website: www.spinningtop.ng", EFFECTIVE, "Version: 1.0"],
   sections: [
     {
       heading: "1. Who we are and scope of this notice",
@@ -285,10 +289,10 @@ export const PRIVACY: LegalDoc = {
           'This Privacy Policy explains how Spinning Top Drycleaners & Launderers ("Spinning Top", "we", "us" or "our") collects and uses personal data when you visit spinningtop.ng, request laundry or cleaning services, buy products, use pickup and delivery, contact our team, enquire about corporate services or enrol in our Training Academy.',
         ),
         p(
-          "The organisation responsible as data controller is [INSERT CAC-REGISTERED LEGAL ENTITY NAME], trading as Spinning Top Drycleaners & Launderers. Its principal address is [INSERT ADDRESS], and its data-protection contact is [INSERT PRIVACY EMAIL]. If a separate corporate client determines why and how certain personal data is used, Spinning Top may act as a data processor under that arrangement.",
+          `The organisation responsible as data controller is ${LEGAL_ENTITY}, trading as Spinning Top Drycleaners & Launderers. Its principal address is ${ADDRESS}, and its data-protection contact is ${EMAIL}. If a separate corporate client determines why and how certain personal data is used, Spinning Top may act as a data processor under that arrangement.`,
         ),
         p(
-          'This notice is intended to reflect the Nigeria Data Protection Act 2023 ("NDPA") and the Nigeria Data Protection Act General Application and Implementation Directive 2025 ("GAID"). Before publication, the final wording must be checked against the technologies and vendors actually used by the Website.',
+          'This notice is intended to reflect the Nigeria Data Protection Act 2023 ("NDPA") and the Nigeria Data Protection Act General Application and Implementation Directive 2025 ("GAID").',
         ),
       ],
     },
@@ -298,6 +302,7 @@ export const PRIVACY: LegalDoc = {
         p("Depending on your interaction with us, we may collect:"),
         ul(
           "Identity and contact data: name, telephone number, email address, delivery or service address and relevant business contact information.",
+          'Account data: if you create an account, your sign-in email, name and saved details (phone, address, newsletter choice). If you choose "Continue with Google", we receive your name, email address, profile picture and Google account identifier from Google (see "Signing in with Google" below).',
           "Bookings and service records: order history, item descriptions, fabric-care instructions, item or site photographs voluntarily supplied, inspection notes, service requests and delivery arrangements.",
           "Purchases and billing data: products ordered, payment confirmations, receipts, invoices, refund requests and transaction references. Full card details should be handled by the applicable payment gateway, not unnecessarily stored by us.",
           "Academy data: course applications, contact information, attendance, assessments, fees paid and certificates where applicable.",
@@ -353,7 +358,7 @@ export const PRIVACY: LegalDoc = {
           "Where non-essential cookies or similar tools are deployed, the Website will provide a visible choice to accept or reject them, explain their purposes and allow visitors to withdraw or adjust applicable preferences.",
         ),
         p(
-          "The following site-specific details must be completed and verified before publication: [INSERT COOKIE/ANALYTICS/ADVERTISING PROVIDERS ACTUALLY USED; CATEGORIES; PURPOSES; RETENTION PERIODS; PREFERENCE CONTROL LINK]. Do not assume that Google Analytics, Meta Pixel or any other service is installed unless confirmed.",
+          "At present the Website uses only strictly necessary browser storage: to keep you signed in, and to remember your cart, wishlist, booking selection and recently viewed items on your device. We do not currently use analytics, advertising or social-media tracking tools (such as Google Analytics or Meta Pixel). This information stays in your browser until you sign out, clear it or it expires, and you can clear it at any time through your browser settings.",
         ),
       ],
     },
@@ -364,10 +369,37 @@ export const PRIVACY: LegalDoc = {
           "We may share the minimum personal data necessary with vetted service providers supporting payments, web hosting, order management, pickup and delivery, communications and Academy operations. The actual providers and their roles should be documented internally and reflected in this notice where appropriate.",
         ),
         p(
-          "Current relevant providers and categories: [INSERT PAYMENT GATEWAY], [INSERT WEBSITE/HOSTING PROVIDER], [INSERT DELIVERY/ORDER MANAGEMENT PROVIDERS], [INSERT MESSAGING AND ACADEMY PLATFORM, IF USED].",
+          "Current providers and their roles:",
+        ),
+        ul(
+          "Paystack — online payments. Card and bank details are entered in Paystack's secure payment window and are not stored by us; we receive the payment confirmation and transaction reference.",
+          "QServers — website hosting and our email server (order and booking emails are sent from noreply@spinningtop.ng).",
+          "Supabase — secure database and sign-in service for accounts, orders, bookings and uploaded booking photos.",
+          'Google — optional "Continue with Google" sign-in.',
+          "Holt — delivery of orders you choose to have delivered (we share your name, phone number and delivery address). Kwik may be added as a delivery option in future.",
+          "WhatsApp (Meta) — messaging, when you choose to contact us or we reply to you on WhatsApp.",
         ),
         p(
           "Where these providers handle personal data on our behalf, we will seek appropriate written contractual safeguards, confidentiality, security obligations and instructions. We do not sell personal data to advertisers.",
+        ),
+      ],
+    },
+    {
+      heading: "8. Signing in with Google",
+      blocks: [
+        p(
+          'You can create an account or sign in with "Continue with Google" instead of an email code. This is optional; you can always use your email address instead.',
+        ),
+        p("When you choose Google sign-in, Google shares the following with us, with your permission:"),
+        ul("your name;", "your email address;", "your profile picture; and", "a Google account identifier that lets us recognise you the next time you sign in."),
+        p(
+          "We use this information only to create and secure your Spinning Top account, sign you in, fill in your name and email on orders and bookings, link earlier bookings made with the same email address, and send you messages about your orders, bookings and account. We do not access your Google contacts, files, emails, calendar or any other Google data, and we do not post anything to your Google account.",
+        ),
+        p(
+          "We do not sell information received from Google, use it for advertising, or share it with anyone except the service providers listed above where needed to run your account (for example our database provider, Supabase). Spinning Top's use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.",
+        ),
+        p(
+          `You can stop using Google sign-in at any time by removing Spinning Top from your Google Account's third-party connections (https://myaccount.google.com/connections). You can delete your Spinning Top account from the My Account page, or ask us to delete it by emailing ${EMAIL}; your account data is then deleted, apart from order and payment records we must keep by law (see Retention below).`,
         ),
       ],
     },
@@ -383,7 +415,7 @@ export const PRIVACY: LegalDoc = {
       heading: "9. Marketing communications",
       blocks: [
         p(
-          "Where you opt in, we may send you offers, product updates and Training Academy announcements via the channels you select. You can withdraw your consent or opt out at any time using the message instructions or by contacting [INSERT PRIVACY EMAIL].",
+          `Where you opt in, we may send you offers, product updates and Training Academy announcements via the channels you select. You can withdraw your consent or opt out at any time using the message instructions or by contacting ${EMAIL}.`,
         ),
         p(
           "Withdrawing marketing consent does not stop necessary transactional updates, including order confirmations, delivery arrangements or important service notices.",
@@ -397,7 +429,7 @@ export const PRIVACY: LegalDoc = {
           "Some hosting, cloud, payment or communication providers may process data outside Nigeria. Where transfers occur, we will assess the destination, applicable lawful transfer mechanism, safeguards and any additional duties under the NDPA and GAID.",
         ),
         p(
-          "Verified transfer countries and safeguards: [INSERT ACTUAL LOCATIONS AND LEGAL SAFEGUARDS AFTER VENDOR REVIEW]. You can request information about applicable transfer safeguards through our privacy contact.",
+          "In particular, our database and sign-in provider (Supabase), Google and WhatsApp may store or process data in data centres outside Nigeria, including in the European Union and the United States. These providers apply contractual and technical safeguards such as encryption in transit and at rest and restricted access. You can request information about applicable transfer safeguards through our privacy contact.",
         ),
       ],
     },
@@ -407,13 +439,14 @@ export const PRIVACY: LegalDoc = {
         p(
           "We retain personal data for no longer than necessary for the stated purposes, subject to applicable accounting, tax, legal, complaint and recordkeeping obligations. Data may be retained longer where genuinely necessary for legal claims or required by law.",
         ),
-        p("The specific retention periods or objective criteria must be completed before publication:"),
+        p("Our retention periods are:"),
         ul(
-          "Service enquiries and unsuccessful booking requests: [INSERT APPROVED PERIOD / APPLICABLE GAID RULE].",
-          "Completed service orders and delivery records: [INSERT APPROVED PERIOD].",
-          "Financial invoices and tax records: [INSERT PERIOD VERIFIED AGAINST CURRENT LEGAL DUTIES].",
-          "Academy enrolment, assessments and certification records: [INSERT APPROVED PERIOD].",
-          "Marketing preferences, cookie choices and security logs: [INSERT PERIODS BASED ON ACTUAL SYSTEMS].",
+          "Customer accounts (including details received through Google sign-in): until you delete your account or ask us to delete it.",
+          "Orders, payments, invoices and delivery records: 6 years, to meet tax and accounting duties.",
+          "Photos uploaded with booking requests: 12 months.",
+          "Service enquiries, booking requests, WhatsApp and other chat messages: 2 years.",
+          "Academy enrolment, assessment and certificate records: 6 years.",
+          "Marketing preferences: until you withdraw consent or close your account. Security logs: up to 12 months.",
         ),
         p(
           "When personal data is no longer required, we will securely delete or anonymise it, or restrict it where continued retention is legally necessary.",
@@ -438,7 +471,7 @@ export const PRIVACY: LegalDoc = {
           "Subject to statutory conditions and applicable exemptions, you may have rights to receive transparent information, access personal data, seek correction, request deletion or restriction, object to processing, request portability, withdraw consent and contest certain automated decisions.",
         ),
         p(
-          "To exercise a right, email [INSERT PRIVACY EMAIL], describing your request and providing sufficient information for us to verify identity without collecting unnecessary extra data. We will respond within applicable legal timeframes and explain any lawful limitation.",
+          `To exercise a right, email ${EMAIL}, describing your request and providing sufficient information for us to verify identity without collecting unnecessary extra data. We will respond within applicable legal timeframes and explain any lawful limitation.`,
         ),
       ],
     },
@@ -465,7 +498,7 @@ export const PRIVACY: LegalDoc = {
       heading: "16. Automated decisions and profiling",
       blocks: [
         p(
-          "If we introduce profiling or solely automated decisions that produce legal or similarly significant effects, we will provide the additional notices, safeguards and rights required by law. [CONFIRM WHETHER ANY SUCH SYSTEM EXISTS BEFORE PUBLICATION.]",
+          "We do not currently use profiling or solely automated decisions that produce legal or similarly significant effects. If we introduce them, we will provide the additional notices, safeguards and rights required by law.",
         ),
       ],
     },
@@ -481,7 +514,7 @@ export const PRIVACY: LegalDoc = {
       heading: "18. Complaints and supervisory authority",
       blocks: [
         p(
-          "Please first contact us at [INSERT PRIVACY EMAIL] if you have a privacy concern. We will examine the issue and provide a response in accordance with applicable Nigerian law.",
+          `Please first contact us at ${EMAIL} if you have a privacy concern. We will examine the issue and provide a response in accordance with applicable Nigerian law.`,
         ),
         p(
           "You may also lodge a complaint with the Nigeria Data Protection Commission (NDPC), including where you believe your statutory rights have not been respected. Official NDPC website: https://ndpc.gov.ng.",
@@ -501,11 +534,21 @@ export const PRIVACY: LegalDoc = {
     heading: "20. Contact details",
     rows: [
       ["Trading name", "Spinning Top Drycleaners & Launderers"],
-      ["Registered legal entity", "[INSERT CAC-REGISTERED LEGAL NAME]"],
-      ["Principal address", "[INSERT PRINCIPAL BUSINESS ADDRESS]"],
-      ["Website", "https://spinningtop.ng"],
-      ["Privacy email", "[INSERT VERIFIED PRIVACY EMAIL]"],
-      ["Telephone / WhatsApp", "[INSERT VERIFIED NUMBER]"],
+      ["Registered legal entity", LEGAL_ENTITY],
+      ["Principal address", ADDRESS],
+      ["Website", "https://www.spinningtop.ng"],
+      ["Privacy email", EMAIL],
+      ["Telephone / WhatsApp", PHONE],
     ],
+  },
+};
+
+/** Privacy sections numbered 1, 2, 3… ("Signing in with Google" was added to the original document). */
+export const PRIVACY: LegalDoc = {
+  ...PRIVACY_SOURCE,
+  sections: PRIVACY_SOURCE.sections.map((sec, i) => ({ ...sec, heading: sec.heading.replace(/^\d+\.\s*/, `${i + 1}. `) })),
+  contact: {
+    ...PRIVACY_SOURCE.contact,
+    heading: PRIVACY_SOURCE.contact.heading.replace(/^\d+\.\s*/, `${PRIVACY_SOURCE.sections.length + 1}. `),
   },
 };

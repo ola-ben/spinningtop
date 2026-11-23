@@ -121,9 +121,13 @@ $where = $pickup
   ? 'our ' . $h($o['outlet'] ?: 'Spinning Top') . ' outlet'
   : $h($o['delivery_address'] ?: 'your address');
 
+$paid = ($o['payment_status'] ?? '') === 'paid';
 $messages = [
-  'Received' => ["We've received your order $id",
-    "Thanks for shopping with Spinning Top. We've received your order <b>$id</b> and will confirm it shortly."],
+  'Received' => $paid
+    ? ["Payment received for order $id",
+       "Thanks for shopping with Spinning Top. We've received your order <b>$id</b> and your online payment. We'll confirm it shortly."]
+    : ["We've received your order $id",
+       "Thanks for shopping with Spinning Top. We've received your order <b>$id</b> and will confirm it shortly."],
   'Processing' => ["Your order $id is being prepared",
     "Good news: we've confirmed your order <b>$id</b> and our team is preparing it now."],
   'Ready for pickup' => ["Your order $id is ready for pickup",
@@ -139,7 +143,7 @@ if (!isset($messages[$o['status']])) done(200, 'No email for this status');
 [$subject, $intro] = $messages[$o['status']];
 
 $note = trim($o['note'] ?? '');
-$skipNotes = ['Order placed on the website', 'Status changed', ''];
+$skipNotes = ['Order placed on the website', 'Status changed', 'Payment received online', 'Payment received online. Order re-opened.', ''];
 $noteHtml = in_array($note, $skipNotes, true) ? '' :
   '<p style="margin:0 0 16px;padding:12px 14px;background:#f6f4ef;border-radius:8px;font-size:14px;color:#333;"><b>Note from us:</b> ' . $h($note) . '</p>';
 

@@ -6,7 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import ImageSlot from "@/components/ImageSlot";
 import { clearCart, useCart } from "@/lib/cart-store";
 import { useLiveProducts } from "@/lib/live-catalogue";
-import { placeOrder } from "@/lib/order-data";
+import { placeOrder, startPayment } from "@/lib/order-data";
 import { formatNaira, type Product } from "@/lib/shop-data";
 import { BRANCHES } from "@/lib/site";
 import { COURIERS, useDeliveryZones } from "@/lib/delivery";
@@ -18,8 +18,8 @@ import Busy from "@/components/Busy";
 const input =
   "w-full rounded-xl border border-ink/15 bg-paper px-3.5 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink/40 focus:border-brand focus:ring-2 focus:ring-brand/15";
 
-/* /checkout — signed-in customers place an order from their cart.
-   Payment: online only (Paystack comes later).
+/* /checkout — signed-in customers place an order from their cart, then pay
+   online with Paystack (card, bank transfer or USSD).
    The order is created by Supabase (supabase/orders.sql), which takes prices
    and stock from the products table. */
 export default function CheckoutView({ products: initial }: { products: Product[] }) {
@@ -48,6 +48,7 @@ export default function CheckoutView({ products: initial }: { products: Product[
   }, [toast]);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -74,10 +75,15 @@ export default function CheckoutView({ products: initial }: { products: Product[
       name,
       note: String(d.get("note") ?? "").trim(),
     });
-    setPending(false);
-    if (res.error || !res.id) return setError(res.error ?? "Could not place the order. Please try again.");
+    if (res.error || !res.id) {
+      setPending(false);
+      return setError(res.error ?? "Could not place the order. Please try again.");
+    }
     clearCart();
-    router.push(`/account/orders/?placed=${encodeURIComponent(res.id)}`);
+    // Straight on to Paystack. If that fails, the order waits in My Orders with a "Pay now" button.
+    setPaying(true);
+    const payErr = await startPayment(res.id);
+    if (payErr) router.push(`/account/orders/?placed=${encodeURIComponent(res.id)}&payment=failed`);
   }
 
   let body;
@@ -268,7 +274,8 @@ export default function CheckoutView({ products: initial }: { products: Product[
           </div>
 
           <div className="mt-4 rounded-xl bg-tint px-3.5 py-3 text-xs leading-relaxed text-ink/70">
-            <strong className="font-semibold text-ink">Payment:</strong> online. Secure online payment is coming soon; we will contact you to complete payment.
+            <strong className="font-semibold text-ink">Payment:</strong> you&rsquo;ll pay securely with Paystack (card, bank transfer or USSD) on the next
+            step. Unpaid orders are cancelled after 1 hour.
           </div>
 
           {error && (
@@ -282,7 +289,7 @@ export default function CheckoutView({ products: initial }: { products: Product[
             disabled={pending || outOfStock.length > 0}
             className="mt-4 w-full cursor-pointer rounded-full bg-brand py-3.5 text-sm font-bold text-paper shadow-md shadow-brand/15 transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {pending ? <Busy text="Placing order" /> : `Place order · ${formatNaira(total)}`}
+            {paying ? <Busy text="Opening secure payment" /> : pending ? <Busy text="Placing order" /> : `Place order & pay · ${formatNaira(total)}`}
           </button>
           <Link href="/shop" className="mt-3 block text-center text-xs font-semibold text-ink/50 hover:text-brand">
             ← Keep shopping

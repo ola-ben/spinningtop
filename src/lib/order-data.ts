@@ -38,6 +38,11 @@ export type Order = {
   deliveryFee: number;
   /** Items + delivery: what the customer pays. */
   total: number;
+  /** "paystack" for online orders (older orders: "pay_on_collection"). */
+  paymentMethod: string;
+  /** Paystack reference once paid. */
+  paymentReference: string;
+  paidAt: string | null;
   channel: string;
   adminNote: string;
   createdAt: string;
@@ -61,6 +66,9 @@ type Row = {
   delivery_courier?: string;
   delivery_area?: string;
   delivery_fee?: number;
+  payment_method?: string;
+  payment_reference?: string;
+  paid_at?: string | null;
   channel: string;
   admin_note: string;
   created_at: string;
@@ -87,6 +95,9 @@ const toOrder = (r: Row): Order => ({
   deliveryArea: r.delivery_area ?? "",
   deliveryFee: r.delivery_fee ?? 0,
   total: r.subtotal + (r.delivery_fee ?? 0),
+  paymentMethod: r.payment_method ?? "",
+  paymentReference: r.payment_reference ?? "",
+  paidAt: r.paid_at ?? null,
   channel: r.channel,
   adminNote: r.admin_note,
   createdAt: r.created_at,
@@ -143,6 +154,46 @@ export async function placeOrder(o: NewOrder): Promise<{ id?: string; error?: st
   });
   if (error) return { error: friendly(error.message) };
   return { id: data as string };
+}
+
+/* ───────────────────────── online payment (Paystack) ─────────────────────────
+   The payment endpoints run on cPanel (public/api/paystack.php). While testing
+   on localhost they're called on the live site. */
+
+const PAYMENT_API =
+  typeof window !== "undefined" && window.location.hostname === "localhost" ? "https://www.spinningtop.ng/api/paystack.php" : "/api/paystack.php";
+
+async function paymentCall(body: Record<string, string>): Promise<{ ok?: boolean; paid?: boolean; message?: string; authorization_url?: string }> {
+  try {
+    const res = await fetch(PAYMENT_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    return await res.json();
+  } catch {
+    return { ok: false, message: "We couldn't reach the payment service. Check your connection and try again." };
+  }
+}
+
+/** Unpaid online orders are cancelled automatically after this long (payments.sql). */
+export const PAY_WITHIN_MINUTES = 60;
+
+/**
+ * Sends the customer to Paystack to pay for an order. They come back to
+ * My Orders, which confirms the payment. Returns an error message, or null
+ * when the browser is leaving for Paystack (or the order is already paid).
+ */
+export async function startPayment(orderId: string): Promise<string | null> {
+  const back = new URL("/account/orders/", window.location.origin);
+  back.searchParams.set("placed", orderId);
+  const res = await paymentCall({ action: "init", order_id: orderId, return_url: back.toString() });
+  if (res.paid) return null;
+  if (!res.ok || !res.authorization_url) return res.message ?? "We could not open the payment page. Please try again.";
+  window.location.assign(res.authorization_url);
+  return null;
+}
+
+/** After returning from Paystack: confirms the payment on the server. */
+export async function verifyPayment(reference: string): Promise<{ paid: boolean; message: string }> {
+  const res = await paymentCall({ action: "verify", reference });
+  return { paid: !!res.paid, message: res.message ?? "" };
 }
 
 export async function cancelOrder(id: string): Promise<string | null> {

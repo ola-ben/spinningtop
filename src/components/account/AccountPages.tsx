@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import AddToCart from "@/components/shop/AddToCart";
 import { DEMO_MESSAGES, DEMO_ORDERS, DEMO_VOUCHERS } from "@/lib/account-demo";
-import { cancelOrder, formatOrderDate, listOrders, type Order } from "@/lib/order-data";
+import { PAY_WITHIN_MINUTES, cancelOrder, formatOrderDate, listOrders, startPayment, verifyPayment, type Order } from "@/lib/order-data";
 import { STATUS_HELP, type OrderStatus } from "@/lib/orders";
 import { useRecentlyViewed, clearViewed } from "@/lib/recent-store";
 import { PRODUCTS, formatNaira, type Product } from "@/lib/shop-data";
@@ -156,8 +156,11 @@ export function AccountOverview() {
 function OrderRow({ order, highlight, onChanged }: { order: Order; highlight: boolean; onChanged: () => void }) {
   const [open, setOpen] = useState(highlight);
   const [busy, setBusy] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
   const first = order.items[0];
+  // Online order not paid yet (and not cancelled): offer "Pay now".
+  const awaitingPayment = order.paymentMethod === "paystack" && order.paymentStatus === "unpaid" && order.status === "Received";
   const more = order.items.length - 1;
   const where = order.fulfilment === "pickup" ? `Pickup — ${order.outlet}` : `Delivery — ${order.deliveryAddress}`;
 
@@ -178,8 +181,11 @@ function OrderRow({ order, highlight, onChanged }: { order: Order; highlight: bo
             </button>
           </div>
           <p className="mt-0.5 text-xs text-ink/55">Order {order.id}</p>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <StatusBadge status={order.status} />
+            {awaitingPayment && (
+              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800">Awaiting payment</span>
+            )}
           </div>
           <p className="mt-1 text-sm font-semibold">Placed {formatOrderDate(order.createdAt)}</p>
           <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className={`${linkBtn} mt-2 sm:hidden`}>
@@ -239,6 +245,30 @@ function OrderRow({ order, highlight, onChanged }: { order: Order; highlight: bo
             Payment: {order.paymentStatus === "paid" ? "Paid ✓" : order.paymentStatus === "refunded" ? "Refunded" : "Awaiting online payment"}
           </p>
 
+          {awaitingPayment && (
+            <div className="mt-4 rounded-md bg-amber-50 px-3.5 py-3">
+              <p className="text-xs text-amber-900">
+                Pay within {PAY_WITHIN_MINUTES} minutes of placing the order, or it will be cancelled automatically.
+              </p>
+              <button
+                type="button"
+                disabled={paying}
+                onClick={async () => {
+                  setError("");
+                  setPaying(true);
+                  const err = await startPayment(order.id);
+                  if (err) {
+                    setPaying(false);
+                    setError(err);
+                  }
+                }}
+                className="mt-2 cursor-pointer rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-paper hover:bg-brand-deep disabled:cursor-wait disabled:opacity-70"
+              >
+                {paying ? <Busy text="Opening secure payment" /> : `Pay now · ${formatNaira(order.total)}`}
+              </button>
+            </div>
+          )}
+
           {order.status === "Received" && (
             <div className="mt-4">
               <button
@@ -256,9 +286,9 @@ function OrderRow({ order, highlight, onChanged }: { order: Order; highlight: bo
               >
                 {busy ? <Busy text="Cancelling" /> : "Cancel order"}
               </button>
-              {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
             </div>
           )}
+          {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
         </div>
       )}
     </li>
@@ -270,6 +300,14 @@ export function AccountOrders() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState("");
   const [placed] = useState(() => (typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("placed")));
+  // Back from Paystack (?reference=…), or the payment page didn't open (?payment=failed).
+  const [payment, setPayment] = useState<{ state: "checking" | "paid" | "unpaid" | "failed"; message: string } | null>(() => {
+    if (typeof window === "undefined") return null;
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("reference") || q.get("trxref")) return { state: "checking", message: "" };
+    if (q.get("payment") === "failed") return { state: "failed", message: "" };
+    return null;
+  });
   const me = useUser();
 
   const load = useCallback(() => {
@@ -285,6 +323,26 @@ export function AccountOrders() {
     if (me) load();
   }, [me, load]);
 
+  // Confirm the payment with the server, then refresh the list and tidy the address bar.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const reference = q.get("reference") ?? q.get("trxref");
+    if (!reference) return;
+    let active = true;
+    void verifyPayment(reference).then((res) => {
+      if (!active) return;
+      setPayment({ state: res.paid ? "paid" : "unpaid", message: res.message });
+      load();
+      const clean = new URL(window.location.href);
+      clean.searchParams.delete("reference");
+      clean.searchParams.delete("trxref");
+      window.history.replaceState(null, "", clean.toString());
+    });
+    return () => {
+      active = false;
+    };
+  }, [load]);
+
   const all = orders ?? [];
   const active = all.filter((o) => o.status !== "Cancelled");
   const cancelled = all.filter((o) => o.status === "Cancelled");
@@ -292,10 +350,27 @@ export function AccountOrders() {
 
   return (
     <AccountPanel title="Orders">
-      {placed && (
+      {placed && payment?.state === "checking" && (
+        <p role="status" className="mb-4 rounded-md bg-tint px-4 py-3 text-sm text-ink/80">
+          <Busy text={`Confirming your payment for order ${placed}`} />
+        </p>
+      )}
+      {placed && payment?.state === "paid" && (
         <p role="status" className="mb-4 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          <strong className="font-semibold">Thank you! Order {placed} has been placed.</strong> We&rsquo;ll confirm it shortly — you can follow
-          its progress here.
+          <strong className="font-semibold">Thank you! Payment received for order {placed}.</strong> We&rsquo;ve emailed your receipt and will
+          confirm your order shortly. You can follow its progress here.
+        </p>
+      )}
+      {placed && (payment?.state === "unpaid" || payment?.state === "failed") && (
+        <p role="alert" className="mb-4 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <strong className="font-semibold">Order {placed} is waiting for payment.</strong>{" "}
+          {payment.state === "unpaid" && payment.message ? `${payment.message} ` : ""}
+          Open the order below and tap &ldquo;Pay now&rdquo; to try again.
+        </p>
+      )}
+      {placed && !payment && (
+        <p role="status" className="mb-4 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <strong className="font-semibold">Order {placed}</strong> — you can follow its progress here.
         </p>
       )}
       <Tabs

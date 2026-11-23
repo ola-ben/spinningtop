@@ -53,9 +53,11 @@ export default function LegalPage({ doc, other }: { doc: LegalDoc; other: { href
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">{LEGAL_TAGLINE}</p>
             <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-5xl">{doc.title}</h1>
             <p className="mt-3 text-sm text-ink/60 sm:text-base">{doc.subtitle}</p>
-            <p className="mt-6 rounded-lg bg-paper/70 px-4 py-3 text-xs font-semibold leading-relaxed text-ink sm:text-sm">
-              <Rich text={doc.draftNote} />
-            </p>
+            {doc.draftNote && (
+              <p className="mt-6 rounded-lg bg-paper/70 px-4 py-3 text-xs font-semibold leading-relaxed text-ink sm:text-sm">
+                <Rich text={doc.draftNote} />
+              </p>
+            )}
             <p className="mt-4 flex flex-col gap-1 text-xs text-ink/55 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:text-sm">
               {doc.meta.map((m, i) => (
                 <span key={m} className="flex items-center gap-3">

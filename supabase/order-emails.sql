@@ -1,9 +1,10 @@
 -- Phase 5: order emails.
--- When an order is placed, or its status changes in the admin, Supabase posts
+-- When an order is paid (Paystack) or its status changes in the admin, Supabase posts
 -- the order to https://www.spinningtop.ng/api/order-mail.php, which emails the
 -- customer from noreply@spinningtop.ng.
 --
 -- Run once in Supabase > SQL Editor. Safe to run again.
+-- Needs payments.sql first (it adds the payment columns used below).
 -- The secret below must match $config['secret'] in order-mail-config.php.
 
 create extension if not exists pg_net with schema extensions;
@@ -17,8 +18,14 @@ as $$
 declare
   payload jsonb;
 begin
-  -- On update, only send when the status actually changed.
-  if tg_op = 'UPDATE' and new.status is not distinct from old.status then
+  -- Online (Paystack) orders: the first email goes out once payment is confirmed,
+  -- not when the unpaid order is created. After that, send on every status change.
+  if tg_op = 'INSERT' then
+    if new.payment_method = 'paystack' and new.payment_status <> 'paid' then
+      return null;
+    end if;
+  elsif new.status is not distinct from old.status
+        and not (new.payment_method = 'paystack' and new.payment_status = 'paid' and old.payment_status is distinct from 'paid') then
     return null;
   end if;
 
@@ -33,6 +40,7 @@ begin
     'outlet', o.outlet,
     'delivery_address', o.delivery_address,
     'payment_status', o.payment_status,
+    'payment_reference', o.payment_reference,
     'subtotal', o.subtotal,
     'delivery_courier', o.delivery_courier,
     'delivery_area', o.delivery_area,
@@ -68,6 +76,6 @@ revoke all on function public.notify_order_email() from public, anon, authentica
 -- Deferred so it fires at commit, after place_order has added the items.
 drop trigger if exists order_email_trigger on public.orders;
 create constraint trigger order_email_trigger
-  after insert or update of status on public.orders
+  after insert or update of status, payment_status on public.orders
   deferrable initially deferred
   for each row execute function public.notify_order_email();
