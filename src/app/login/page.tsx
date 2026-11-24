@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import LoginView from "@/components/account/LoginView";
-import SiteFooter from "@/components/SiteFooter";
-import FloatingActions from "@/components/FloatingActions";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -11,9 +9,8 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="min-h-screen bg-paper text-ink">
+      {/* Focused: no menu, footer or floating buttons — just signing in. */}
       <LoginView />
-      <SiteFooter />
-      <FloatingActions quoteBar={false} />
     </div>
   );
 }

@@ -501,6 +501,46 @@ export default function Home() {
           </Reveal>
         </section>
 
+        {/* 5a. YOUR ACCOUNT --------------------------------------------- */}
+        {/* Explains what website accounts (and "Continue with Google") are for. */}
+        <section id="account" className="scroll-mt-20 border-b border-ink/10">
+          <Reveal className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 md:grid-cols-2 md:gap-16">
+            <div>
+              <p className="eyebrow">Your account</p>
+              <h2 className="mt-4 font-display text-2xl font-semibold tracking-display text-ink sm:text-3xl">
+                One Spinning Top account for your orders and bookings.
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-ink/65">
+                Spinning Top Drycleaners &amp; Launderers is a laundry, dry-cleaning and home-care business in Ibadan. Create a free account on
+                this website, with your email address or with &ldquo;Continue with Google&rdquo;, to buy laundry and hygiene products from our
+                shop, pay online, track your orders and service bookings, and save your delivery details.
+              </p>
+              <Link href="/login" className="btn-ink mt-8">
+                Sign in or create an account <ArrowIcon />
+              </Link>
+            </div>
+            <div className="self-center rounded-2xl bg-tint p-6 text-sm leading-relaxed text-ink/70 sm:p-8">
+              <p className="font-semibold text-ink">Signing in with Google</p>
+              <p className="mt-2">
+                If you choose Google, we only receive your name, email address and profile picture, and we use them only to create your
+                account, sign you in and send you updates about your orders and bookings. We never sell your information or use it for
+                advertising.
+              </p>
+              <p className="mt-4">
+                Read our{" "}
+                <Link href="/privacy" className="font-semibold text-brand hover:underline">
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link href="/terms" className="font-semibold text-brand hover:underline">
+                  Terms of Service
+                </Link>
+                .
+              </p>
+            </div>
+          </Reveal>
+        </section>
+
         {/* 5b. VISIT US ------------------------------------------------- */}
         <section id="visit" className="scroll-mt-20">
           <Reveal className="mx-auto max-w-7xl px-4 py-24 sm:px-6">

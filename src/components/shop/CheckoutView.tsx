@@ -10,7 +10,8 @@ import { placeOrder, startPayment } from "@/lib/order-data";
 import { formatNaira, type Product } from "@/lib/shop-data";
 import { BRANCHES } from "@/lib/site";
 import { COURIERS, useDeliveryZones } from "@/lib/delivery";
-import { useHydrated, useUser } from "@/lib/user-store";
+import { signInWithGoogle, useHydrated, useUser } from "@/lib/user-store";
+import { GoogleLogo, MailIcon } from "@/components/account/AuthIcons";
 import { cartLines } from "./CartDrawer";
 import ShopChrome from "./ShopChrome";
 import Busy from "@/components/Busy";
@@ -100,20 +101,8 @@ export default function CheckoutView({ products: initial }: { products: Product[
       </Card>
     );
   } else if (!user) {
-    body = (
-      <Card>
-        <p className="font-display text-lg font-semibold">Sign in to place your order</p>
-        <p className="mt-1 text-sm text-ink/60">
-          We&rsquo;ll email you a 6-digit code — no password needed. Your cart stays saved.
-        </p>
-        <Link
-          href="/login/?next=/checkout/"
-          className="mt-5 inline-flex w-full justify-center rounded-full bg-brand py-3.5 text-sm font-bold text-paper hover:bg-brand-deep"
-        >
-          Sign in or create an account
-        </Link>
-      </Card>
-    );
+    // Focused sign-in pop-up over the checkout (nothing else to click).
+    return <SignInModal />;
   } else {
     body = (
       <form onSubmit={onSubmit} noValidate className="grid gap-4 lg:grid-cols-[1fr_22rem] lg:items-start">
@@ -338,5 +327,72 @@ function Field({ label, children, className = "" }: { label: string; children: R
       <span className="text-sm font-medium">{label}</span>
       {children}
     </label>
+  );
+}
+
+/** Checkout while signed out: a focused pop-up with just the sign-in choices. */
+function SignInModal() {
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
+  const option =
+    "flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-ink/15 bg-paper py-3 text-sm font-semibold text-ink transition-colors hover:border-ink/35 hover:bg-ink/[0.02] disabled:cursor-wait disabled:opacity-70";
+  return (
+    <div className="fixed inset-0 z-[200] grid place-items-center overflow-y-auto bg-ink/55 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="checkout-signin">
+      <div className="relative w-full max-w-md rounded-2xl bg-paper p-6 shadow-2xl sm:p-8">
+        <Link
+          href="/shop"
+          aria-label="Back to the shop"
+          className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full text-ink/60 transition-colors hover:bg-ink/[0.05] hover:text-ink"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </Link>
+        <h2 id="checkout-signin" className="pr-8 font-display text-2xl font-semibold tracking-tight">
+          Sign in to place your order
+        </h2>
+        <p className="mt-1 text-sm text-ink/55">Your cart is saved. It only takes a moment.</p>
+
+        <button
+          type="button"
+          disabled={pending}
+          onClick={async () => {
+            setError("");
+            setPending(true);
+            const err = await signInWithGoogle("/checkout/");
+            if (err) {
+              setPending(false);
+              setError(err);
+            }
+          }}
+          className={`${option} mt-6`}
+        >
+          {pending ? (
+            <Busy text="Opening Google" />
+          ) : (
+            <>
+              <GoogleLogo />
+              Continue with Google
+            </>
+          )}
+        </button>
+        <Link href="/login/?next=/checkout/&with=email" className={`${option} mt-3`}>
+          <MailIcon />
+          Continue with email
+        </Link>
+
+        {error && (
+          <p role="alert" className="mt-4 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }

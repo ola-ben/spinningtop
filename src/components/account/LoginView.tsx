@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import SiteHeader from "@/components/SiteHeader";
+import Image from "next/image";
+import Link from "next/link";
+import { GoogleLogo, MailIcon } from "./AuthIcons";
 import CodeBoxes from "@/components/CodeBoxes";
 import { CODE_LENGTH, sendCode, signInWithGoogle, useUser, verifyCode } from "@/lib/user-store";
 import Busy from "@/components/Busy";
@@ -17,8 +19,10 @@ type Mode = "signin" | "signup";
 /** Seconds before another code can be sent (Supabase allows one per 60s per email). */
 const RESEND_AFTER = 60;
 
-/* /login — customers sign in or create an account with a 6-digit code sent
-   to their email. No passwords (see src/lib/user-store.ts). */
+/* /login — customers sign in or create an account with Google, or with a
+   6-digit code sent to their email. No passwords (see src/lib/user-store.ts).
+   A focused screen: just the logo, a close button and the sign-in card.
+   ?with=email opens the email form straight away (e.g. from checkout). */
 export default function LoginView() {
   const router = useRouter();
   const user = useUser();
@@ -56,6 +60,22 @@ export default function LoginView() {
     const next = new URLSearchParams(window.location.search).get("next") ?? "";
     router.replace(next.startsWith("/") && !next.startsWith("//") ? next : "/account/");
   }, [user, router]);
+
+  // ?with=email → open the email form straight away.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("with") !== "email") return;
+    const t = setTimeout(() => setShowEmail(true), 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Close: back to where they came from (e.g. checkout), else home.
+  const [closeHref, setCloseHref] = useState("/");
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get("next") ?? "";
+    if (!next.startsWith("/") || next.startsWith("//")) return;
+    const t = setTimeout(() => setCloseHref(next.startsWith("/checkout") ? "/shop" : next), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   // Back from Google with a problem (e.g. cancelled): show it instead of failing silently.
   useEffect(() => {
@@ -130,7 +150,21 @@ export default function LoginView() {
 
   return (
     <>
-      <SiteHeader />
+      {/* Focused top bar: logo + close */}
+      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between px-4 sm:px-6">
+        <Link href="/" aria-label="Spinning Top — home" className="inline-flex">
+          <Image src="/spinning-top-logo.jpg" alt="Spinning Top" width={1168} height={424} className="h-9 w-auto" priority />
+        </Link>
+        <Link
+          href={closeHref}
+          aria-label="Close"
+          className="grid h-10 w-10 place-items-center rounded-full bg-paper text-ink/70 shadow-sm transition-colors hover:text-ink"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </Link>
+      </header>
       {/* "Code sent" toast */}
       <div
         role="status"
@@ -146,7 +180,7 @@ export default function LoginView() {
           </p>
         )}
       </div>
-      <main className="min-h-[70vh] bg-ink/[0.03] px-4 py-10 sm:py-16">
+      <main className="flex min-h-dvh items-center bg-ink/[0.04] px-4 pb-10 pt-20">
         <div className="mx-auto w-full max-w-md">
           <div className="rounded-2xl bg-paper p-6 shadow-sm sm:p-8">
             {step === "email" ? (
@@ -327,29 +361,4 @@ export default function LoginView() {
     setPending(false);
     if (err) failed(err);
   }
-}
-
-/** Envelope for "Continue with email" (neutral black, like the site's other icons). */
-function MailIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 text-ink" fill="none" stroke="currentColor" strokeWidth={1.7} aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="m4 7 8 6 8-6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-/** Google's "G" mark (shown in its own colours, as Google requires for sign-in buttons). */
-function GoogleLogo() {
-  return (
-    <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">
-      <path
-        fill="#FFC107"
-        d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
-      />
-      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
-      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
-    </svg>
-  );
 }
