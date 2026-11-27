@@ -90,6 +90,16 @@ export default function CheckoutView({ products: initial }: { products: Product[
   let body;
   if (!ready) {
     body = <div className="h-[50vh]" aria-busy="true" />;
+  } else if (paying) {
+    // The cart is already cleared — keep a calm "on the way" screen until Paystack opens.
+    body = (
+      <Card>
+        <p className="font-display text-lg font-semibold">
+          <Busy text="Taking you to Paystack" />
+        </p>
+        <p className="mt-1 text-sm text-ink/60">Your order is saved. Please don&apos;t close this page.</p>
+      </Card>
+    );
   } else if (lines.length === 0) {
     body = (
       <Card>

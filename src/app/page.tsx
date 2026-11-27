@@ -301,14 +301,14 @@ export default function Home() {
 
           <SwipeRail
             label="Spinning Top's three pillars"
-            trackClassName="no-scrollbar -mx-4 mt-12 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-px sm:overflow-visible sm:border sm:border-ink/10 sm:bg-ink/10 sm:px-0"
+            trackClassName="no-scrollbar -mx-4 mt-12 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-5 sm:overflow-visible sm:px-0 lg:gap-6"
           >
             {PILLARS.map((p, i) => (
               <Link
                 key={p.no}
                 href={p.href}
                 aria-label={`${p.title} — ${i + 1} of ${PILLARS.length}`}
-                className="group relative isolate flex w-[84%] shrink-0 snap-start flex-col overflow-hidden border border-ink/10 bg-paper outline-none sm:w-auto sm:border-0"
+                className="group relative isolate flex w-[84%] shrink-0 snap-start flex-col overflow-hidden border border-ink/10 bg-paper outline-none sm:w-auto"
               >
                 <ImageSlot
                   image={p.image}

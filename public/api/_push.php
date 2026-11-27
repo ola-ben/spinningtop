@@ -95,16 +95,24 @@ function push_rpc($fn, $args) {
 /**
  * Sends a notification to every team device allowed to see orders & bookings.
  * $url is the admin page to open when it's tapped. Never throws.
+ * Every problem is written to error_log (lines start with "push:"); with
+ * $report set, the steps are also collected there (used by push-test.php).
  */
-function push_notify_team($config, $title, $body, $url, $tag) {
+function push_notify_team($config, $title, $body, $url, $tag, &$report = null) {
+  $say = function ($msg, $isError = true) use (&$report) {
+    if (is_array($report)) $report[] = ($isError ? 'PROBLEM: ' : 'ok: ') . $msg;
+    if ($isError) error_log('push: ' . $msg);
+  };
   try {
-    if (empty($config['vapid_private_key'])) return;
-    if (!function_exists('openssl_pkey_derive') || !function_exists('hash_hkdf')) {
-      error_log('push: PHP 7.3+ with OpenSSL is needed for notifications');
-      return;
-    }
+    if (empty($config['vapid_private_key'])) { $say("'vapid_private_key' is missing from order-mail-config.php"); return; }
+    if (strlen(push_b64u_dec($config['vapid_private_key'])) !== 32) { $say("'vapid_private_key' in order-mail-config.php looks wrong (not a 43-character key)"); return; }
+    $say('vapid_private_key found', false);
+    if (!function_exists('openssl_pkey_derive') || !function_exists('hash_hkdf')) { $say('PHP ' . PHP_VERSION . ' is too old — choose PHP 7.4 or newer in cPanel → Select PHP Version'); return; }
+    $say('PHP ' . PHP_VERSION . ' with OpenSSL ' . OPENSSL_VERSION_TEXT, false);
     $targets = push_rpc('push_targets', ['p_secret' => $config['secret']]);
-    if (!is_array($targets) || !$targets) return;
+    if (!is_array($targets)) { $say('could not read the device list from Supabase (is push.sql run? does the secret match?)'); return; }
+    if (!$targets) { $say('no devices have notifications turned on'); return; }
+    $say(count($targets) . ' device(s) to notify', false);
     $payload = json_encode(['title' => $title, 'body' => $body, 'url' => $url, 'tag' => $tag]);
     $headers = [];
     foreach ($targets as $t) {
@@ -112,9 +120,13 @@ function push_notify_team($config, $title, $body, $url, $tag) {
       $p = parse_url($endpoint);
       if (empty($p['scheme']) || empty($p['host'])) continue;
       $audience = $p['scheme'] . '://' . $p['host'];
-      if (!isset($headers[$audience])) $headers[$audience] = push_vapid_header($config, $audience);
+      if (!isset($headers[$audience])) {
+        $headers[$audience] = push_vapid_header($config, $audience);
+        if (!$headers[$audience]) { $say('could not sign with the vapid key: ' . (openssl_error_string() ?: 'unknown openssl error')); continue; }
+      }
+      if (!$headers[$audience]) continue;
       $bodyBytes = push_encrypt($payload, $t['p256dh'] ?? '', $t['auth'] ?? '');
-      if (!$headers[$audience] || $bodyBytes === null) continue;
+      if ($bodyBytes === null) { $say('could not encrypt the message: ' . (openssl_error_string() ?: 'unknown openssl error')); continue; }
       $ch = curl_init($endpoint);
       curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true, CURLOPT_TIMEOUT => 10,
@@ -127,14 +139,16 @@ function push_notify_team($config, $title, $body, $url, $tag) {
         ],
         CURLOPT_POSTFIELDS => $bodyBytes,
       ]);
-      curl_exec($ch);
+      $answer = (string) curl_exec($ch);
       $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $curlErr = curl_error($ch);
       curl_close($ch);
       // 404/410 = the device turned notifications off or the browser was reset.
-      if ($code === 404 || $code === 410) push_rpc('push_forget', ['p_secret' => $config['secret'], 'p_endpoint' => $endpoint]);
-      elseif ($code >= 300) error_log('push: ' . $audience . ' answered ' . $code);
+      if ($code === 404 || $code === 410) { push_rpc('push_forget', ['p_secret' => $config['secret'], 'p_endpoint' => $endpoint]); $say($p['host'] . ' says this device is gone — removed it', false); }
+      elseif ($code >= 200 && $code < 300) $say($p['host'] . ' accepted the notification (' . $code . ')', false);
+      else $say($p['host'] . ' answered ' . $code . ' ' . substr($curlErr ?: $answer, 0, 200));
     }
   } catch (Throwable $e) {
-    error_log('push: ' . $e->getMessage());
+    $say($e->getMessage());
   }
 }
