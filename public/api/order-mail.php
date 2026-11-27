@@ -15,6 +15,7 @@ function done($code, $msg) {
 $configFile = dirname(__DIR__, 2) . '/order-mail-config.php';
 if (!is_file($configFile)) done(500, 'Config missing');
 $config = require $configFile;
+require __DIR__ . '/_push.php'; // team push notifications (skipped if not set up)
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') done(405, 'POST only');
 $given = $_SERVER['HTTP_X_ORDER_MAIL_SECRET'] ?? '';
@@ -34,6 +35,14 @@ $id = $h($o['id']);
 
 // ── Service bookings (Phase E) ─────────────────────────────────────────────
 if (($o['type'] ?? '') === 'booking') {
+  // Push to the team's devices first, so it goes out even if an email fails.
+  if (($o['status'] ?? '') === 'New') {
+    $svc = implode(', ', array_map('strval', (array) ($o['services'] ?? [])));
+    push_notify_team($config, 'New booking ' . $o['id'],
+      trim(($svc !== '' ? $svc : 'Service request') . ' · ' . ($o['customer_name'] ?? '')),
+      $site . '/admin/orders/?view=bookings', 'booking-' . $o['id']);
+  }
+
   $logi = ['pickup_delivery' => 'Pickup & delivery', 'drop_off' => 'Drop-off at our location', 'either' => 'Either is fine'];
   $logistics = $logi[$o['logistics'] ?? ''] ?? '';
   if (($o['logistics'] ?? '') === 'drop_off' && trim($o['outlet'] ?? '') !== '') $logistics = 'Drop-off at ' . trim($o['outlet']);
@@ -115,6 +124,15 @@ if (($o['type'] ?? '') === 'booking') {
   done(200, 'Sent');
 }
 // ── Product orders ─────────────────────────────────────────────────────────
+
+// New (paid) order → push to the team's devices first.
+if (($o['status'] ?? '') === 'Received') {
+  $pushTotal = (int) ($o['subtotal'] ?? 0) + (int) ($o['delivery_fee'] ?? 0);
+  $pushPaid = ($o['payment_status'] ?? '') === 'paid';
+  push_notify_team($config, ($pushPaid ? 'New paid order ' : 'New order ') . $o['id'] . ' · ' . html_entity_decode($naira($pushTotal)),
+    trim(($o['customer_name'] ?? '') . ' · ' . (($o['fulfilment'] ?? '') === 'delivery' ? 'Delivery' : 'Pickup')),
+    $site . '/admin/orders/', 'order-' . $o['id']);
+}
 
 $pickup = ($o['fulfilment'] ?? '') === 'pickup';
 $where = $pickup

@@ -5,6 +5,7 @@ import { useAdminOrders } from "@/lib/admin-orders";
 import { formatOrderDate, orderCount, setAdminNote, setOrderStatus, setPaymentStatus, type Order } from "@/lib/order-data";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/orders";
 import { useAdminSession } from "@/lib/admin-auth";
+import { toast } from "./Toast";
 import { courierName } from "@/lib/delivery";
 import { formatNaira } from "@/lib/shop-data";
 import { Badge, STATUS_TONE, Toolbar, btn, inputClass, table } from "./ui";
@@ -171,7 +172,10 @@ function OrderDetails({ order: o, onClose, onSaved }: { order: Order; onClose: (
     await onSaved();
     setBusy(false);
     setStatusNote("");
-    setMessage(err ? { ok: false, text: err } : { ok: true, text: "Saved ✓ The customer sees the new status in their account." });
+    setMessage(err ? { ok: false, text: err } : null);
+    if (err) toast(err, false);
+    else if (status !== o.status) toast(`${o.id} changed to ${status}. The customer has been emailed.`);
+    else toast(`${o.id} saved.`);
   }
 
   return (

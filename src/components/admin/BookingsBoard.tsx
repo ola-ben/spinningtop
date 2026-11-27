@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useAdminSession } from "@/lib/admin-auth";
+import { toast } from "./Toast";
 import {
   BOOKING_STATUSES,
   bookingPhotoUrls,
@@ -177,7 +178,10 @@ function BookingDetails({ booking: b, onClose, onSaved }: { booking: Booking; on
     await onSaved();
     setBusy(false);
     setStatusNote("");
-    setMessage(err ? { ok: false, text: err } : { ok: true, text: "Saved ✓" });
+    setMessage(err ? { ok: false, text: err } : null);
+    if (err) toast(err, false);
+    else if (status !== b.status) toast(`${b.id} changed to ${status}. The customer has been emailed.`);
+    else toast(`${b.id} saved.`);
   }
 
   const label = "text-xs font-semibold uppercase tracking-wide text-ink/45";

@@ -1,0 +1,428 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <!-- Studio Ambient Lighting & Shadow Filters -->
+    <filter id="softGlow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.18"/>
+    </filter>
+    <filter id="groundDrop" x="-5%" y="-5%" width="115%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#180C03" flood-opacity="0.32"/>
+    </filter>
+
+    <!-- Wall & Studio Background -->
+    <linearGradient id="wallBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="65%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#EDF2F7"/>
+    </linearGradient>
+
+    <!-- Polished Hardwood Table -->
+    <linearGradient id="tableSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#B86D36"/>
+      <stop offset="10%" stop-color="#A15925"/>
+      <stop offset="80%" stop-color="#803E13"/>
+      <stop offset="100%" stop-color="#642C0A"/>
+    </linearGradient>
+    <linearGradient id="tableBevel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="100%" stop-color="#B86D36"/>
+    </linearGradient>
+
+    <!-- Cast Iron Machine Enamel (Deep lustrous black enamel) -->
+    <linearGradient id="castIron" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="22%" stop-color="#1E293B"/>
+      <stop offset="70%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Chrome Hardware Gradients -->
+    <linearGradient id="chromeH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94A3B8"/>
+      <stop offset="30%" stop-color="#FFFFFF"/>
+      <stop offset="65%" stop-color="#CBD5E1"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+    <linearGradient id="chromeV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="45%" stop-color="#CBD5E1"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+
+    <!-- Gold Filigree Decal Gradient -->
+    <linearGradient id="goldDecal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="50%" stop-color="#EAB308"/>
+      <stop offset="100%" stop-color="#A16207"/>
+    </linearGradient>
+
+    <!-- Melanin Skin Shading Planes (Warm Espresso & Caramel Tones) -->
+    <linearGradient id="skinMid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C462A"/>
+      <stop offset="65%" stop-color="#66351D"/>
+      <stop offset="100%" stop-color="#502410"/>
+    </linearGradient>
+    <linearGradient id="skinLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9E5D3A"/>
+      <stop offset="100%" stop-color="#7C462A"/>
+    </linearGradient>
+    <linearGradient id="skinShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#502410"/>
+      <stop offset="100%" stop-color="#341306"/>
+    </linearGradient>
+
+    <!-- Brand Blue Work Shirt Palette -->
+    <linearGradient id="brandShirt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="35%" stop-color="#0000FE"/>
+      <stop offset="85%" stop-color="#0000B0"/>
+      <stop offset="100%" stop-color="#000072"/>
+    </linearGradient>
+    <linearGradient id="shirtHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="50%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#0000FE"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ==================== 1. STUDIO WALL (BACKGROUND) ==================== -->
+  <rect width="600" height="400" fill="url(#wallBg)"/>
+
+  <!-- Minimal Architectural Light: Soft diagonal sun cast & horizon -->
+  <polygon points="0,0 340,0 200,285 0,285" fill="#FFFFFF" opacity="0.6"/>
+  <line x1="0" y1="285" x2="600" y2="285" stroke="#CBD5E1" stroke-width="1.2"/>
+
+  <!-- Clean Floating Studio Wall Shelf -->
+  <g opacity="0.45">
+    <rect x="440" y="68" width="130" height="5" rx="1.5" fill="#B45309"/>
+    <!-- Color Swatches & Spools on shelf -->
+    <rect x="455" y="50" width="12" height="18" rx="2" fill="#0000FE"/>
+    <rect x="472" y="46" width="12" height="22" rx="2" fill="#FF5A1F"/>
+    <rect x="489" y="53" width="12" height="15" rx="2" fill="#CA8A04"/>
+    <rect x="506" y="48" width="12" height="20" rx="2" fill="#059669"/>
+    <!-- Folded textile swatches -->
+    <rect x="525" y="58" width="35" height="10" rx="2" fill="#E2E8F0"/>
+    <rect x="528" y="52" width="30" height="6" rx="1.5" fill="#CBD5E1"/>
+  </g>
+
+  <!-- ==================== 2. WORK TABLE ==================== -->
+  <!-- Solid Hardwood Table Top -->
+  <rect x="0" y="285" width="600" height="115" fill="url(#tableSurface)"/>
+  <!-- Polished Bevel Edge catching overhead studio light -->
+  <rect x="0" y="285" width="600" height="3.5" fill="url(#tableBevel)"/>
+  <!-- Front Edge Core Shadow -->
+  <rect x="0" y="288.5" width="600" height="5" fill="#341306" opacity="0.4"/>
+  <!-- Fine Woodgrain Accent Lines -->
+  <path d="M 0 322 Q 160 326 340 322 T 600 324" fill="none" stroke="#502410" stroke-width="1" opacity="0.3"/>
+  <path d="M 0 358 Q 240 364 480 358 T 600 360" fill="none" stroke="#502410" stroke-width="1" opacity="0.2"/>
+
+  <!-- Grounding Ambient Shadows beneath machine and tailor -->
+  <ellipse cx="180" cy="289" rx="105" ry="9" fill="#180C03" opacity="0.42" filter="url(#groundDrop)"/>
+  <ellipse cx="385" cy="289" rx="95" ry="11" fill="#180C03" opacity="0.38" filter="url(#groundDrop)"/>
+
+  <!-- ==================== 3. VINTAGE "BUTTERFLY" SEWING MACHINE ==================== -->
+  <g id="vintage-machine" filter="url(#softGlow)">
+    <!-- Base Plate (Bed) resting securely on table -->
+    <rect x="88" y="276" width="182" height="12" rx="3" fill="url(#castIron)" stroke="#020617" stroke-width="1"/>
+    <!-- Gold Victorian Decal Trim on Base Plate -->
+    <rect x="94" y="280" width="170" height="1.8" fill="url(#goldDecal)" opacity="0.9"/>
+    <!-- Chrome Needle Throat Plate -->
+    <rect x="226" y="276" width="34" height="2.5" rx="1" fill="url(#chromeH)"/>
+
+    <!-- Cast Iron Body with OPEN THROAT Cavity -->
+    <path d="M 108 276
+             L 108 210
+             C 108 168, 134 154, 168 154
+             L 238 154
+             C 258 154, 268 166, 268 192
+             L 268 238
+             L 244 238
+             L 244 204
+             C 244 192, 235 186, 218 186
+             L 165 186
+             C 146 186, 142 205, 142 226
+             L 142 276
+             Z"
+          fill="url(#castIron)" stroke="#020617" stroke-width="1.2"/>
+
+    <!-- Specular Highlight Curve Along Top of Arm -->
+    <path d="M 122 210
+             C 122 178, 142 162, 172 162
+             L 236 162
+             C 248 162, 256 168, 258 182
+             L 254 182
+             C 252 172, 244 166, 234 166
+             L 172 166
+             C 146 166, 128 180, 128 210
+             Z"
+          fill="#475569" opacity="0.45"/>
+
+    <!-- Pillar Cylindrical Light Plane -->
+    <rect x="118" y="202" width="12" height="68" rx="6" fill="#334155" opacity="0.5"/>
+
+    <!-- Throat Underside Deep Ambient Shadow -->
+    <path d="M 142 186 L 244 186 L 244 194 L 142 194 Z" fill="#020617" opacity="0.65"/>
+
+    <!-- "BUTTERFLY" Gold Brand Plaque on Horizontal Arm (Completely clear, unblocked) -->
+    <g transform="translate(152, 164)">
+      <rect x="0" y="0" width="84" height="16" rx="3" fill="#090D16" stroke="url(#goldDecal)" stroke-width="1.2"/>
+      <path d="M 9 8 C 7 4.5, 11 4, 13 6.5 C 15 4, 19 4.5, 17 8 C 19 11.5, 15 12, 13 9.5 C 11 12, 7 11.5, 9 8 Z" fill="url(#goldDecal)"/>
+      <text x="50" y="11.5" font-family="'Georgia', 'Times New Roman', serif" font-size="7" font-weight="bold" fill="url(#goldDecal)" text-anchor="middle" letter-spacing="1.4">BUTTERFLY</text>
+    </g>
+
+    <!-- Gold Filigree Decals on Pillar & Arm -->
+    <path d="M 120 252 C 126 244, 126 234, 120 226" fill="none" stroke="url(#goldDecal)" stroke-width="1.4"/>
+    <path d="M 122 248 C 126 242, 126 236, 122 230" fill="none" stroke="url(#goldDecal)" stroke-width="1"/>
+    <path d="M 235 186 C 240 182, 246 186, 244 192" fill="none" stroke="url(#goldDecal)" stroke-width="1.2"/>
+
+    <!-- Handwheel / Balance Wheel on Left -->
+    <g id="handwheel">
+      <ellipse cx="106" cy="222" rx="7" ry="28" fill="url(#castIron)" stroke="#020617" stroke-width="1"/>
+      <ellipse cx="106" cy="222" rx="7" ry="28" fill="none" stroke="url(#chromeH)" stroke-width="2"/>
+      <line x1="106" y1="198" x2="106" y2="246" stroke="#475569" stroke-width="2"/>
+      <ellipse cx="106" cy="222" rx="3.5" ry="11" fill="url(#goldDecal)"/>
+      <ellipse cx="106" cy="222" rx="1.8" ry="6" fill="#78350F"/>
+    </g>
+
+    <!-- Spool Pin & Studio Orange Thread Spool (#FF5A1F) -->
+    <rect x="134" y="140" width="2.5" height="15" fill="url(#chromeH)"/>
+    <rect x="127" y="128" width="16" height="14" rx="2" fill="#FF5A1F" stroke="#1E293B" stroke-width="1"/>
+    <rect x="125" y="126" width="20" height="2.5" rx="1" fill="#D97706"/>
+    <rect x="125" y="141" width="20" height="2.5" rx="1" fill="#D97706"/>
+    <line x1="127" y1="132" x2="143" y2="132" stroke="#EA580C" stroke-width="1"/>
+    <line x1="127" y1="137" x2="143" y2="137" stroke="#EA580C" stroke-width="1"/>
+
+    <!-- Chrome Face Plate & Needle Bar Assembly -->
+    <g id="needle-head">
+      <rect x="250" y="190" width="18" height="48" rx="1" fill="url(#chromeH)" stroke="#475569" stroke-width="0.8"/>
+      <line x1="259" y1="195" x2="259" y2="233" stroke="#94A3B8" stroke-width="1" stroke-dasharray="2 3"/>
+
+      <!-- Tension Dial & Take-Up Lever -->
+      <circle cx="242" cy="214" r="5.5" fill="url(#chromeH)" stroke="#334155" stroke-width="1"/>
+      <circle cx="242" cy="214" r="2.2" fill="#0F172A"/>
+      <path d="M 244 200 L 238 186 L 241 185 L 247 198 Z" fill="url(#chromeH)"/>
+      <circle cx="239.5" cy="186.5" r="1.5" fill="#0F172A"/>
+
+      <!-- Presser Bar & Foot -->
+      <rect x="248" y="212" width="2.8" height="66" fill="url(#chromeH)"/>
+      <path d="M 245 276 L 257 276 L 260 272" fill="none" stroke="url(#chromeH)" stroke-width="2.2" stroke-linecap="round"/>
+
+      <!-- Needle Bar & Steel Sewing Needle -->
+      <rect x="254" y="200" width="3" height="74" fill="url(#chromeH)"/>
+      <rect x="251" y="262" width="8" height="4.5" rx="1" fill="#334155"/>
+      <line x1="255.5" y1="266" x2="255.5" y2="280" stroke="#FFFFFF" stroke-width="1.4"/>
+
+      <!-- Clean Mechanical Thread Path: Runs along TOP of arm above plaque, then down head! -->
+      <path d="M 135 128 C 160 148, 205 150, 240 152 L 242 214 L 239.5 186 L 254 262 L 255.5 278"
+            fill="none" stroke="#FF5A1F" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- ==================== 4. FABRIC DRAPING UNDER NEEDLE ==================== -->
+  <g id="sewing-fabric" filter="url(#softGlow)">
+    <!-- Main Fabric Sheet: Lies flat across the hardwood work table in true perspective -->
+    <path d="M 170 275
+             L 280 275
+             C 320 275, 355 278, 375 282
+             L 375 298
+             L 165 298
+             Z"
+          fill="#FEF9C3" stroke="#EAB308" stroke-width="1"/>
+
+    <!-- Subtle front bevel drape fold -->
+    <path d="M 165 298 L 375 298 L 370 305 L 163 305 Z" fill="#FDE047" opacity="0.6"/>
+
+    <!-- Botanical / Ankara Pattern Motifs (Olive & Orange Leaves) -->
+    <path d="M 195 286 C 188 280, 202 276, 208 282 C 214 288, 202 293, 195 286 Z" fill="#4D7C0F"/>
+    <circle cx="201" cy="284" r="2" fill="#EA580C"/>
+
+    <path d="M 230 285 C 222 279, 236 275, 243 281 C 250 287, 238 292, 230 285 Z" fill="#4D7C0F"/>
+    <circle cx="236" cy="283" r="2" fill="#0000FE"/>
+
+    <path d="M 272 286 C 265 280, 278 276, 285 282 C 292 288, 280 293, 272 286 Z" fill="#4D7C0F"/>
+    <circle cx="278" cy="284" r="2.2" fill="#EA580C"/>
+
+    <path d="M 314 288 C 306 282, 320 278, 326 284 C 332 290, 320 295, 314 288 Z" fill="#4D7C0F"/>
+    <circle cx="320" cy="286" r="2" fill="#0000FE"/>
+
+    <path d="M 352 288 C 345 282, 358 278, 364 284 C 370 290, 358 295, 352 288 Z" fill="#4D7C0F"/>
+    <circle cx="358" cy="286" r="2" fill="#EA580C"/>
+
+    <!-- Fresh Stitched Seam Line (Studio Orange Dashed Line trailing straight from needle) -->
+    <line x1="180" y1="277.5" x2="255.5" y2="277.5" stroke="#FF5A1F" stroke-width="1.8" stroke-dasharray="3.5 2"/>
+
+    <!-- Fabric Front Edge Drop Shadow -->
+    <rect x="163" y="305" width="208" height="4" fill="#642C0A" opacity="0.35"/>
+  </g>
+
+  <!-- ==================== 5. THE TAILOR (PROPORTIONATE 2D FLAT REALISTIC ARTISAN) ==================== -->
+  <g id="artisan-tailor">
+
+    <!-- 1. BACK BODY & LAT SHADOWS (Seated forward-leaning posture) -->
+    <path d="M 340 285
+             C 334 238, 344 200, 370 172
+             L 412 166
+             C 446 176, 474 216, 476 285
+             Z"
+          fill="url(#brandShirt)"/>
+
+    <!-- Shirt Planar Shading & Volume -->
+    <path d="M 372 170 C 396 166, 436 176, 456 200 L 440 208 C 422 190, 394 182, 374 182 Z" fill="url(#shirtHighlight)" opacity="0.7"/>
+    <path d="M 448 202 C 466 228, 472 254, 476 285 L 428 285 C 448 256, 452 228, 452 202 Z" fill="#000062" opacity="0.55"/>
+    <path d="M 356 212 Q 369 230, 359 254 L 349 248 Q 357 228, 349 214 Z" fill="#000055" opacity="0.45"/>
+    <path d="M 388 224 Q 402 242, 394 264 L 384 258 Q 390 240, 380 228 Z" fill="#000055" opacity="0.4"/>
+
+    <!-- 2. NECK & TRAPEZIUS (Drawn BEFORE the collar and head so seams overlap cleanly) -->
+    <path d="M 364 174
+             L 354 144
+             L 380 140
+             L 408 168
+             Z"
+          fill="url(#skinMid)"/>
+    <path d="M 354 144 L 372 174 L 364 175 L 352 144 Z" fill="url(#skinShadow)"/>
+
+    <!-- 3. SHIRT COLLAR & CHEST OVERLAY -->
+    <!-- Collar cleanly caps the base of the neck -->
+    <path d="M 362 172 C 374 182, 398 182, 408 168 L 412 172 C 400 188, 372 188, 360 176 Z" fill="#000075"/>
+
+    <!-- 4. RIGHT ARM & SHORT SLEEVE (Supporting the fabric on table) -->
+    <!-- Right Sleeve Cap -->
+    <path d="M 412 170 C 430 176, 444 190, 446 206 L 426 210 C 424 198, 418 186, 408 174 Z" fill="url(#brandShirt)"/>
+    <!-- Right Arm & Forearm resting on table -->
+    <path d="M 436 206 C 448 226, 446 248, 428 266 L 418 258 C 432 244, 434 228, 426 212 Z" fill="url(#skinMid)"/>
+    <path d="M 428 266 C 412 271, 392 274, 372 276 L 370 282 C 392 280, 414 276, 432 271 Z" fill="url(#skinMid)"/>
+    <!-- Right Hand resting on fabric -->
+    <path d="M 372 275 C 362 275, 354 277, 350 280 C 349 281, 351 283, 355 282 C 362 281, 370 279, 374 279 Z" fill="url(#skinLight)"/>
+    <ellipse cx="372" cy="278" rx="6" ry="3.5" fill="url(#skinMid)"/>
+
+    <!-- 5. LEFT ARM & SHORT SLEEVE (The active sewing arm!) -->
+    <!-- Left Shirt Sleeve emerging from shoulder -->
+    <path d="M 348 174 C 336 186, 330 200, 328 214 L 350 220 C 354 204, 358 190, 368 176 Z" fill="url(#brandShirt)"/>
+    <!-- Sleeve Cuff Ring -->
+    <path d="M 328 214 L 350 220 L 348 223 L 326 217 Z" fill="#0000C8"/>
+
+    <!-- Upper Arm / Bicep emerging from under sleeve -->
+    <path d="M 328 217 C 322 228, 314 240, 304 248 L 322 254 C 332 242, 340 232, 348 223 Z" fill="url(#skinMid)"/>
+    <!-- Forearm tapering smoothly to wrist -->
+    <path d="M 304 248 C 292 256, 280 264, 270 274 L 276 282 C 288 272, 304 262, 322 254 Z" fill="url(#skinMid)"/>
+    <!-- Forearm Top Light Plane -->
+    <path d="M 328 217 C 314 236, 296 254, 272 274 L 278 278 C 300 256, 320 238, 340 221 Z" fill="url(#skinLight)" opacity="0.6"/>
+    <!-- Forearm Core Shadow Plane -->
+    <path d="M 304 248 L 322 254 L 276 282 L 270 274 Z" fill="url(#skinShadow)" opacity="0.55"/>
+
+    <!-- Left Hand (Articulated craftsman fingers guiding cloth into needle) -->
+    <!-- Wrist & Palm -->
+    <path d="M 270 274 C 264 270, 256 272, 254 276 C 252 280, 258 284, 266 284 L 276 282 Z" fill="url(#skinMid)"/>
+    <!-- Index Finger (Precision touch near needle) -->
+    <path d="M 254 275 C 248 275, 238 276, 234 279 C 233 280, 235 282, 239 281 C 244 280, 251 279, 256 279 Z" fill="url(#skinLight)"/>
+    <!-- Middle Finger -->
+    <path d="M 256 279 C 250 279, 240 280, 236 283 C 235 284, 237 286, 241 285 C 246 284, 253 283, 258 283 Z" fill="url(#skinMid)"/>
+    <!-- Finger Joint Accents -->
+    <line x1="241" y1="279" x2="242" y2="281" stroke="#341306" stroke-width="0.8"/>
+    <line x1="243" y1="283" x2="244" y2="285" stroke="#341306" stroke-width="0.8"/>
+
+    <!-- 6. TAILOR'S MEASURING TAPE (Draped gracefully across chest) -->
+    <g id="measuring-tape">
+      <path d="M 368 174 C 362 195, 355 215, 356 235 C 357 248, 352 258, 346 268"
+            fill="none" stroke="#38BDF8" stroke-width="7" stroke-linecap="square"/>
+      <path d="M 368 174 C 362 195, 355 215, 356 235 C 357 248, 352 258, 346 268"
+            fill="none" stroke="#0284C7" stroke-width="1"/>
+      <!-- Millimeter Markings (White) -->
+      <line x1="358" y1="198" x2="365" y2="198" stroke="#FFFFFF" stroke-width="1.2"/>
+      <line x1="355" y1="210" x2="361" y2="210" stroke="#FFFFFF" stroke-width="1"/>
+      <line x1="352" y1="222" x2="359" y2="222" stroke="#FFFFFF" stroke-width="1.2"/>
+      <line x1="351" y1="234" x2="357" y2="234" stroke="#FFFFFF" stroke-width="1"/>
+      <line x1="350" y1="246" x2="357" y2="246" stroke="#FFFFFF" stroke-width="1.2"/>
+      <line x1="347" y1="258" x2="353" y2="258" stroke="#FFFFFF" stroke-width="1"/>
+      <!-- Brass End Clip in Studio Orange (#FF5A1F) -->
+      <rect x="342" y="267" width="8" height="3.5" rx="1" fill="#FF5A1F" stroke="#1E293B" stroke-width="0.8"/>
+    </g>
+
+    <!-- 7. HEAD & FACE (NATURAL FORWARD-TILTED 3/4 PROFILE) -->
+    <!-- Centered and tilted gracefully forward ~26° toward the hands & sewing needle -->
+    <g id="tailor-head" transform="translate(366, 126) rotate(-26)">
+      <!-- Cranium base (Natural smooth human skull) -->
+      <ellipse cx="6" cy="-14" rx="24" ry="28" fill="url(#skinMid)"/>
+      <!-- Facial contour (Forehead, nose, lips, chin, jawline) -->
+      <path d="M -16 -28
+               C -20 -18, -20 -10, -18 -4
+               L -24 6
+               C -25 9, -20 11, -17 9
+               L -18 13
+               C -18 16, -14 17, -12 16
+               L -14 20
+               C -14 24, -8 26, -4 25
+               L 10 18
+               C 16 12, 18 4, 18 -6
+               Z"
+            fill="url(#skinMid)"/>
+
+      <!-- Modern Taper Fade Haircut (Matte black charcoal texture) -->
+      <path d="M -16 -28
+               C -14 -42, 6 -46, 22 -36
+               C 34 -28, 34 -10, 26 2
+               C 22 -6, 18 -16, 8 -22
+               C -4 -28, -12 -28, -16 -28
+               Z"
+            fill="#18181B"/>
+      <!-- Soft fade gradient on temple and nape -->
+      <path d="M 18 -8 C 24 -2, 22 8, 14 14 L 8 10 C 14 4, 16 -2, 14 -8 Z" fill="#27272A" opacity="0.75"/>
+
+      <!-- Facial Lighting Planes (Flat Realism) -->
+      <!-- Forehead & Brow Highlight -->
+      <path d="M -15 -24 C -12 -32, 2 -34, 12 -28 L 8 -20 C 0 -24, -10 -22, -15 -24 Z" fill="url(#skinLight)" opacity="0.7"/>
+      <!-- Cheekbone Highlight Plane -->
+      <path d="M -12 -6 C -2 -10, 8 -6, 12 2 L 4 6 C -2 2, -8 0, -12 -6 Z" fill="url(#skinLight)" opacity="0.65"/>
+
+      <!-- Focused Eye Looking Downward at Hands -->
+      <!-- Brow -->
+      <path d="M -19 -16 Q -12 -19, -4 -16 Q -12 -17, -19 -16 Z" fill="#18181B"/>
+      <!-- Almond eye shape tilted downward -->
+      <path d="M -18 -12 Q -12 -16, -6 -12 Q -12 -9, -18 -12 Z" fill="#F8FAFC"/>
+      <!-- Dark Iris focused downward -->
+      <circle cx="-13" cy="-11" r="1.8" fill="#18181B"/>
+      <circle cx="-13.6" cy="-11.6" r="0.6" fill="#FFFFFF"/>
+      <path d="M -19 -12 Q -12 -16, -6 -12" fill="none" stroke="#2B1408" stroke-width="1.3" stroke-linecap="round"/>
+
+      <!-- Refined African Nose Profile -->
+      <path d="M -24 6 L -16 6 L -19 9 Z" fill="url(#skinLight)"/>
+      <ellipse cx="-19" cy="9" rx="1.4" ry="0.9" fill="#240E05"/>
+
+      <!-- Natural Sculpted Lips -->
+      <path d="M -18 13 Q -14 12, -11 14 Q -14 15, -18 13 Z" fill="#4A2514"/>
+      <path d="M -17 15 Q -13 18, -10 16" fill="none" stroke="#7A3D22" stroke-width="1.1"/>
+
+      <!-- Ear with Cartilage Planes -->
+      <g id="ear" transform="translate(12, -8)">
+        <path d="M 0 0 C 6 -3, 10 4, 7 12 C 4 15, 0 13, 1 6 Z" fill="url(#skinMid)"/>
+        <path d="M 2 2 C 5 1, 7 5, 4 9" fill="none" stroke="#341306" stroke-width="1.2"/>
+        <circle cx="3" cy="11" r="1.8" fill="url(#skinLight)"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== 6. FOREGROUND ACCESSORIES ==================== -->
+  <!-- Professional Heavy Tailor's Shears on Table Right -->
+  <g id="shears" transform="translate(475, 298) rotate(14)" filter="url(#softGlow)">
+    <!-- Chrome Blades -->
+    <polygon points="12,4 52,11 12,8" fill="url(#chromeH)"/>
+    <polygon points="12,12 52,9 12,15" fill="url(#chromeV)"/>
+    <!-- Pivot Screw (Brass/Chrome) -->
+    <circle cx="16" cy="10" r="2.5" fill="#EAB308" stroke="#334155" stroke-width="0.6"/>
+    <!-- Black Enamel Ergonomic Handles -->
+    <ellipse cx="6" cy="5" rx="6.5" ry="4.5" fill="none" stroke="#0F172A" stroke-width="2.5"/>
+    <ellipse cx="6" cy="16" rx="8" ry="5.5" fill="none" stroke="#0F172A" stroke-width="2.5"/>
+  </g>
+
+  <!-- Ceramic Pin Dish with Studio Orange Pins -->
+  <g transform="translate(445, 292)" filter="url(#softGlow)">
+    <ellipse cx="12" cy="6" rx="12" ry="5" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="0.8"/>
+    <ellipse cx="12" cy="5.5" rx="9" ry="3.5" fill="#E2E8F0"/>
+    <!-- Orange Pin Heads (#FF5A1F) -->
+    <circle cx="8" cy="5" r="1.5" fill="#FF5A1F"/>
+    <circle cx="13" cy="4.5" r="1.5" fill="#FF5A1F"/>
+    <circle cx="16" cy="6" r="1.5" fill="#FF5A1F"/>
+    <line x1="8" y1="5" x2="14" y2="7" stroke="#94A3B8" stroke-width="0.6"/>
+    <line x1="13" y1="4.5" x2="10" y2="7" stroke="#94A3B8" stroke-width="0.6"/>
+  </g>
+
+</svg>

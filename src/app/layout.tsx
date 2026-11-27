@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: "Spinning Top",
+  // Home-screen web app on iPhone (needed for admin notifications there).
+  appleWebApp: { capable: true, title: "Spinning Top", statusBarStyle: "default" },
   keywords: [
     "Spinning Top",
     "dry cleaning Nigeria",

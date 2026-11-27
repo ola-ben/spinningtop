@@ -16,6 +16,7 @@ import {
   type TeamRole,
 } from "@/lib/admin-team";
 import Busy from "@/components/Busy";
+import { toast } from "./Toast";
 import { Badge, Card, Field, PageHeader, btn, inputClass, table } from "./ui";
 
 /* /admin/team — the Owner creates roles (ticks what each may do), adds workers
@@ -52,7 +53,8 @@ export default function TeamScreen() {
     const err = await action();
     await reload();
     setBusyKey("");
-    setNotice(err ? { ok: false, text: err } : { ok: true, text: success });
+    setNotice(null);
+    toast(err ?? success, !err);
     return !err;
   }
 
@@ -265,7 +267,7 @@ export default function TeamScreen() {
           onSaved={async (name) => {
             setEditing(null);
             await reload();
-            setNotice({ ok: true, text: `Role "${name}" saved. Everyone with this role gets the change straight away.` });
+            toast(`Role "${name}" saved. Everyone with this role gets the change straight away.`);
           }}
         />
       )}

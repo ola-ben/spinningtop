@@ -4,6 +4,7 @@ import { useState } from "react";
 import { deleteZone, saveZone, useDeliveryZones, type DeliveryZone } from "@/lib/delivery";
 import { formatNaira } from "@/lib/shop-data";
 import Busy from "@/components/Busy";
+import { toast } from "./Toast";
 import { Badge, Card, Field, PageHeader, btn, inputClass, table } from "./ui";
 
 /* /admin/delivery — areas customers can choose at checkout, with the Holt
@@ -23,7 +24,8 @@ export default function DeliveryScreen() {
     const err = await action();
     await reload();
     setBusyKey("");
-    setNotice(err ? { ok: false, text: err } : { ok: true, text: success });
+    setNotice(null);
+    toast(err ?? success, !err);
     return !err;
   }
 

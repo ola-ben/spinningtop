@@ -10,6 +10,8 @@ import { useAdminOrders } from "@/lib/admin-orders";
 import { useAdminBookings } from "@/lib/admin-bookings";
 import { AdminIcon, type AdminIconName } from "./AdminIcons";
 import { PageGate } from "./AdminGuard";
+import { AdminToaster } from "./Toast";
+import NotificationBell from "./NotificationBell";
 
 type NavItem = { href: string; label: string; icon: AdminIconName; badge?: number };
 
@@ -185,6 +187,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] text-ink">
+      <AdminToaster />
       {/* Top bar — sits on the page background, items are white pills */}
       <header className="sticky top-0 z-30 bg-[#f3f4f6]/90 px-3 backdrop-blur sm:px-4 lg:px-5">
         <div className="flex h-[72px] items-center gap-2 sm:gap-3">
@@ -211,9 +214,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2 md:ml-0">
-            <button type="button" aria-label="Notifications" className={roundBtn}>
-              <AdminIcon name="bell" className="h-5 w-5" />
-            </button>
+            <NotificationBell className={roundBtn} />
             {can("settings.manage") && (
               <Link href="/admin/settings" aria-label="Help & settings" className={`${roundBtn} hidden sm:grid`}>
                 <AdminIcon name="help" className="h-5 w-5" />

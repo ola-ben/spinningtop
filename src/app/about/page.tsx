@@ -103,7 +103,7 @@ export default function AboutPage() {
             <ol className="mt-12 grid gap-px bg-paper/15 sm:grid-cols-2 lg:grid-cols-4">
               {RULE.map((r, i) => (
                 <li key={r.title} className="bg-ink p-6 sm:p-8">
-                  <span className="font-mono text-sm text-paper/50">0{i + 1}</span>
+                  <span className="font-mono text-sm text-accent">0{i + 1}</span>
                   <p className="mt-4 font-display text-xl font-semibold tracking-tight">{r.title}</p>
                   <p className="mt-2 text-sm leading-relaxed text-paper/65">{r.text}</p>
                 </li>

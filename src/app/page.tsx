@@ -191,7 +191,7 @@ export default function Home() {
           <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-14 sm:px-6 md:gap-14 lg:grid-cols-12 lg:gap-10 lg:pb-24 lg:pt-16">
             <div className="lg:col-span-7">
               <Reveal className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-ink/70 sm:text-[11px]">
-                <span className="h-1.5 w-1.5 shrink-0 rotate-45 animate-pulse bg-brand" />
+                <span className="h-1.5 w-1.5 shrink-0 rotate-45 animate-pulse bg-accent" />
                 <span>Drycleaners &amp; Launderers</span>
               </Reveal>
 
@@ -269,7 +269,7 @@ export default function Home() {
                     image={IMAGES.hero}
                     aspect="aspect-[16/10] sm:aspect-[16/9] lg:aspect-[3/2]"
                     sizes="(min-width: 1024px) 34vw, 100vw"
-                    objectPosition="30% 55%"
+                    objectPosition="60% 45%"
                     priority
                   />
                 </div>
@@ -279,7 +279,7 @@ export default function Home() {
                   <ol className="mt-5 divide-y divide-paper/15 lg:mt-3">
                     {["Inspect first.", "Explain scope.", "Confirm price.", "Check the result."].map((line, i) => (
                       <li key={line} className="grid grid-cols-[auto_1fr] items-baseline gap-5 py-4 first:pt-0 last:pb-0 sm:py-3 lg:gap-4 lg:py-2">
-                        <span className="font-mono text-sm text-paper/55 lg:text-xs">0{i + 1}</span>
+                        <span className="font-mono text-sm text-accent lg:text-xs">0{i + 1}</span>
                         <span className="font-display text-2xl font-semibold tracking-tight sm:text-[1.6rem] lg:text-xl">{line}</span>
                       </li>
                     ))}

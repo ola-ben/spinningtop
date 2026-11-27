@@ -20,6 +20,7 @@ import type { ServiceIconName } from "@/components/ServiceIcon";
 import type { AdminProduct, AdminService } from "@/lib/catalogue-rows";
 import type { Product } from "@/lib/shop-data";
 import { Badge, Card, Field, PageHeader, SettingRow, btn, inputClass } from "./ui";
+import { toast } from "./Toast";
 import Busy from "@/components/Busy";
 
 /* Admin forms, lists and switches for products, services and the shop
@@ -126,7 +127,11 @@ export function ProductForm({ product, categories }: { product?: AdminProduct; c
   const router = useRouter();
   const [state, action] = useActionState<FormState, FormData>(async (_prev, formData) => {
     const error = await saveProduct(formData, product);
-    if (error) return { error };
+    if (error) {
+      toast(error, false);
+      return { error };
+    }
+    toast(product ? `${String(formData.get("name") ?? product.name)} saved.` : "Product added.");
     router.push("/admin/products/");
     return {};
   }, {});
@@ -252,7 +257,11 @@ export function ServiceForm({ service }: { service?: AdminService }) {
   const router = useRouter();
   const [state, action] = useActionState<FormState, FormData>(async (_prev, formData) => {
     const error = await saveService(formData, service);
-    if (error) return { error };
+    if (error) {
+      toast(error, false);
+      return { error };
+    }
+    toast(service ? `${String(formData.get("name") ?? service.name)} saved.` : "Service added.");
     router.push("/admin/services/");
     return {};
   }, {});
@@ -380,8 +389,11 @@ function LiveSwitch({ label, checked, onSave }: { label: string; checked: boolea
             setOn(next);
             try {
               await onSave(next);
+              toast(`${label}: ${next ? "on" : "off"}.`);
             } catch (err) {
-              setError(err instanceof Error ? err.message : "Could not save.");
+              const msg = err instanceof Error ? err.message : "Could not save.";
+              setError(msg);
+              toast(msg, false);
             }
           });
         }}
@@ -442,8 +454,9 @@ export function DeleteButton({
           try {
             await (kind === "product" ? deleteProduct(item as AdminProduct) : deleteService(item as AdminService));
             await onDone();
+            toast(`"${item.name}" deleted.`);
           } catch (err) {
-            window.alert(err instanceof Error ? err.message : "Could not delete.");
+            toast(err instanceof Error ? err.message : "Could not delete.", false);
           }
         });
       }}

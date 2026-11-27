@@ -11,5 +11,6 @@ return [
   'from_email' => 'noreply@spinningtop.ng',
   'from_name'  => 'Spinning Top',
   'admin_email' => 'admin@spinningtop.ng', // new-order alerts; add more with commas
+  'vapid_private_key' => 'PASTE_HERE', // team push notifications (private key; the public one is in the site)
   'paystack_secret_key' => 'sk_test_PASTE_HERE', // Paystack → Settings → API Keys (sk_live_… when going live)
 ];
