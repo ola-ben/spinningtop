@@ -33,6 +33,17 @@ export function ProductsScreen() {
   const { can } = useAdminSession();
   const categories = ["All categories", ...new Set(products.map((p) => p.category))];
   const drafts = products.filter((p) => p.status === "draft").length;
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All categories");
+  const [stock, setStock] = useState("All stock");
+  const q = query.trim().toLowerCase();
+  const shown = products.filter(
+    (p) =>
+      (!q || `${p.name} ${p.size} ${p.category}`.toLowerCase().includes(q)) &&
+      (category === "All categories" || p.category === category) &&
+      (stock === "All stock" || (stock === "In stock") === p.inStock),
+  );
+  const filtering = q !== "" || category !== "All categories" || stock !== "All stock";
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,9 +52,6 @@ export function ProductsScreen() {
         description={loading ? "Loading…" : `${products.length} products in the catalogue${drafts ? ` · ${drafts} draft` : ""}`}
         actions={
           <>
-            <button type="button" className={btn.secondary}>
-              Export CSV
-            </button>
             {can("products.edit") && (
               <Link href="/admin/products/new/" className={btn.primary}>
                 + Add product
@@ -56,9 +64,22 @@ export function ProductsScreen() {
 
       <Card flush>
         <Toolbar>
-          <SearchInput placeholder="Search products" />
-          <Select label="Category" options={categories} />
-          <Select label="Stock" options={["All stock", "In stock", "Out of stock"]} />
+          <SearchInput placeholder="Search products" value={query} onChange={setQuery} />
+          <Select label="Category" options={categories} value={category} onChange={setCategory} />
+          <Select label="Stock" options={["All stock", "In stock", "Out of stock"]} value={stock} onChange={setStock} />
+          {filtering && (
+            <button
+              type="button"
+              className={btn.ghost}
+              onClick={() => {
+                setQuery("");
+                setCategory("All categories");
+                setStock("All stock");
+              }}
+            >
+              Clear
+            </button>
+          )}
         </Toolbar>
         <div className={table.wrap}>
           <table className={table.table}>
@@ -80,7 +101,14 @@ export function ProductsScreen() {
                   </td>
                 </tr>
               )}
-              {products.map((p) => (
+              {!loading && products.length > 0 && shown.length === 0 && (
+                <tr>
+                  <td colSpan={6} className={`${table.td} py-10 text-center text-ink/50`}>
+                    No products match your search.
+                  </td>
+                </tr>
+              )}
+              {shown.map((p) => (
                 <tr key={p.id} className={table.row}>
                   <td className={table.td}>
                     <div className="flex items-center gap-3">

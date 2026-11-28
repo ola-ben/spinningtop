@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import { AdminIcon, type AdminIconName } from "./AdminIcons";
 
 /* Admin UI kit — plain, server-safe building blocks shared by every tab.
@@ -220,7 +220,8 @@ export function Toolbar({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap items-center gap-2 px-5 py-4">{children}</div>;
 }
 
-export function SearchInput({ placeholder }: { placeholder: string }) {
+/* Search and Select work uncontrolled (no onChange) or controlled (value + onChange). */
+export function SearchInput({ placeholder, value, onChange }: { placeholder: string; value?: string; onChange?: (v: string) => void }) {
   return (
     <div className="relative min-w-[12rem] flex-1">
       <svg
@@ -233,16 +234,36 @@ export function SearchInput({ placeholder }: { placeholder: string }) {
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z" />
       </svg>
-      <input type="search" placeholder={placeholder} aria-label={placeholder} className={`${inputClass.replace("rounded-xl", "rounded-full")} pl-9`} />
+      <input
+        type="search"
+        placeholder={placeholder}
+        aria-label={placeholder}
+        {...(onChange ? { value: value ?? "", onChange: (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value) } : {})}
+        className={`${inputClass.replace("rounded-xl", "rounded-full")} pl-9`}
+      />
     </div>
   );
 }
 
-export function Select({ options, label, defaultValue }: { options: string[]; label: string; defaultValue?: string }) {
+export function Select({
+  options,
+  label,
+  defaultValue,
+  value,
+  onChange,
+}: {
+  options: string[];
+  label: string;
+  defaultValue?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+}) {
   return (
     <select
       aria-label={label}
-      defaultValue={defaultValue}
+      {...(onChange
+        ? { value: value ?? options[0], onChange: (e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value) }
+        : { defaultValue })}
       // Same look as inputs, but sized to its content so filters sit in a row.
       className={`${inputClass.replace("w-full ", "").replace("rounded-xl", "rounded-full")} w-auto cursor-pointer pr-8`}
     >

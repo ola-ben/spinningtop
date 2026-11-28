@@ -12,9 +12,7 @@ type NavItem = { href: string; label: string; icon?: AccountIconName };
 
 export const ACCOUNT_NAV: NavItem[] = [
   { href: "/account/orders", label: "Orders", icon: "orders" },
-  { href: "/account/inbox", label: "Inbox", icon: "inbox" },
   { href: "/account/reviews", label: "Pending Reviews", icon: "reviews" },
-  { href: "/account/vouchers", label: "Vouchers", icon: "voucher" },
   { href: "/account/wishlist", label: "Wishlist", icon: "heart" },
   { href: "/account/recently-viewed", label: "Recently Viewed", icon: "history" },
 ];
@@ -167,6 +165,8 @@ function MobileMenu({ name, email }: { name: string; email: string }) {
 }
 
 function SignedOut() {
+  // Come back to this page after signing in (e.g. the "Rate your products" email link).
+  const here = usePathname();
   return (
     <div className="w-full px-4 py-12">
       <div className="mx-auto max-w-md rounded-2xl bg-paper p-8 text-center shadow-sm">
@@ -174,9 +174,9 @@ function SignedOut() {
           <AccountIcon name="user" className="h-7 w-7" />
         </span>
         <h1 className="mt-4 font-display text-xl font-semibold tracking-tight">Sign in to your account</h1>
-        <p className="mt-1.5 text-sm text-ink/55">See your orders, messages and saved items.</p>
+        <p className="mt-1.5 text-sm text-ink/55">See your orders and saved items.</p>
         <Link
-          href="/login"
+          href={`/login/?next=${encodeURIComponent(here)}`}
           className="mt-6 inline-flex w-full justify-center rounded-full bg-brand py-3 text-sm font-bold text-paper transition-colors hover:bg-brand-deep"
         >
           Sign in

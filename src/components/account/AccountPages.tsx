@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import AddToCart from "@/components/shop/AddToCart";
-import { DEMO_MESSAGES, DEMO_ORDERS, DEMO_VOUCHERS } from "@/lib/account-demo";
+import { myReviewedKeys, reviewKey, submitReview } from "@/lib/reviews";
 import { PAY_WITHIN_MINUTES, cancelOrder, formatOrderDate, listOrders, startPayment, verifyPayment, type Order } from "@/lib/order-data";
 import { STATUS_HELP, type OrderStatus } from "@/lib/orders";
 import { useRecentlyViewed, clearViewed } from "@/lib/recent-store";
@@ -17,9 +17,9 @@ import { AccountIcon, type AccountIconName } from "./AccountIcons";
 import Busy from "@/components/Busy";
 
 /* The pages inside /account. Profile, address and
-   close account are saved in Supabase (src/lib/user-store.ts). Orders, inbox,
-   reviews and vouchers come from account-demo.ts (empty until orders are
-   built in Phase 3); wishlist and recently viewed are stored in this browser. */
+   close account are saved in Supabase (src/lib/user-store.ts); orders and
+   reviews too (order-data.ts, reviews.ts);
+   wishlist and recently viewed are stored in this browser. */
 
 const byId = (id: string) => PRODUCTS.find((p) => p.id === id);
 
@@ -397,47 +397,25 @@ export function AccountOrders() {
   );
 }
 
-/* ── Inbox ────────────────────────────────────────────────────────────── */
-
-export function AccountInbox() {
-  return (
-    <AccountPanel title="Inbox Messages">
-      <ul className="flex flex-col gap-3">
-        {DEMO_MESSAGES.map((m) => {
-          const p = byId(m.productId);
-          return (
-            <li key={m.id} className="rounded-md border border-ink/10 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs text-ink/55">{formatDate(m.date)}</p>
-                <Link href="/account/orders" className={linkBtn}>
-                  See details
-                </Link>
-              </div>
-              <p className="mt-2 font-display text-base font-semibold">{m.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-ink/65">{m.body}</p>
-              {p && (
-                <Link href={`/shop/${p.id}`} className="mt-3 flex max-w-md items-center gap-3 rounded-md border border-ink/10 p-2 hover:border-ink/25">
-                  <Thumb product={p} size="h-14 w-14" />
-                  <span className="text-sm">{p.name}</span>
-                </Link>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </AccountPanel>
-  );
-}
-
 /* ── Pending reviews ──────────────────────────────────────────────────── */
 
-function ReviewForm({ onDone }: { onDone: () => void }) {
+function ReviewForm({ orderId, productId, onDone }: { orderId: string; productId: string; onDone: () => void }) {
   const [stars, setStars] = useState(0);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        if (stars) onDone();
+        if (!stars || busy) return;
+        setBusy(true);
+        setError("");
+        const err = await submitReview({ orderId, productId, rating: stars, title, body });
+        setBusy(false);
+        if (err) setError(err);
+        else onDone();
       }}
       className="mt-4 flex flex-col gap-3 border-t border-ink/10 pt-4"
     >
@@ -456,39 +434,98 @@ function ReviewForm({ onDone }: { onDone: () => void }) {
           </button>
         ))}
       </div>
-      <input placeholder="Review title (optional)" className={input} />
-      <textarea rows={3} placeholder="What did you like or dislike?" className={`${input} resize-none`} />
+      <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Review title (optional)" className={input} />
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        maxLength={2000}
+        rows={3}
+        placeholder="What did you like or dislike?"
+        className={`${input} resize-none`}
+      />
+      {error && (
+        <p role="alert" className="text-sm text-red-700">
+          {error}
+        </p>
+      )}
       <div>
-        <button type="submit" disabled={!stars} className={primaryBtn}>
-          Submit review
+        <button type="submit" disabled={!stars || busy} className={primaryBtn}>
+          {busy ? <Busy text="Sending" /> : "Submit review"}
         </button>
       </div>
     </form>
   );
 }
 
+const deliveredOn = (o: Order) => [...o.history].reverse().find((h) => h.status === "Delivered")?.at ?? o.createdAt;
+
 export function AccountReviews() {
-  const delivered = DEMO_ORDERS.filter((o) => o.status === "Delivered").flatMap((o) =>
-    o.items.map((i) => ({ key: `${o.id}-${i.productId}`, order: o, product: byId(i.productId) })),
-  );
-  const [done, setDone] = useState<string[]>([]);
+  const me = useUser();
+  const [orders, setOrders] = useState<Order[] | null>(null);
+  const [reviewed, setReviewed] = useState<Set<string>>(new Set());
+  const [error, setError] = useState("");
+  const [thanks, setThanks] = useState(false);
   const [rating, setRating] = useState<string | null>(null);
-  const pending = delivered.filter((d) => !done.includes(d.key));
+
+  useEffect(() => {
+    if (!me) return;
+    let active = true;
+    Promise.all([listOrders(), myReviewedKeys()])
+      .then(([list, keys]) => {
+        if (!active) return;
+        setOrders(list.filter((o) => o.userId === me.id && o.status === "Delivered"));
+        setReviewed(keys);
+      })
+      .catch((err) => active && setError(err instanceof Error ? err.message : "Could not load your orders."));
+    return () => {
+      active = false;
+    };
+  }, [me]);
+
+  // One row per product per delivered order, minus the ones already reviewed.
+  const seen = new Set<string>();
+  const pending = (orders ?? []).flatMap((o) =>
+    o.items.flatMap((i) => {
+      if (!i.productId) return [];
+      const key = reviewKey(o.id, i.productId);
+      if (reviewed.has(key) || seen.has(key)) return [];
+      seen.add(key);
+      return [{ key, order: o, item: i, productId: i.productId }];
+    }),
+  );
 
   return (
     <AccountPanel title={`Pending Reviews (${pending.length})`}>
-      {done.length > 0 && (
-        <p className="mb-3 rounded-md bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">Thanks — your review has been submitted.</p>
+      {thanks && (
+        <p className="mb-3 rounded-md bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+          Thanks — your review has been sent. It will show on the product page once approved.
+        </p>
       )}
-      {pending.length ? (
+      {error && (
+        <p role="alert" className="mb-3 rounded-md bg-red-50 px-4 py-2.5 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      {!orders && !error ? (
+        <p className="py-14 text-center text-sm text-ink/50">
+          <Busy text="Loading" />
+        </p>
+      ) : pending.length ? (
         <ul className="flex flex-col gap-3">
           {pending.map((d) => (
             <li key={d.key} className="rounded-md border border-ink/10 p-3 sm:p-4">
               <div className="flex gap-3 sm:gap-4">
-                <Thumb product={d.product} />
+                <span className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-md bg-ink/[0.04] sm:h-24 sm:w-24">
+                  {(d.item.image ?? byId(d.productId)?.image?.src) && (
+                    <Image src={(d.item.image ?? byId(d.productId)?.image?.src) as string} alt={d.item.name} fill sizes="96px" className="object-cover" />
+                  )}
+                </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm sm:text-[15px]">{d.product?.name}</p>
+                    <p className="text-sm sm:text-[15px]">
+                      {d.item.name}
+                      {d.item.size && <span className="text-ink/55"> · {d.item.size}</span>}
+                    </p>
                     {rating !== d.key && (
                       <button type="button" onClick={() => setRating(d.key)} className={`${linkBtn} hidden shrink-0 sm:block`}>
                         Rate this product
@@ -496,7 +533,7 @@ export function AccountReviews() {
                     )}
                   </div>
                   <p className="mt-1 text-xs text-ink/70">Order nº: {d.order.id}</p>
-                  <p className="text-xs text-emerald-700">Delivered on {formatDate(d.order.date)}</p>
+                  <p className="text-xs text-emerald-700">Delivered on {formatDate(deliveredOn(d.order))}</p>
                   {rating !== d.key && (
                     <button type="button" onClick={() => setRating(d.key)} className={`${linkBtn} mt-2 sm:hidden`}>
                       Rate this product
@@ -506,9 +543,12 @@ export function AccountReviews() {
               </div>
               {rating === d.key && (
                 <ReviewForm
+                  orderId={d.order.id}
+                  productId={d.productId}
                   onDone={() => {
-                    setDone((x) => [...x, d.key]);
+                    setReviewed((s) => new Set(s).add(d.key));
                     setRating(null);
+                    setThanks(true);
                   }}
                 />
               )}
@@ -517,63 +557,6 @@ export function AccountReviews() {
         </ul>
       ) : (
         <Empty icon="reviews" title="No pending reviews" text="Products from delivered orders will appear here for you to rate." />
-      )}
-    </AccountPanel>
-  );
-}
-
-/* ── Vouchers ─────────────────────────────────────────────────────────── */
-
-export function AccountVouchers() {
-  const [tab, setTab] = useState<"active" | "inactive">("active");
-  const [copied, setCopied] = useState("");
-  const active = DEMO_VOUCHERS.filter((v) => !v.used);
-  const inactive = DEMO_VOUCHERS.filter((v) => v.used);
-  const list = tab === "active" ? active : inactive;
-
-  return (
-    <AccountPanel title="Vouchers">
-      <Tabs
-        value={tab}
-        onChange={setTab}
-        tabs={[
-          { id: "active", label: `Active (${active.length})` },
-          { id: "inactive", label: `Used/Expired (${inactive.length})` },
-        ]}
-      />
-      {list.length ? (
-        <ul className="grid gap-3 md:grid-cols-2">
-          {list.map((v) => (
-            <li key={v.code} className={`flex overflow-hidden rounded-md border border-ink/10 ${v.used ? "opacity-60" : ""}`}>
-              <div className="grid w-24 shrink-0 place-items-center bg-brand px-2 text-center font-display text-lg font-semibold leading-tight text-paper">
-                {v.title}
-              </div>
-              <div className="min-w-0 flex-1 p-3.5">
-                <p className="text-sm">{v.detail}</p>
-                <p className="mt-1 text-xs text-ink/55">
-                  {v.used ? "Used" : `Valid until ${formatDate(v.expires)}`}
-                </p>
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <code className="rounded border border-dashed border-ink/25 px-2 py-1 text-xs font-semibold">{v.code}</code>
-                  {!v.used && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard?.writeText(v.code).catch(() => {});
-                        setCopied(v.code);
-                      }}
-                      className={linkBtn}
-                    >
-                      {copied === v.code ? "Copied ✓" : "Copy code"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Empty icon="voucher" title="No vouchers here" text="Vouchers you receive will show up here." />
       )}
     </AccountPanel>
   );

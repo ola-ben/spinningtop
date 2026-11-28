@@ -11,6 +11,7 @@ import { formatNaira, type Product } from "@/lib/shop-data";
 import ShopChrome from "./ShopChrome";
 import AddToCart from "./AddToCart";
 import ProductRail from "./ProductRail";
+import ProductReviews from "./ProductReviews";
 import WishlistButton from "./WishlistButton";
 
 /* /shop/[id] — product details: photo, price, add to cart, then the
@@ -120,6 +121,8 @@ export default function ProductView({
               <Row label="Category">{p.category}</Row>
             </dl>
           </section>
+
+          <ProductReviews productId={p.id} />
 
           {/* Related — scrolls left and right */}
           {related.length > 0 && <ProductRail title="You may also need" products={related} />}

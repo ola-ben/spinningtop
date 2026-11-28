@@ -1,0 +1,2862 @@
+
+FORMAT: 1A
+HOST: https://staging-api-test.kwik.delivery/
+
+
+# KWIK API DOCUMENTATION
+The purpose of this document is to describe how the KWIK Platform shall expose its service to third
+parties via an API.
+    
+
+### Data Types & Response Format
+
+The API we have follows all the following DATATYPES and Response Formats.
+
+- Throughout the api the date format we recommend is YYYY-MM-DD HH:MM:SS. Explore http://gr2m.github.io/moment-parseformat/ for more formats.
+- The response format will be JSON having status, message and data key.
+        
+        {
+            "message": "Successful",
+            "status": 200,
+            "data": {}
+        }
+
+### Error Codes
+
+When something is wrong with a request, the API will respond with a non-`200` status code in the response. To help you better understand the problem, where possible, the API overloads a number of different error codes so your application logic has as much visibility as possible into what has gone wrong.
+
+ `100`  -- PARAMETER_MISSING <br>
+ `101`  -- INVALID_KEY <br>
+ `200`  -- ACTION_COMPLETE <br>
+ `201`  -- SHOW_ERROR_MESSAGE <br>
+ `404`  -- ERROR_IN_EXECUTION <br>
+
+
+
+### Task Statuses
+
+Below mentioned are the values of the `job_status` parameters of the respective Task Status:
+
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td style="padding-left: 0;" colspan="1"><strong>Status</strong><td style="padding-left: 0;" colspan="1"><strong>Value </strong></td><td style="padding-left: 0;" colspan="1"><strong>Description </strong></td></tr>
+<tr><td style="padding-left: 0;" >UPCOMING</td><td > <code>0</code></td><td>The task has been assigned to a agent.</td></tr>
+<tr><td style="padding-left: 0;" >STARTED</td><td><code>1</code></td><td>The task has been started and the agent is on the way. </td></tr>
+<tr><td style="padding-left: 0;" >ENDED</td><td><code>2</code></td><td>The task has been completed successfully </td></tr>
+<tr><td style="padding-left: 0;" >FAILED</td><td><code>3</code></td><td>The task has been completed unsuccessfully </td></tr>
+<tr><td style="padding-left: 0;" >ARRIVED</td><td><code>4</code></td><td>The task is being performed and the agent has reached the destination.</td></tr>
+<tr><td style="padding-left: 0;" >UNASSIGNED</td><td><code>6</code></td><td>The task has not been assigned to any agent.</td></tr>
+<tr><td style="padding-left: 0;" >ACCEPTED</td><td><code>7</code></td><td> The task has been accepted by the agent which is assigned to him.</td></tr>
+<tr><td style="padding-left: 0;" >DECLINE</td><td><code>8</code></td><td> The task has been declined by the agent which is assigned to him.</td></tr>
+<tr><td style="padding-left: 0;" >CANCEL</td><td><code>9</code></td><td> The task has been cancelled by the agent which is accepted by him.</td></tr>
+<tr><td style="padding-left: 0;" >Deleted</td><td><code>10</code></td><td>When the task is deleted from the Dashboard.</td></tr>
+</table>
+
+
+If you have any questions regarding Custom Fields, you can reach out to us, with your questions on xxxxx@xxxx.xxx
+
+#  Group Login API
+
+## Vendor Login [/vendor_login]
+
+api is used to get login credentials
+
+
+### Vendor Login [POST]
+
+This API is used to get login credentials of customer.
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">domain_name</td><td>string</td><td>domain name for webapp</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">email</td><td>string</td><td></td>email of customer</tr>
+<tr><td style="padding-left: 0;" colspan="2">password</td><td>string</td><td> </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">api_login</td><td>number</td><td> </td></tr>
+</table>
+
++ Request (application/json)
+
+ {
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "email": "ishita123@yopmail.com",
+  "password": "qwerty",
+  "api_login" :1
+}
+
++ Response 200 (application/json)
+{
+  "message": "Logged in successfully.",
+  "status": 200,
+  "data": {
+    "access_token": "74b8e93c9a925b5b7e3acb40858e36ad",
+    "app_access_token": "74b8e93c9a925b5b7e3acb40858e36ad",
+    "vendor_details": {
+      "vendor_id": 291,
+      "is_created_by_admin": 1,
+      "first_name": "ishita",
+      "last_name": "kumari",
+      "email": "ishita123@yopmail.com",
+      "phone_no": "+2349087889876",
+      "description": null,
+      "user_id": 1,
+      "access_token": "74b8e93c9a925b5b7e3acb40858e36ad",
+      "password": "d8578edf8458ce06fbc5bb76a58c5ca4",
+      "company": null,
+      "address": "IT Park Rd, Mansa Devi Complex, Rajeev Vihar, Rail Vihar, Mansa Devi Temple Complex, Panchkula, Haryana, India",
+      "password_reset_token": null,
+      "is_blocked": 0,
+      "latitude": "0.0",
+      "longitude": "0.0",
+      "vendor_image": null,
+      "device_type": 3,
+      "device_token": "deviceToken",
+      "voice_token": "NoDeviceToken",
+      "app_versioncode": "102",
+      "app_access_token": "74b8e93c9a925b5b7e3acb40858e36ad",
+      "language": "English",
+      "last_login_date_time": "2019-12-10T04:19:38.000Z",
+      "creation_datetime": "2019-10-10T05:16:47.000Z",
+      "vendor_api_key": null,
+      "credits": 0,
+      "pending_amount": 0,
+      "fb_token": null,
+      "otp": 9680,
+      "is_phone_verified": 1,
+      "successful_task_count": 0,
+      "referral_code": null,
+      "referrer_id": null,
+      "reference_id": null,
+      "registration_status": 1,
+      "unverified_phone": null,
+      "customer_id": 561,
+      "cookies": 1,
+      "authentic_phone_no": "+2349087889876",
+      "favorite_fleets": null,
+      "vendor_type": 0,
+      "customer_type": 1,
+      "corporate_id": 38,
+      "is_master_admin": 1,
+      "company_name": "1mg",
+      "is_email_verified": 1,
+      "temporary_rc_number": null,
+      "default_payment_option": 0,
+      "card_id": "",
+      "paga_access_token": null,
+      "is_paga_verified": 0,
+      "paga_user_name": "",
+      "default_pickup_address": "IT Park Rd, Mansa Devi Complex, Rajeev Vihar, Rail Vihar, Mansa Devi Temple Complex, Panchkula, Haryana, India",
+      "default_pickup_latitude": "30.7252367",
+      "default_pickup_longitude": "30.7252367",
+      "freshsales_lead_id": null,
+      "freshsales_contact_id": 5005504953,
+      "is_monthly_invoice": 0,
+      "monthly_invoice_date": "0000-00-00 00:00:00",
+      "monthly_amount": 0,
+      "origin_booking": 1,
+      "freshchat_restore_id": null,
+      "email_verification_token": null
+    },
+    "fav_locations": [
+      {
+        "fav_id": 297,
+        "address": "IT Park Rd, Mansa Devi Complex, Rajeev Vihar, Rail Vihar, Mansa Devi Temple Complex, Panchkula, Haryana, India",
+        "name": null,
+        "latitude": "30.7252367",
+        "longitude": "76.8519139",
+        "vendor_id": 291,
+        "default_location": 1,
+        "landmark": null,
+        "house": null,
+        "locType": 2
+      }
+    ],
+    "app_version": [
+      
+    ],
+    "formSettings": [
+      {
+        "form_id": 2,
+        "form_type": 0,
+        "form_name": "vendor-form",
+        "is_web_app": 0,
+        "user_id": 1,
+        "domain_name": "staging-client-panel.kwik.delivery",
+        "work_flow": 0,
+        "selected_template": "pricing-template",
+        "delivery_template": "pricing-template",
+        "color": "#02bf6f",
+        "logo": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/q6U11548221726016-group5.png",
+        "fav_logo": "https://s3.ap-south-1.amazonaws.com/kwik-project/acknowledgement_images/hT6c1545226140376-faviconsavein32x32.png",
+        "font": null,
+        "nav_bar": null,
+        "login_required": 1,
+        "auto_assign": 1,
+        "signup_allow": 1,
+        "status": 0,
+        "pickup_delivery_flag": 2,
+        "autofill_required": 1,
+        "creation_datetime": "2019-01-11T09:40:15.000Z",
+        "map_theme": 0,
+        "call_tasks_as": "Tasks",
+        "force_pickup_delivery": 1,
+        "payment_methods": [
+          {
+            "enabled": 0,
+            "value": 2
+          },
+          {
+            "enabled": 0,
+            "value": 4
+          },
+          {
+            "enabled": 1,
+            "value": 8
+          },
+          {
+            "enabled": 0,
+            "value": 16
+          },
+          {
+            "enabled": 1,
+            "value": 32
+          },
+          {
+            "enabled": 0,
+            "value": 64
+          },
+          {
+            "enabled": 0,
+            "value": 128
+          },
+          {
+            "enabled": 0,
+            "value": 256
+          },
+          {
+            "enabled": 0,
+            "value": 512
+          },
+          {
+            "enabled": 0,
+            "value": 1024
+          },
+          {
+            "enabled": 0,
+            "value": 2048
+          },
+          {
+            "enabled": 0,
+            "value": 4096
+          },
+          {
+            "enabled": 0,
+            "value": 8192
+          },
+          {
+            "enabled": 0,
+            "value": 16384
+          },
+          {
+            "enabled": 0,
+            "value": 32768
+          },
+          {
+            "enabled": 0,
+            "value": 65536
+          },
+          {
+            "enabled": 1,
+            "value": 131072
+          },
+          {
+            "enabled": 1,
+            "value": 262144
+          },
+          {
+            "enabled": 1,
+            "value": 524288
+          }
+        ],
+        "payment_step": 0,
+        "is_facebook_required": 0,
+        "is_google_required": 0,
+        "is_otp_required": 1,
+        "is_promo_required": 1,
+        "is_referral_required": 1,
+        "is_destination_required": 0,
+        "show_waiting_screen": 0,
+        "waiting_screen_time": 0,
+        "show_active_task": 0,
+        "show_category": 0,
+        "is_rating_required": 0,
+        "is_scheduling_enabled": 0,
+        "schedule_offset_time": 0,
+        "is_credit_enabled": 0,
+        "show_payment_screen": 0,
+        "vertical": 0,
+        "is_nlevel": 0,
+        "is_tip_enabled": 0,
+        "tip_default_values": null,
+        "tip_type": 0,
+        "show_prefilled_data": 1,
+        "show_service_providers": 0,
+        "distance_range": 4,
+        "language": "English",
+        "is_tags_enabled": 0,
+        "show_t_n_c": 1,
+        "t_n_c": "http://kwik.delivery/terms",
+        "insurance_enabled": 0
+      }
+    ],
+    "userOptions": {
+      "template": "pricing-template",
+      "display_name": "pricing-template",
+      "template_id": "pricing-template",
+      "items": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "payment_formula": "[{{baseFare}}+[[{{job_distance}}]*{{distanceFare}}]+[[{{totalTimeTaken}}]*{{timeFare}}]]",
+      "job_formulas": [
+        "5995bedfb53022085ffa2775",
+        "5c5160b2127df31675edb7fc",
+        "5c6a54fdc5ea3a44147fb98b"
+      ],
+      "is_signup_template": 0,
+      "extras": {
+        "req_popup": [
+          "t_d",
+          "estimatedDistance"
+        ],
+        "invoice_html": "<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<p>&nbsp;</p>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n<title></title>\n<link crossorigin=\"anonymous\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" integrity=\"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u\" rel=\"stylesheet\" />\n<link crossorigin=\"anonymous\" href=\"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" integrity=\"sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN\" rel=\"stylesheet\" />\n<style type=\"text/css\">.container{ max-width: 700px; } .map{ margin-top: 15px; } .map img{ width:100%; } .map-heading{ font-size: 5vw; font-weight: 400; color: #505050; margin-bottom: 20px; } .number-section{ color: rgba(80, 80, 80, 0.51); font-size: 3vw; } .number-section span{ display: block; } .line{ background: #cccccc; height: 1px; margin-bottom: 20px; } .number-section span.number{ color: #505050; font-size: 4vw; } .number-section>div{ position: relative; } .number-section>div:not(:last-child):after{ content: ''; position: absolute; right:0; top:0; background: #cccccc; height: 30px; width: 1px; } .reating-heading{ font-size: 4.5vw; font-weight: 400; color: #505050; margin: 20px 0 10px; } .rating-section svg{ color: #f9c117; font-size: 9vw; width: 10vw; height: 10vw; } .rating-section svg path{ fill: #f9c117; } span.glyphicon { color: #f9c117; font-size: 9vw; width: 10vw; height: 10vw; } .rating-section{ margin-bottom: 5px; } .btn-submit{ background: #1592ce; color: #fff; width: 100%; min-height: 50px; margin: 10px 0px; font-weight: 300; font-size: 6vw; } .star{ background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABDCAYAAADOIRgJAAAAAXNSR0IArs4c6QAAC9JJREFUeAHtW3uMVFcZP+fOubMLu1RedWcf0AV2oWUJyD4GK6WtPGxpY0SlKZrWaJREy18aLRbsg5gUH2hb7QMr0VQTqZY2gRhqLSWgEt2ZZSkgrx26y2OfUMpDlp2de+49/r47czezuww7c2eYGUhvMrmv8/i+3/2d7/vOd84wlieHai6fI4NlX8gTcWwxRL4II6X5lGKsEvJszReZtHwQRAVLZjGmvsiUqpWBks/ng0wkQ16AYyj+pFKMk0A4PUnnfDhyDo5q9s3kTC3nnPfjd1Yp1SCDvqUfgwMEDEP9CKzRQJtNuP0pgaIs9RSdc33YVM6VECpYNkMq8zBjXAqmVWGQn5OWdQLsuZV7PPfp9Z1/z5Vs1G9Oh5WhzChrlPo993ee5vWdV2B5NtiAWGbO2ZMzcNTeiiqu2Fc4Z4ZH19Y7DBGjJ7wM23MOQ22+sbdkofM8F+ecgWOYci3iGg9+r/HarpOO8rzm0GXG+S/te5M/7TzPxTknNkcFJ0+VVv8xUlgUsul8Tk9bvPLq6Iwx8uLFk4qpcWDRvbq/e3f8+2xd54Q5hmWsAWOE4vyPQ4Ehxfntx/4H2/OcDYJiObM9WQdHNZfexrn1NVDW1D3i2UQsENroX8EeXQB7FhpNZXclKnc9n2cdHENaa2BsdUTCf+J17ccTKcfrWy8yxV+w3+fIc2XV5qhA2STJLACihFDiDj6voyUROPRcHZg8Tvb1n8AQvIUJcae3ruM/1yqf6XdZZY7JrB8iwPNC2ddHAoYU5bNPnUck9mv72jSfzrTyI7WXNeao9yvKZUR+AD7owqPN4nVdR0YSjt6rQxXj5WUDnosVw8X7vf7uYDL1MlEma8wxDbkarCmArXkjWWBIQV7T/hHj2ov2Ncuu58oKc1TTbaXS7G9lXBUIzmbzhp7/pvJlVVPZxNicq0j3eOowzWhOpb7bsllhjjTDP4BLLgQP3koVGJsx9Z0fItHzMl1LM3tzruvOHHVwSom80tcG1hQKIeby2o79br6k2l/ySdnP22CFRqXTTip9X3fmyHDf42DNKHz5rW6BIYUQSZ9BGvU3lDGkfHMqSrotmxHmqH2VYw0jXK0xPh1Gt1pxVc0Zr8ZXroYyY0m4TNgKFaj0SRVuoyGKOVcvziGueAj9hNBfi+JaSAgrxGu7z7oFJL5e0uCoQzXF7Mr5alNZUJhXQ7DpHCDgm+JeTYxvNP4aU4CLKP+md173N+Ofu702Gn3PYN61aqQ+IVcIMrYQeAAyZHEV0gu8ITt2SrLzQeCo0xWjWA+rMi2TFAYAvDoKgAIjmC9Rm8O+IoSxv6LHasnUVxzat81WGZ6u0YdKwNahdegesp4D01rwwWzQOLNCHs0TYsVjQvaEN64SNwK+78MeLFWcYSioChrTce8HLkHbMMp8gDItmPOAxhoAsEBjHTQ+3TlQMA8ukLS/VUqtmhPLNbDbwnCnoa5YlR1MJpARLO8m3fD638L/7Se4ap5UZkhjJ4zdDLsO56eBzn7cg5ZaC6dxrKkQq+s4DdTR9o192DGXFcGIAHAADV4UzGNYN2MwEWAW42eg7yIKOWyWkLs1+vreAyA14N1RXStYyOtPdt3YMCQnPdlSefncdtinBWBOl9A80L3zaBSoWBtERSyT7MDtbPxCeqFYyOd0tMde35Qn1TT1E9LqfRvMuROMaRde6Dy3nYaVfQyyLzTJM3rlu2BQLQjWpuv8s/H5XafSzXC20yHhyDsw5g3Q9YReqECGwenaQUEgTfJ0vXARUGyERZ9iSPUP1TRp2s0ARrwOqrF8ghHu32kDAyeje7R7hgJD5Qcxx2nATnBfukB0m48CHYKBbiMkppy6+X6maYjRz8m+zoJ9bdFpKH2qveNqcg9ijlOA/L0oYPfBO+2CeyqXXO6mNW3n/Y16Jk9lhPkuGxjGD+us8J5EwJCOV2WOozwFhbLL2AYGLQZQZ4VHLEbe94Dz/kY6q/3lFUZY7oTM5LIPwJ4uHilAvSY4pLxqqyyUZ8NvYXwuhS36CFm8JdnKp1D/mThoxQOJfcRybCqGUrNeJJbYSbQRGr/qsIqvw6ecCIuiCcsQA2xDLDBeWuZ7kaDPH18mn69pAZEcCwED9gdsh0PZxSSOEcGhNrBEGxFaxXIwZwuG2FhuqXeNYNn8JNrPaRF4pelYWQUwajI+7h4xrngJn3viQrJCJQUONcbr9xrCv2AFLjfDSN/CLPNvmJfdk2xH2S5HDsR2JHAoYMxuUTTxfl59/FIqciQNDjXK+Rum7v/OI7h4DQAV49F2MGhxKh1moyx2cMyWku0Cy31gzA6haQ/YGxSy0rl6RosESn4baSxRyK/05cs2NdIdyfhaMPpDW7aAbzs5FLeYjOitEjUM78XNYOmLllKPgbYRzN4fEg2d2xKVz8ZzchRcKUwJYBfhQDCUHiJ76bbvlIZVfCcARAl/9yoI8TyA8iplbpFNZcviy2TzOtJUMo8cRRQY/qbtQNIAhmR3DY6juO7v+S6uN0MonZnWIud51s9K+ww5CnjUf4mG21eQA0lXhrTBiQrAbUEsjR9MVyC39QGKs1CIbT+7pNt24utlBhxuZ9KQVBsQML6PrFwLrjvgUFYvI0fa4Ch4LiRP7yBphFZ4KCNSuWiEMpc0vUEUP45Svy6aGFYlbXBY86apEGgUYh9slcWGo1wenNnswRQnI+xJGxysY9mCICZwaJ0zeAZkMJGrycCRNjjYiu8IkrMh5eBgxT4QlmEcmZxXrs7pg8OigsDu5J45nqhDAIPyAxx8ElsQS+TOUzm0EIUeh70zKYJ3nrs9p8Uc1VSnYwUUa+bM0hVPahubW0GTqUcJLMjSCWCK2AFfZTJ1rlUmLXCYap9BkTF+rfafOq7VU/be2ewx+9MfWmmBY8aG1ICXcAmA2ldRHQn4XjcaS96JNJbWu2wmWi1m+zCVSNvupAUOGFNjSxSLL1JVipLeSH28KiPGYWTrHoZCn2PMCiLlsEXtLbUDy1Tb5FrUMeQcHORl7a+TKnNoA6QR9P1Chs0Q2lgZA3gTItyf4dcHm/FlKa2DYNPvKDmeCkCWM8eKyZZK3aFl02NOjLoezhwvMbT9Qfe0WEibj7DpsRXx0fdodyki6z8Lrz7T6+9Zqc/rXi08BdM0zl/BopEFNn1DStViBEpfoM0OgxpLcKOPnnAYRhmTTw57eG9afw137e5ia1qXIaOJ3EnRtVIEseWdVSj7BFgxgfQCQ7YL7lnL/R3v0/3Qw141UP3rIOBXMXyBF+8FmM8LMWrDSEnySKOvlZazdaHNTGXP81AZXDPHOGMilmAa9jq1JAKGvpwMlK6UZ/qOA5QNBAxA+SfXPHeBJQ8mAoaE5A2nWsGmR7FveQ4A2oq6Rcpia2Uk3Ar2rcbQHD1UGecezLEDUtPClpo0DtfgaHIgRB8WGUMRLoMlK4zAkSOWsl6FcSzH8NmnafwBgHK33tC5J1mZaRORPq9nGfOwTwPYnfasm6mfYHJ5HDbpMYq1hrcVDUgBZloeyzU4iD9jxnhwZCybfA/C2+yzLLYZQlcBlGMYEw/rDV11oqH77eGKJPfEW9/TCGAXgXVLMMSCYG0pbNJLhtlxTAZLH6XUidMSmBa1gTEZneepngcaTLUiykfB0aLgwGjebQRK9lim+ivezaEUhqaxb+kNC2qQa/4L5Zxd9DGsCli3A39r9GtM+xIGH/52raZYlvUHI7jxgJPD9gjNZnO67ty1QQalT+HLTcK/5VfA7nwdQ+l+0gQgnIWreFYfW/QKFtH6h2mXwQfEFrNp4yNg6TqAVElNo/8AbM46eEN7JUSMH1PkVg5X4NB2McPsHbSsioYuQbINWFd/LmsLaDGgsa/Pa1w5txLLMvQ/9UFbgnWOvxQk8Iix6glProaVtMIDXoCCNvx+Lor1KaD7j7MNDGlGa1Pehu6XsNlxGlizBvKcdzTGH+BcG2VX4FAyCUIY8D4bha5XwVA+nsyWDkfg63WmyS+WitYLbyF2VGjrMcR6M5X4SlpmWv69EfYK2v/YCfqWJ63YkIL/B/CyEuvvl58dAAAAAElFTkSuQmCC'); background-size: 100%; display: inline-block; width: 8vw; height: 8vw; background-repeat: no-repeat; line-height:16px; margin: 0 1%; cursor: pointer; zoom:1; } .fullStar{ background-size: 100%; } .stars{ overflow: hidden; } .tmp_es{ background-image:url('data:image/png;base64,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'); } .tmp_fs{ background-image:url('data:image/png;base64,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'); } @media all and (min-width: 768px) { .map-heading{ font-size: 35px; } .number-section{ font-size: 20px; } .number-section span.number{ font-size: 25px; } .reating-heading { font-size: 30px; } .rating-section i { font-size: 50px; } .btn-submit{ font-size: 40px; } }\n</style>\n<div class=\"container\">\n<div class=\"row\">&nbsp;\n<h3 class=\"col-xs-12 map\" style=\"text-align: center;\">Invoice&nbsp;</h3>\n\n<div class=\"col-xs-12\">\n<div class=\"line\"><span>Total Amount</span><span class=\"number\">&nbsp; :&nbsp;<span style=\"font-size: 14px; display: inline !important;\">[{{total_amount}}]</span></span></div>\n</div>\n</div>\n</div>\n"
+      }
+    },
+    "deliveryOptions": {
+      "template": "pricing-template",
+      "display_name": "pricing-template",
+      "template_id": "pricing-template",
+      "items": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "payment_formula": "[{{baseFare}}+[[{{job_distance}}]*{{distanceFare}}]+[[{{totalTimeTaken}}]*{{timeFare}}]]",
+      "job_formulas": [
+        "5995bedfb53022085ffa2775",
+        "5c5160b2127df31675edb7fc",
+        "5c6a54fdc5ea3a44147fb98b"
+      ],
+      "is_signup_template": 0,
+      "extras": {
+        "req_popup": [
+          "t_d",
+          "estimatedDistance"
+        ],
+        "invoice_html": "<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<div aria-disabled=\"false\" aria-invalid=\"false\" class=\"mrn-top-field ng-pristine ng-untouched ng-valid\" contenteditable=\"true\" data-parsley-maxlength=\"160\" focus-me=\"\" ng-disabled=\"disableField\" ng-model=\"template_Object['extras']['invoice_html']\">\n<p>&nbsp;</p>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n<title></title>\n<link crossorigin=\"anonymous\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" integrity=\"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u\" rel=\"stylesheet\" />\n<link crossorigin=\"anonymous\" href=\"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" integrity=\"sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN\" rel=\"stylesheet\" />\n<style type=\"text/css\">.container{ max-width: 700px; } .map{ margin-top: 15px; } .map img{ width:100%; } .map-heading{ font-size: 5vw; font-weight: 400; color: #505050; margin-bottom: 20px; } .number-section{ color: rgba(80, 80, 80, 0.51); font-size: 3vw; } .number-section span{ display: block; } .line{ background: #cccccc; height: 1px; margin-bottom: 20px; } .number-section span.number{ color: #505050; font-size: 4vw; } .number-section>div{ position: relative; } .number-section>div:not(:last-child):after{ content: ''; position: absolute; right:0; top:0; background: #cccccc; height: 30px; width: 1px; } .reating-heading{ font-size: 4.5vw; font-weight: 400; color: #505050; margin: 20px 0 10px; } .rating-section svg{ color: #f9c117; font-size: 9vw; width: 10vw; height: 10vw; } .rating-section svg path{ fill: #f9c117; } span.glyphicon { color: #f9c117; font-size: 9vw; width: 10vw; height: 10vw; } .rating-section{ margin-bottom: 5px; } .btn-submit{ background: #1592ce; color: #fff; width: 100%; min-height: 50px; margin: 10px 0px; font-weight: 300; font-size: 6vw; } .star{ background-image:url('data:image/png;base64,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'); background-size: 100%; display: inline-block; width: 8vw; height: 8vw; background-repeat: no-repeat; line-height:16px; margin: 0 1%; cursor: pointer; zoom:1; } .fullStar{ background-size: 100%; } .stars{ overflow: hidden; } .tmp_es{ background-image:url('data:image/png;base64,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'); } .tmp_fs{ background-image:url('data:image/png;base64,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'); } @media all and (min-width: 768px) { .map-heading{ font-size: 35px; } .number-section{ font-size: 20px; } .number-section span.number{ font-size: 25px; } .reating-heading { font-size: 30px; } .rating-section i { font-size: 50px; } .btn-submit{ font-size: 40px; } }\n</style>\n<div class=\"container\">\n<div class=\"row\">&nbsp;\n<h3 class=\"col-xs-12 map\" style=\"text-align: center;\">Invoice&nbsp;</h3>\n\n<div class=\"col-xs-12\">\n<div class=\"line\"><span>Total Amount</span><span class=\"number\">&nbsp; :&nbsp;<span style=\"font-size: 14px; display: inline !important;\">[{{total_amount}}]</span></span></div>\n</div>\n</div>\n</div>\n"
+      }
+    },
+    "active_task": {
+      
+    },
+    "categories": [
+      
+    ],
+    "vendorPromos": {
+      "promos": [
+        
+      ],
+      "coupons": [
+        
+      ]
+    },
+    "signup_template_name": "singup",
+    "signup_template_data": [
+      {
+        "label": "Vehicle_serial_number",
+        "display_name": "Vehicle serial number",
+        "data_type": "Text",
+        "app_side": "1",
+        "required": 1,
+        "value": 1,
+        "data": "",
+        "input": "",
+        "template_id": "singup"
+      },
+      {
+        "label": "Vehicle_license_plate_number",
+        "display_name": "Vehicle license plate number",
+        "data_type": "Text",
+        "app_side": "1",
+        "required": 1,
+        "value": 1,
+        "data": "",
+        "input": "",
+        "template_id": "singup"
+      },
+      {
+        "label": "gaurav",
+        "display_name": "gaurav",
+        "data_type": "Checklist",
+        "app_side": "1",
+        "required": 1,
+        "value": 1,
+        "data": "[{\"id\":0,\"value\":\"gaurav\",\"check\":false},{\"id\":1,\"value\":\"gaurav1\",\"check\":false},{\"id\":2,\"value\":\"gaurav2\",\"check\":false},{\"id\":3,\"value\":\"gaurav3\",\"check\":false}]",
+        "input": "gaurav,gaurav1,gaurav2,gaurav3",
+        "template_id": "singup"
+      }
+    ],
+    "vendor_signup_info": "",
+    "is_signup_info_editable": 0,
+    "map": {
+      
+    }
+  }
+}
+
+#   Group Vehicle APi
+
+##  Fetch Vehicle Id  [/getVehicle{?access_token,is_vendor,size}]
+
+### Fetch Vehicle Id [GET]
+
+The api is used to get vehicle details based on its size
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_vendor</td><td>number</td><td>It is fixed value set to 1</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">size</td><td>number</td><td>if the value is <code>0</code> then the vehicle type will be bike,if value is <code>1</code> then the vehicle type will be small, if value is <code>2</code> then the vehicle type will be medium,if value is <code>3</code> then the vehicle type will be large</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + is_vendor    - Enter is vendor.
+    + size         - Enter size for vehicle
+    
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": [
+    {
+      "vehicle_id": 3,
+      "user_id": 1,
+      "weight": 20,
+      "size": 3,
+      "name": "taxi",
+      "vehicle_icon": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/oN1W1596454822440-Icon.png",
+      "is_deleted": 0,
+      "dimension": "10*50*30",
+      "time_fare": 120,
+      "distance_fare": 11,
+      "waiting_fare": 111,
+      "base_fare": 100
+    },
+    {
+      "vehicle_id": 10,
+      "user_id": 1,
+      "weight": 11,
+      "size": 3,
+      "name": "car 6",
+      "vehicle_icon": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/k9eo1598425955552-group33.png",
+      "is_deleted": 0,
+      "dimension": "11*11*11",
+      "time_fare": 11,
+      "distance_fare": 11,
+      "waiting_fare": 11,
+      "base_fare": 11
+    },
+    {
+      "vehicle_id": 11,
+      "user_id": 1,
+      "weight": 12,
+      "size": 3,
+      "name": "saasda",
+      "vehicle_icon": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/fp0j1600066469595-Screenshot20200912at9.52.44AM.png",
+      "is_deleted": 0,
+      "dimension": "11*12*10",
+      "time_fare": 112,
+      "distance_fare": 23132,
+      "waiting_fare": 32312,
+      "base_fare": 21
+    }
+  ]
+}
+
+#   Group Loader APi
+
+##  Fetch Loader Amount  [/getLoaderList{?access_token,is_vendor}]
+
+### Fetch Loader Amount [GET]
+
+The api is used to get loaders count mapped with their amount
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_vendor</td><td>number</td><td>It is fixed value set to 1</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + is_vendor    - Enter is vendor.
+    
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "loaderInfo": [
+      {
+        "loader_id": 3,
+        "loaders_count": 2,
+        "loaders_amount": 70,
+        "user_id": 1
+      },
+      {
+        "loader_id": 1,
+        "loaders_count": 3,
+        "loaders_amount": 100,
+        "user_id": 1
+      },
+      {
+        "loader_id": 4,
+        "loaders_count": 4,
+        "loaders_amount": 300,
+        "user_id": 1
+      }
+    ],
+    "is_loaders_enabled": 1
+  }
+}
+
+# Group Task
+
+## Create Task [/v2/create_task_via_vendor]
+
+There are different types of tasks can be created in kwik depending on the type you have selected while creating task for e.g. - pick & delivery task, return task,recurring task etc. Please refer to appropriate API below according to your requirement.
+
+### Create a Pickup AND Delivery Task [POST]
+
+The following api is used to create order using Kwik wallet if customer wallet have funds otherwise it will create order using EOMB(End of Month Billing) 
+<br>
+Request Body Parameters:
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td colspan="1"><strong>Name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">domain_name</td><td>string</td> <td> domain of client web panel</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>access token of individual or corporate</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td> String </td><td> vendor_id for individual or corporate </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_multiple_tasks</td><td>boolean</td><td> The value is fixed 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">timezone</td><td> string </td><td>Timezone difference with UTC <br>in minutes for e.g., For PST:<code>+480</code> (PDT: <code>+420</code>),For MST <br><code>+420</code> (MDT:<code>+360</code>) for EST: <code>+300</code>(EDT:<code>+240</code>),<br> for AEST: <code>-600</code> (AEDT: <code>-660</code>), for IST: <code>-330</code>,<br> for CST: <code>+360</code> (CDT:<code>+300</code>)</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_pickup</td><td> boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_delivery</td><td>boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">layout_type</td><td> integer <br/> (Fixed)</td><td>For a Pickup and delivery task this is fixed to <code>0</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">auto_assignment</td><td>boolean</td> <td> If this value is <code>1</code> The task will be auto assigned to the members of the specific team mentioned. or if this value is <code>0</code> it will be unassigned task created. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">team_id</td><td>integer</td> <td>This is the Unique id of every team. You can get it from the dashBoard. More>teams>respective id of the team will displayed.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,email where address defines pickup address,name defines customer name,latitude defines pickup latitude,longitude defines pickup longitude,time defines pickup time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,email defines the email of the customer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,has_return_task,is_package_insured,hadVairablePayment,hadFixedPayment where address defines delivery address,name defines customer name,latitude defines delivery latitude,longitude defines delivery longitude,time defines delivery time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,has_return_task defines whether task is return task or not,is_package_insured defines whether vendor has insured package by paying insurance ,amount or not if value is <code>0</code> then task is not insured and if value is <code>1</code> task is insured </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">insurance_amount</td><td>string</td><td>is fetched from send_payment_for_task api from key name insurance_amount .</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_no_of_tasks</td><td>string</td><td> is fetched from send_payment_for_task api from key name total_no_of_tasks</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_service_charge</td><td>string </td><td>is fetched from send_payment_for_task api from key name total_service_charge</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">payment_method</td><td>string</td><td> if the value is <code>524288</code> the task payment type is EOMB,but in case there is fund in one's wallet priority will be given to Kwik wallet</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">amount</td><td> string </td><td> amount is fetched from send_payment_for_task from key per_task_cost </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_loader_required</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api ,key is_loader_required.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">loaders_amount</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api ,key loaders_amount.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">loaders_count</td><td>number</td> <td> Fetch the value from response of /send_payment_for_task api, key loaders_count. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_instruction</td><td>string</td> <td>Fetch the value from response of /send_payment_for_task api, key delivery_instruction. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vehicle_id</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api , key vehicle_id. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_images</td><td>string</td> <td> Fetch the value from response of /send_payment_for_task api ,key delivery_images. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_cod_job</td><td> number </td><td> The value is 1 for collect on delivery task </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">surge_cost</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key SURGE_PRICING </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">surge_type</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key SURGE_TYPE </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_task_otp_required</td><td> number </td><td> The value is can be 0 or 1 depends on whether one need to secure the delivery by OTP </td></tr>
+
+
+
+</table>
+
+
+ + Request (application/json)
+{
+    "domain_name": "staging-client-panel.kwik.delivery",
+    "access_token": "aeea63d6f889c67dd75155e9e5fc930e",
+    "vendor_id": 37,
+    "is_multiple_tasks": 1,
+    "fleet_id": "",
+    "latitude": 0,
+    "longitude": 0,
+    "timezone": -330,
+    "has_pickup": 1,
+    "has_delivery": 1,
+    "pickup_delivery_relationship": 0,
+    "layout_type": 0,
+    "auto_assignment": 1,
+    "team_id": "",
+    "pickups": [
+        {
+            "address": "Sector 28, Chandigarh, India",
+            "name": "Ishita",
+            "latitude": 30.7172888,
+            "longitude": 76.8035087,
+            "time": "2023-08-22 15:25:23",
+            "phone": "+919898989898",
+            "email": ""
+        }
+    ],
+    "deliveries": [
+        {
+            "address": "Sector 32, Chandigarh, India",
+            "name": "Ishita",
+            "latitude": 30.709472,
+            "longitude": 76.7743709,
+            "time": "2023-08-22T15:33:53.000Z",
+            "phone": "+919898989898",
+            "email": "",
+            "has_return_task": false,
+            "is_package_insured": 0,
+            "hadVairablePayment": 1,
+            "hadFixedPayment": 0,
+            "is_task_otp_required:0
+        }
+    ],
+    "insurance_amount": 0,
+    "total_no_of_tasks": 1,
+    "total_service_charge": 0,
+    "payment_method": 524288,
+    "amount": "1320.2",
+    "surge_cost": 0,
+    "surge_type": 0,
+    "delivery_instruction": "",
+    "loaders_amount": 0,
+    "loaders_count": 0,
+    "is_loader_required": 0,
+    "delivery_images": "",
+    "vehicle_id": 1,
+    "sareaId": "6"
+}
+
+
+
++ Response 200 (application/json)
+
+
+    + Body
+
+{
+    "message": "Successful",
+    "status": 200,
+    "data": {
+        "pickups": [
+            {
+                "job_id": 16349,
+                "job_hash": "1b5c4e18f81c9a0ff92bdbfd3b08dd7b",
+                "job_token": "1634916926788117362436",
+                "status": true,
+                "auto_assignment_data": {
+                    "job_id": 16349,
+                    "broadcast_type": 2,
+                    "expires_in": 30,
+                    "send_to_all_expires_in": 60,
+                    "offline_agents": 0,
+                    "put_agent_busy": 0,
+                    "user_id": 1,
+                    "job_pickup_latitude": 30.7172888,
+                    "job_pickup_longitude": 76.8035087,
+                    "job_pickup_datetime": "2023-08-22 15:25",
+                    "job_delivery_datetime": "0000-00-00 00:00:00",
+                    "latitude": 30.7172888,
+                    "relationship": "1634916926788117362436",
+                    "longitude": 76.8035087,
+                    "has_pickup": 1,
+                    "has_delivery": 1,
+                    "accept_button": 1,
+                    "send_push": 1,
+                    "push_msg": "1 pickups and 1 deliveries are available.",
+                    "vertical": 0,
+                    "agent_workflow": 0,
+                    "team_id": 0,
+                    "job_type": 0,
+                    "job_time": "2023-08-22 15:25",
+                    "related_job_count": 2,
+                    "roundRobinConfig": {
+                        "broadcast_type": 2,
+                        "is_enabled": 1,
+                        "offline_agents": 0,
+                        "send_to_all_expires_in": 60,
+                        "expires_in": 30,
+                        "startingRadius": 10,
+                        "incRadius": 5,
+                        "radiusLimit": 10,
+                        "batchTime": 30,
+                        "acceptTime": 90,
+                        "batchSize": 50,
+                        "attemptLimit": 20,
+                        "tasks": 20,
+                        "radius": 10,
+                        "retryLimit": 3,
+                        "ride_type": 0,
+                        "put_agent_busy": 0,
+                        "jobAndFleetStatus": {},
+                        "retry": 0
+                    },
+                    "batchConfig": {
+                        "broadcast_type": 2,
+                        "is_enabled": 1,
+                        "offline_agents": 0,
+                        "send_to_all_expires_in": 60,
+                        "expires_in": 30,
+                        "startingRadius": 10,
+                        "incRadius": 5,
+                        "radiusLimit": 10,
+                        "batchTime": 30,
+                        "acceptTime": 90,
+                        "batchSize": 50,
+                        "attemptLimit": 20,
+                        "tasks": 20,
+                        "radius": 10,
+                        "retryLimit": 3,
+                        "ride_type": 0,
+                        "put_agent_busy": 0,
+                        "jobAndFleetStatus": {},
+                        "retry": 0
+                    },
+                    "agent_offline_time": 14400,
+                    "deliveries": [
+                        {
+                            "job_type": 1,
+                            "job_time": "2023-08-22 15:33:00",
+                            "job_status": 6,
+                            "customer_username": "Ishita",
+                            "job_address": "Sector 32, Chandigarh, India",
+                            "job_latitude": 30.709472,
+                            "job_longitude": 76.7743709,
+                            "job_delivery_datetime": "2023-08-22 15:33:00",
+                            "customer_phone": "+919898989898",
+                            "is_return_task": 0,
+                            "is_package_insured": 0,
+                            "insurance_amount": 0,
+                            "upto_limit": 0
+                        }
+                    ],
+                    "is_nexus": 0,
+                    "ride_type": 0,
+                    "delivery_instruction": "",
+                    "loaders_count": 0,
+                    "delivery_images": "",
+                    "sareaId": "6",
+                    "landmark": "-",
+                    "payment_method": 2097152,
+                    "created_by": 3,
+                    "order_id": 37,
+                    "customer_type": 1,
+                    "access_token": "1.0c6a29cdab0008011c15283811132d4718e6c4f322",
+                    "send_push_to_busy_fleets": 1,
+                    "is_cod_job": 0,
+                    "vehicle_id": 1,
+                    "busy_fleet_minutes": 4,
+                    "isSlaAdded": false,
+                    "team_pool_config_enabled": -1,
+                    "attempt": 0,
+                    "job_lat": 30.7172888,
+                    "job_lng": 76.8035087,
+                    "start_date": "2023-08-22T14:25:00.000Z",
+                    "start_date_origin": "2023-08-22T15:25:00.000Z",
+                    "end_date": "2023-08-22T16:25:00.000Z",
+                    "allFleets": [],
+                    "fleets_length": 0,
+                    "timeinseconds": 10
+                },
+                "order_id": 37,
+                "result_tracking_link": "https://staging-dashboard.kwik.delivery/tracking/index.html?jobID=1b5c4e18f81c9a0ff92bdbfd3b08dd7b",
+                "new_agent_task_insertion_data": []
+            }
+        ],
+        "deliveries": [
+            {
+                "job_id": 16350,
+                "job_hash": "217c904be04f0b19562086f832a87bd3",
+                "job_token": "1634916926788117362436",
+                "status": true,
+                "auto_assignment_data": 0,
+                "order_id": 37,
+                "result_tracking_link": "https://staging-dashboard.kwik.delivery/tracking/index.html?jobID=217c904be04f0b19562086f832a87bd3",
+                "new_agent_task_insertion_data": [
+                    {
+                        "job_id": 16350,
+                        "fleet_ids": [],
+                        "fleetNameAndNumber": [],
+                        "pickup_delivery_relationship": "1634916926788117362436",
+                        "job_date": "2023-08-22",
+                        "time_in_seconds": 0,
+                        "related_job_count": 2,
+                        "broadcast_type": 2,
+                        "insert_new_task": true
+                    }
+                ]
+            }
+        ],
+        "unique_order_id": "16349AH859",
+        "job_status_check_link": "https://staging-api.kwik.delivery/getJobStatus?unique_order_id=16349AH859&customer_id=37",
+        "contactUs": {
+            "email": "support@kwik.africa",
+            "phone_no": "+2348090642993"
+        },
+        "cashback": 0
+    }
+}
+
+
+### Create a Return Task [POST]
+
+This API is used to create Return Task.The api will have two objects for deliveries one for pickup to delivery address and second one from delivery address back to pickup.
+<br>
+Body Parameters :
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td colspan="1"><strong>name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">domain_name</td><td>string</td> <td> domain of client web panel</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>access token of individual or corporate</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td> String </td><td> vendor_id for individual or corporate </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_multiple_tasks</td><td>boolean</td><td> The value is fixed 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">timezone</td><td> string </td><td>Timezone difference with UTC in minutes for e.g., For PST:<code>+480</code> (PDT: <code>+420</code>),For MST <code>+420</code> (MDT:<code>+360</code>) for EST: <code>+300</code>(EDT:<code>+240</code>), for AEST: <code>-600</code> (AEDT: <code>-660</code>), for IST: <code>-330</code>, for CST: <code>+360</code> (CDT:<code>+300</code>)</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_pickup</td><td> boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_delivery</td><td>boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">layout_type</td><td> integer <br/> (Fixed)</td><td>For a Pickup and delivery task this is fixed to <code>0</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">auto_assignment</td><td>boolean</td> <td> If this value is <code>1</code> The task will be auto assigned to the members of the specific team mentioned. or if this value is <code>0</code> it will be unassigned task created. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">team_id</td><td>integer</td> <td>This is the Unique id of every team. You can get it from the dashBoard. More>teams>respective id of the team will displayed.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,email where address defines pickup address,name defines customer name,latitude defines pickup latitude,longitude defines pickup longitude,time defines pickup time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,email defines the email of the customer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries</td><td>json Array</td><td>It will have two delivery,the delivery with return task will have is_return_task equal to 1.Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,is_package_insured,hadVairablePayment,hadFixedPayment where address defines delivery address,name defines customer name,latitude defines delivery latitude,longitude defines delivery longitude,time defines delivery time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,is_package_insured defines whether vendor has insured package by paying insurance ,amount or not if value is <code>0</code> then task is not insured and if value is <code>1</code> task is insured </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">insurance_amount</td><td>string</td><td>is fetched from send_payment_for_task api from key name insurance_amount .</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_no_of_tasks</td><td>string</td><td> is fetched from send_payment_for_task api from key name total_no_of_tasks</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_service_charge</td><td>string </td><td>is fetched from send_payment_for_task api from key name total_service_charge</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">payment_method</td><td>string</td><td> if the value is <code>8</code> the task payment type is cash,if value is <code>2</code> the task payment method is stripe if value is <code>32</code> the payment method is paystack,if value is <code>131072</code> then payment method is PAGA<code>524288</code> the task payment method is end of month billing if value is </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">amount</td><td> string </td><td> amount is fetched from send_payment_for_task from key per_task_cost </td></tr>
+</table>
++ Request (application/json)
+
+           {
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "access_token": "3b6220eb66129f2fc06281a9901aecda",
+  "vendor_id": 151,
+  "is_multiple_tasks": 1,
+  "fleet_id": "",
+  "latitude": 0,
+  "longitude": 0,
+  "timezone": -330,
+  "has_pickup": 1,
+  "has_delivery": 1,
+  "pickup_delivery_relationship": 0,
+  "layout_type": 0,
+  "auto_assignment": 1,
+  "team_id": "",
+  "pickups": [
+    {
+      "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+      "name": "Corporate Grg",
+      "latitude": 30.6951827,
+      "longitude": 76.87945890000003,
+      "time": "2019-09-03 14:09:48",
+      "phone": "+919898765434",
+      "template_data": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "template_name": "pricing-template",
+      "ref_images": "",
+      "email": "co@yopmail.com"
+    }
+  ],
+  "deliveries": [
+    {
+      "address": "CDCL Building, 28B, Sector 28, Chandigarh, India",
+      "name": "Ishita",
+      "latitude": 30.7187849,
+      "longitude": 76.81037409999999,
+      "time": "2019-09-03T14:29:27.000Z",
+      "phone": "+918765434567",
+      "template_data": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "template_name": "pricing-template",
+      "ref_images": "",
+      "is_package_insured": 0,
+      "hadVairablePayment": 1,
+      "hadFixedPayment": 0
+    },
+    {
+      "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+      "name": "Corporate Grg",
+      "latitude": 30.6951827,
+      "longitude": 76.87945890000003,
+      "time": "2019-09-03T14:49:06.000Z",
+      "phone": "+919898765434",
+      "template_data": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "template_name": "pricing-template",
+      "ref_images": "",
+      "email": "co@yopmail.com",
+      "is_return_task": 1,
+      "hadVairablePayment": 1,
+      "hadFixedPayment": 0
+    }
+  ],
+  "insurance_amount": 0,
+  "total_no_of_tasks": 1,
+  "total_service_charge": 23,
+  "payment_method": 8,
+  "amount": "140.35"
+}
+
++ Response 200 (application/json)
+
+
+    + Body
+
+               {
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "pickups": [
+      {
+        "job_id": 1770,
+        "job_hash": "7f8884b1cc6d7de1cc84f10f68eec05f",
+        "job_token": "177015675000027416829",
+        "status": true,
+        "auto_assignment_data": {
+          "job_id": 1770,
+          "broadcast_type": 7,
+          "expires_in": 30,
+          "send_to_all_expires_in": 1321,
+          "offline_agents": 0,
+          "put_agent_busy": 0,
+          "user_id": 1,
+          "job_pickup_latitude": 30.6951827,
+          "job_pickup_longitude": 76.87945890000003,
+          "job_pickup_datetime": "2019-09-03 14:09",
+          "job_delivery_datetime": "0000-00-00 00:00:00",
+          "latitude": 30.6951827,
+          "relationship": "177015675000027416829",
+          "longitude": 76.87945890000003,
+          "has_pickup": 1,
+          "has_delivery": 1,
+          "accept_button": 1,
+          "send_push": 1,
+          "push_msg": "1 pickups and 2 deliveries are available.",
+          "vertical": 0,
+          "agent_workflow": 2,
+          "team_id": 0,
+          "job_type": 0,
+          "job_time": "2019-09-03 14:09",
+          "related_job_count": 3,
+          "roundRobinConfig": {
+            "broadcast_type": 7,
+            "is_enabled": 1,
+            "offline_agents": 0,
+            "send_to_all_expires_in": 1321,
+            "expires_in": 30,
+            "startingRadius": 5,
+            "incRadius": 1,
+            "radiusLimit": 10,
+            "batchTime": 30,
+            "acceptTime": 30,
+            "batchSize": 5,
+            "attemptLimit": 5,
+            "tasks": 20,
+            "radius": 10,
+            "retryLimit": 0,
+            "ride_type": 0,
+            "retry": 0
+          },
+          "batchConfig": {
+            "broadcast_type": 7,
+            "is_enabled": 1,
+            "offline_agents": 0,
+            "send_to_all_expires_in": 1321,
+            "expires_in": 30,
+            "startingRadius": 5,
+            "incRadius": 1,
+            "radiusLimit": 10,
+            "batchTime": 30,
+            "acceptTime": 30,
+            "batchSize": 5,
+            "attemptLimit": 5,
+            "tasks": 20,
+            "radius": 10,
+            "retryLimit": 0,
+            "ride_type": 0,
+            "retry": 0
+          },
+          "agent_offline_time": 7200,
+          "deliveries": [
+            {
+              "job_type": 1,
+              "job_time": "2019-09-03 14:29:00",
+              "job_status": 6,
+              "customer_username": "Ishita",
+              "job_address": "CDCL Building, 28B, Sector 28, Chandigarh, India",
+              "job_latitude": 30.7187849,
+              "job_longitude": 76.81037409999999,
+              "job_delivery_datetime": "2019-09-03 14:29:00",
+              "customer_phone": "+918765434567",
+              "is_return_task": 0,
+              "is_package_insured": 0,
+              "insurance_amount": 0,
+              "upto_limit": 0
+            },
+            {
+              "job_type": 1,
+              "job_time": "2019-09-03 14:49:00",
+              "job_status": 6,
+              "customer_username": "Corporate Grg",
+              "job_address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+              "job_latitude": 30.6951827,
+              "job_longitude": 76.87945890000003,
+              "job_delivery_datetime": "2019-09-03 14:49:00",
+              "customer_phone": "+919898765434",
+              "is_return_task": 1,
+              "is_package_insured": 0,
+              "insurance_amount": 0,
+              "upto_limit": 0
+            }
+          ],
+          "is_nexus": 0,
+          "ride_type": 0,
+          "payment_method": 8,
+          "created_by": 3,
+          "order_id": 151,
+          "customer_type": 1,
+          "access_token": "1.503d3187b84b4d411c152a3d17102d4e1ee6c1f923",
+          "send_push_to_busy_fleets": 1,
+          "busy_fleet_minutes": 1,
+          "sla_rating": 5,
+          "sla_eta_minutes": 22,
+          "isSlaAdded": true,
+          "team_pool_config_enabled": -1,
+          "attempt": 0,
+          "job_lat": 30.6951827,
+          "job_lng": 76.87945890000003,
+          "start_date": "2019-09-03T13:09:00.000Z",
+          "start_date_origin": "2019-09-03T14:09:00.000Z",
+          "end_date": "2019-09-03T15:09:00.000Z",
+          "allFleets": [
+            
+          ],
+          "fleets_length": 0,
+          "timeinseconds": 10
+        },
+        "order_id": 151,
+        "result_tracking_link": "http://dev-dashboard.kwik.capuchin.co/tracking/index.html?jobID=7f8884b1cc6d7de1cc84f10f68eec05f",
+        "new_agent_task_insertion_data": [
+          
+        ]
+      }
+    ],
+    "deliveries": [
+      {
+        "job_id": 1771,
+        "job_hash": "1601abc03f3d059459d561ea46b240a2",
+        "job_token": "177015675000027416829",
+        "status": true,
+        "auto_assignment_data": 0,
+        "order_id": 151,
+        "result_tracking_link": "http://dev-dashboard.kwik.capuchin.co/tracking/index.html?jobID=1601abc03f3d059459d561ea46b240a2",
+        "new_agent_task_insertion_data": [
+          {
+            "job_id": 1771,
+            "fleet_ids": [
+              
+            ],
+            "fleetNameAndNumber": [
+              
+            ],
+            "pickup_delivery_relationship": "177015675000027416829",
+            "job_date": "2019-09-03",
+            "time_in_seconds": 0,
+            "related_job_count": 3,
+            "broadcast_type": 7,
+            "insert_new_task": true
+          }
+        ]
+      },
+      {
+        "job_id": 1772,
+        "job_hash": "2fdc3a308c35805ce39306cf046b1539",
+        "job_token": "177015675000027416829",
+        "status": true,
+        "auto_assignment_data": 0,
+        "order_id": 151,
+        "result_tracking_link": "http://dev-dashboard.kwik.capuchin.co/tracking/index.html?jobID=2fdc3a308c35805ce39306cf046b1539",
+        "new_agent_task_insertion_data": [
+          {
+            "job_id": 1772,
+            "fleet_ids": [
+              
+            ],
+            "fleetNameAndNumber": [
+              
+            ],
+            "pickup_delivery_relationship": "177015675000027416829",
+            "job_date": "2019-09-03",
+            "time_in_seconds": 0,
+            "related_job_count": 3,
+            "broadcast_type": 7,
+            "insert_new_task": true
+          }
+        ]
+      }
+    ]
+  }
+}
+### Create a Scheduled Task [POST]
+
+This api is used to create Scheduled task.
+<br>
+Request Body Parameters :
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td colspan="1"><strong>name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">domain_name</td><td>string</td> <td> domain of client web panel</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>access token of individual or corporate</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td> String </td><td> vendor_id for individual or corporate </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_multiple_tasks</td><td>boolean</td><td> The value is fixed 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_schedule_task</td><td>boolean</td><td> The value is fixed 1 which specifies it is scheduled task</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">timezone</td><td> string </td><td>Timezone difference with UTC in minutes for e.g., For PST:<code>+480</code> (PDT: <code>+420</code>),For MST <code>+420</code> (MDT:<code>+360</code>) for EST: <code>+300</code>(EDT:<code>+240</code>), for AEST: <code>-600</code> (AEDT: <code>-660</code>), for IST: <code>-330</code>, for CST: <code>+360</code> (CDT:<code>+300</code>)</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_pickup</td><td> boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_delivery</td><td>boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">layout_type</td><td> integer <br/> (Fixed)</td><td>For a Pickup and delivery task this is fixed to <code>0</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">auto_assignment</td><td>boolean</td> <td> If this value is <code>1</code> The task will be auto assigned to the members of the specific team mentioned. or if this value is <code>0</code> it will be unassigned task created. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">team_id</td><td>integer</td> <td>This is the Unique id of every team. You can get it from the dashBoard. More>teams>respective id of the team will displayed.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,email where address defines pickup address,name defines customer name,latitude defines pickup latitude,longitude defines pickup longitude,time defines pickup time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,email defines the email of the customer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,has_return_task,is_package_insured,hadVairablePayment,hadFixedPayment where address defines delivery address,name defines customer name,latitude defines delivery latitude,longitude defines delivery longitude,time defines delivery time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,has_return_task defines whether task is return task or not,is_package_insured defines whether vendor has insured package by paying insurance ,amount or not if value is <code>0</code> then task is not insured and if value is <code>1</code> task is insured </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">insurance_amount</td><td>string</td><td>is fetched from send_payment_for_task api from key name insurance_amount .</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_no_of_tasks</td><td>string</td><td> is fetched from send_payment_for_task api from key name total_no_of_tasks</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_service_charge</td><td>string </td><td>is fetched from send_payment_for_task api from key name total_service_charge</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">payment_method</td><td>string</td><td> if the value is <code>8</code> the task payment type is cash,if value is <code>2</code> the task payment method is stripe if value is <code>32</code> the payment method is paystack,if value is <code>131072</code> then payment method is PAGA<code>524288</code> the task payment method is end of month billing if value is</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">amount</td><td> string </td><td> amount is fetched from send_payment_for_task from key per_task_cost </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_loader_required</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api ,key is_loader_required.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">loaders_amount</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api ,key loaders_amount.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">loaders_count</td><td>number</td> <td> Fetch the value from response of /send_payment_for_task api, key loaders_count. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_instruction</td><td>string</td> <td>Fetch the value from response of /send_payment_for_task api, key delivery_instruction. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vehicle_id</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api , key vehicle_id. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_images</td><td>string</td> <td> Fetch the value from response of /send_payment_for_task api ,key delivery_images. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_cod_job</td><td> number </td><td> The value is 1 for collect on delivery task </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">surge_cost</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key SURGE_PRICING </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">surge_type</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key SURGE_TYPE </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">cash_handling_charges</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key CASH_HANDLING_CHARGE </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">cash_handling_percentage</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key CASH_HANDLING_PERCENTAGE </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">net_processed_amount</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key NET_CASH_PROCEEDS </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">kwister_cash_handling_charge</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key KWISTER_CASH_HANDLING_CHARGE </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_charge_by_buyer</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key delivery_charge_by_buyer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_charge</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key DELIVERY_CHARGE </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">collect_on_delivery</td><td> number </td><td> The value is retrieved from /get_bill_breakdown api from key COLLECT_ON_DELIVERY </td></tr>
+</table>
+
+<br>
+
+Response Body Parameters : 
+<table>
+<tr><td colspan="1"><strong>Name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">message</td><td>string</td><tdThis says whether the request is successful or not></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">status</td><td>number</td><td>This should be mapped with the error codes mention in error codes section above.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">data</td><td>Object</td> <td>This gives the information about the task like pickup_tracking_link,delivery_tracing_link,job_id, job_token,
+pickup_hash, delivery_hash</td></tr>
+</table>
+
++ Request (application/json)
+
+   {
+  "domain_name": "dev-client-panel.kwik.delivery",
+  "access_token": "3d1b524d1f07dd22b60d40d3b2292d1b",
+  "vendor_id": 151,
+  "is_multiple_tasks": 1,
+  "fleet_id": "",
+  "latitude": 0,
+  "longitude": 0,
+  "timezone": -330,
+  "has_pickup": 1,
+  "has_delivery": 1,
+  "pickup_delivery_relationship": 0,
+  "layout_type": 0,
+  "auto_assignment": 1,
+  "team_id": "",
+  "is_schedule_task": "1",
+  "parcel_amount": 1000,
+  "pickups": [
+    {
+      "address": "CDCL, Madhya Marg, 28B, Sector 28B, Chandigarh, India",
+      "name": "Corporate Grg",
+      "latitude": 30.7188978,
+      "longitude": 76.8102981,
+      "time": "2020-10-29 18:08:00",
+      "phone": "+919885968596",
+      "email": "co@yopmail.com"
+    }
+  ],
+  "deliveries": [
+    {
+      "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+      "name": "cjdhdgdf",
+      "latitude": 30.6951827,
+      "longitude": 76.8794589,
+      "time": "2020-10-29T18:27:55.800Z",
+      "phone": "+919898989898",
+      "has_return_task": false,
+      "is_package_insured": 0,
+      "hadVairablePayment": 1,
+      "hadFixedPayment": 0
+    }
+  ],
+  "insurance_amount": 0,
+  "total_no_of_tasks": 1,
+  "total_service_charge": 500,
+  "payment_method": 1048576,
+  "amount": "1981.50",
+  "surge_cost": 7,
+  "surge_type": 3,
+  "is_cod_job": 1,
+  "cash_handling_charges": 20,
+  "cash_handling_percentage": 1.5,
+  "net_processed_amount": 980,
+  "kwister_cash_handling_charge": "14.67",
+  "delivery_charge_by_buyer": 1,
+  "delivery_charge": 2100,
+  "collect_on_delivery": 3100,
+  "delivery_instruction": "Hey, deliver order safely.",
+  "loaders_amount": 40,
+  "loaders_count": 4,
+  "is_loader_required": 1,
+  "delivery_images": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/h9Qh1603888385149-stripeconnect.png",
+  "vehicle_id": 4
+}
+
++ Response 200 (application/json)
+
+
+    + Body
+
+                {
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "pickups": [
+      {
+        "job_id": 1773,
+        "job_hash": "7800802954a074d7fd4bcc0fc28a2486",
+        "job_token": "177315675009495569210",
+        "status": true,
+        "auto_assignment_data": 0,
+        "order_id": 151,
+        "result_tracking_link": "http://dev-dashboard.kwik.capuchin.co/tracking/index.html?jobID=7800802954a074d7fd4bcc0fc28a2486",
+        "new_agent_task_insertion_data": [
+          
+        ]
+      }
+    ],
+    "deliveries": [
+      {
+        "job_id": 1774,
+        "job_hash": "6a586f200f1cb25eafd619faba44ea7a",
+        "job_token": "177315675009495569210",
+        "status": true,
+        "auto_assignment_data": 0,
+        "order_id": 151,
+        "result_tracking_link": "http://dev-dashboard.kwik.capuchin.co/tracking/index.html?jobID=6a586f200f1cb25eafd619faba44ea7a",
+        "new_agent_task_insertion_data": [
+          
+        ]
+      }
+    ]
+  }
+}
+
+### Create a Recurring Task [POST]
+
+This api is used to create a recurring task.
+<br>
+Request Body Parameters :
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td colspan="1"><strong>name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">domain_name</td><td>string</td> <td> domain of client web panel</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>access token of individual or corporate</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td> String </td><td> vendor_id for individual or corporate </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_multiple_tasks</td><td>boolean</td><td> The value is fixed 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">isReccuringTask</td><td> string <br/> (Fixed)</td><td>For recurring task is fixed to true</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">cycle_def</td><td> Object </td><td> specifies “0”->Sunday,”1”->Monday,”2”->Tuesday,”3”->Wednesday,“4”->Thursday,”5”->Friday,”6”->Saturday,specify 1 in front of day id on which the task is scheduled</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">cycle</td><td>integer <br/> (Fixed)</td><td>For recurring task is 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">start_date</td><td> string </td><td>start date of recurring task</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">startOn</td><td> string</td><td>start date of recurring task</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">end_date</td><td> string </td><td>end date of recurring task</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">timezone</td><td> string </td><td>Timezone difference with UTC in minutes for e.g., For PST:<code>+480</code> (PDT: <code>+420</code>),For MST <code>+420</code> (MDT:<code>+360</code>) for EST: <code>+300</code>(EDT:<code>+240</code>), for AEST: <code>-600</code> (AEDT: <code>-660</code>), for IST: <code>-330</code>, for CST: <code>+360</code> (CDT:<code>+300</code>)</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_pickup</td><td> boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_delivery</td><td>boolean <br/> (Fixed)</td><td>For a Pickup task and delivery task this is fixed to <code>1</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">layout_type</td><td> integer <br/> (Fixed)</td><td>For a Pickup and delivery task this is fixed to <code>0</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">auto_assignment</td><td>boolean</td> <td> If this value is <code>1</code> The task will be auto assigned to the members of the specific team mentioned. or if this value is <code>0</code> it will be unassigned task created. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">team_id</td><td>integer</td> <td>This is the Unique id of every team. You can get it from the dashBoard. More>teams>respective id of the team will displayed.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,email where address defines pickup address,name defines customer name,latitude defines pickup latitude,longitude defines pickup longitude,time defines pickup time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,email defines the email of the customer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries</td><td>json Array</td><td>Array of objects containing address,name,latitude,longitude,time,phone,template_data,template_name,ref_images,has_return_task,is_package_insured,hadVairablePayment,hadFixedPayment where address defines delivery address,name defines customer name,latitude defines delivery latitude,longitude defines delivery longitude,time defines delivery time,phone defines customer phone,template_data defines an array of object containing label and data where label defines the custom field name and data will be his value,ref_images defines an array of strings containing links of images,has_return_task defines whether task is return task or not,is_package_insured defines whether vendor has insured package by paying insurance ,amount or not if value is <code>0</code> then task is not insured and if value is <code>1</code> task is insured </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">insurance_amount</td><td>string</td><td>is fetched from send_payment_for_task api from key name insurance_amount .</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_no_of_tasks</td><td>string</td><td> is fetched from send_payment_for_task api from key name total_no_of_tasks</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">total_service_charge</td><td>string </td><td>is fetched from send_payment_for_task api from key name total_service_charge</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">payment_method</td><td>string</td><td> if the value is <code>8</code> the task payment type is cash,if value is <code>2</code> the task payment method is stripe if value is <code>32</code> the payment method is paystack,if value is <code>131072</code> then payment method is PAGA<code>524288</code> the task payment method is end of month billing if value is</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">amount</td><td> string </td><td> amount is fetched from send_payment_for_task from key per_task_cost </td></tr>
+</table>
++ Request (application/json)
+
+           {
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "access_token": "3b6220eb66129f2fc06281a9901aecda",
+  "vendor_id": 151,
+  "is_multiple_tasks": 1,
+  "fleet_id": "",
+  "latitude": 0,
+  "longitude": 0,
+  "timezone": -330,
+  "has_pickup": 1,
+  "has_delivery": 1,
+  "pickup_delivery_relationship": 0,
+  "layout_type": 0,
+  "auto_assignment": 1,
+  "team_id": "",
+  "isReccuringTask": true,
+  "cycle_def": {
+    "0": 1,
+    "1": 1,
+    "2": 1,
+    "3": 0,
+    "4": 1,
+    "5": 0,
+    "6": 0
+  },
+  "cycle": 1,
+  "start_date": "2019-09-03 14:39:40",
+  "startOn": "2019-09-03 14:39:40",
+  "end_date": "2019-09-27 00:00:00",
+  "pickups": [
+    {
+      "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+      "name": "Corporate Grg",
+      "latitude": 30.6951827,
+      "longitude": 76.87945890000003,
+      "time": "2019-09-03 14:39:40",
+      "phone": "+918765345678",
+      "template_data": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "template_name": "pricing-template",
+      "ref_images": "",
+      "email": "co@yopmail.com"
+    }
+  ],
+  "deliveries": [
+    {
+      "address": "CDCL, Madhya Marg, 28B, Sector 28B, Chandigarh, India",
+      "name": "Ishita",
+      "latitude": 30.7188978,
+      "longitude": 76.81029809999995,
+      "time": "2019-09-03T14:59:16.000Z",
+      "phone": "+917898765432",
+      "template_data": [
+        {
+          "label": "baseFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 40,
+          "input": 40,
+          "template_id": "pricing-template",
+          "display_name": "baseFare"
+        },
+        {
+          "label": "timeFare",
+          "display_name": "timeFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 2,
+          "input": 2,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "distanceFare",
+          "display_name": "distanceFare",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 1,
+          "input": 1,
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "pricingType",
+          "display_name": "pricingType",
+          "data_type": "Text",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": "Variable",
+          "input": "Variable",
+          "template_id": "pricing-template"
+        },
+        {
+          "label": "insuranceAmount",
+          "display_name": "insuranceAmount",
+          "data_type": "Number",
+          "app_side": "2",
+          "required": 0,
+          "value": 0,
+          "data": 0,
+          "input": 0,
+          "template_id": "pricing-template"
+        }
+      ],
+      "template_name": "pricing-template",
+      "ref_images": "",
+      "has_return_task": false,
+      "is_package_insured": 0,
+      "hadVairablePayment": 1,
+      "hadFixedPayment": 0
+    }
+  ],
+  "insurance_amount": 0,
+  "total_no_of_tasks": 14,
+  "total_service_charge": 23,
+  "payment_method": 8,
+  "amount": "88.58"
+}
++ Response 200 (application/json)
+
+
+    + Body
+
+             {
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    
+  }
+}
+
+
+
+
+
+
+
+## Cancel Task [/cancel_vendor_task]
+
+### Cancel Task [POST]
+
+This API is used to cancel the task by customer.
+Request Body Parameters:
+
+<table>
+<tr><td style="padding-left: 0;" colspan="2"><strong>Name</strong><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of vendor</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">vendor_id</td><td>string</td><td>vendor id of vendor </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">job_id</td><td>string</td><td>You can get it from task details. (single or comma separated values)</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">job_status</td><td>number (fixed)</td><td>Set this value to “9” to start the task.</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">domain_name</td><td>string</td><td>client web panel name </td></tr>
+</table>
+
++ Request (application/json)
+
+    {
+      "access_token": "3b6220eb66129f2fc06281a9901aecda",
+      "vendor_id": 151,
+      "job_id": "1777,1778",
+      "job_status": 9,
+      "domain_name": "dev-client-panel.kwik.delivery"
+    }
++ Response 200 (application/json)
+
+{
+  "message": "The task has been updated  to Cancelled",
+  "status": 200,
+  "data": {
+    
+  }
+}
+
+# Group Payments
+
+## Fetch  Added Cards [/fetch_merchant_cards]
+
+For getting the added cards of customer
+### Fetch Customer Cards [POST]
+
+<br>
+Request Body Parameters:
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td colspan="1"><strong>name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">domain_name</td><td>string</td> <td>  It is domain name of the customer , it will be provided by the kwik's admin </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td> Access token of customer who require the card details</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">payment_method</td><td>string</td> <td>It will always be 32 as 32 is payment method for card</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">origin_booking</td><td>number</td> <td>It will always be 1 </td></tr>
+</table>
++ Request (application/json)
+{
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "access_token": "e41cedaa47fefe7287ba6781d9736d62",
+  "payment_method": 32,
+  "origin_booking": 1
+}
+
++ Response 200 (application/json)
+
+
+    + Body
+
+    {
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "pagaSettings": {
+      "is_paga_verified": 0,
+      "redirect_uri": "https://mypaga.com/paga-webservices/oauth2/authorization?client_id=43A0A244-DC1C-4164-A0D4-4772463192CF&response_type=code&redirect_uri=https://test-api.kwik.delivery/paga_creds?vendor_id=162&scope=MERCHANT_PAYMENT USER_DEPOSIT_FROM_CARD USER_REQUEST_TRANSACTION_HISTORY MONEY_TRANSFER USER_DETAILS_REQUEST &user_data=MOBILE_NUMBER EMAIL USERNAME LAST_NAME FIRST_NAME "
+    },
+    "cards": [
+      {
+        "payment_method": 32,
+        "email": "lead@yopmail.com",
+        "last4_digits": "4081",
+        "brand": "visa",
+        "expiry_date": "12/2020",
+        "card_id": "593d0e294d55672bba744fab826ad477"
+      }
+    ],
+    "default_payment_option": 0,
+    "card_id": ""
+  }
+}
+
+
+
+## Add card   [/add_cards_view{?access_token,domain_name,client_email}]
+
+### Add merchant card [GET]
+
+This API is used to add card.
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">domain_name</td><td>string</td><td>web-panel domain name</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">client_email</td><td>string</td><td>vendor email id</td></tr>
+
+
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + domain_name  - Enter domain name.
+    + client_email - Enter email of client
+
+
+
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "payment_method": 32,
+    "email": "co@yopmail.com",
+    "last4_digits": "4081",
+    "brand": "visa",
+    "card_type": "visa DEBIT",
+    "expiry_date": "12/2023",
+    "card_id": "1553261c7ab247e70dc77b1e24b7fcb5"
+  }
+}
+
+      
+## Delete card   [/delete_merchant_card]
+
+### Delete merchant card [POST]
+
+This API is used to delete card.
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">card_id</td><td>string</td><td>fetch card_id from fetch merchant card api with key name card_id</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">payment_method</td><td>number</td><td>if the value is <code>8</code> the task payment type is cash,if value is <code>2</code> the task payment method is stripe if value is <code>32</code> the payment method is paystack,if value is <code>131072</code> then payment method is PAGA</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">domain_name</td><td>string</td><td> domain of client web panel</td></tr>
+
+</table>
+
+
++ Request (application/json)
+
+{
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "access_token": "b5a12383b8281911e1cf9d7aceb14938",
+  "payment_method": 32,
+  "card_id": "1553261c7ab247e70dc77b1e24b7fcb5"
+}
+
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    
+  }
+}
+
+  
+# Group Pricing Logic
+
+## Calculate Pricing [/send_payment_for_task]
+
+For calculating pricing the api used is send_payment_for_task . In this api calculations like service charge and charge according to google distances are calculated.
+
+### Calculate Pricing  [POST]
+
+<br>
+Request Body Parameters:
+<table class="humanColumnApiDescription markdown formalTheme">
+<tr><td colspan="1"><strong>name</strong><td colspan="1"><strong>Type</strong><td colspan="1"><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">custom_field_template</td><td>string</td> <td> The name of template  mapped with customer , it will be provided by admin  <a href="https://dashboard.kwik.delivery/#/app/settings/apikey">click here</a> to get API key</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td> Access token of customer who is creating a task , it will be provided by kwik admin</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">domain_name</td><td>string</td> <td>Domain name is the domain of client panel , it will be provided by kwik admin</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td>number</td> <td>It is id of customer , it will be privided by admin</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">auto_assignment</td><td>boolean</td> <td> If this value is <code>1</code> The task will be auto assigned to the members of the specific team mentioned. or if this value is <code>0</code> it will be unassigned task created. </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">layout_type</td><td> number </td><td>It is the vertical number which decides task flow , for kwik's platform it will always be 0 </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickup_custom_field_template</td><td>string</td><td> The name of template  mapped with customer , it will be provided by admin </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_pickup</td><td>number <br/>  </td><td>It determines if  the pickup is required , for kwik's platform it always will be 1  </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">has_delivery</td><td>number <br/> </td><td> It determines if  the delivery is required , for kwik's platform it always will be 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_multiple_tasks</td><td>number</td><td>It determines if multiple tasks are required(like in kwik's case signle pickup and single delivery), for our platform it will be 1</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">user_id</td><td>number <br/></td><td> The id of the admin</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">payment_method</td><td>number <br/></td><td> There are 4 payment methods supported in kwik 8: Cash on pickup , 32: Card payment , 262144 : Cash on delivery ,131072 : Paga </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">form_id</td><td>number</td><td> The id of for mapped with customer , it will be provided by kwik's admin</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_schedule_task</td><td>number</td> <td>The values are 0 or 1 , 0 is for the normal task and 1 is for the scheduled task </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups</td><td>JSON Array</td> <td> The array of pickup details </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups[0].address</td><td>json array</td> <td>This address of pickup</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups[0].email</td><td> string <br/> </td><td>  The email of pickup , it is the email of the customer</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups[0].phone</td><td>String <br/> </td> <td> The phone no of pickup , it is the phone no of the customer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups[0].latitiude</td><td> String </td><td> The latitiude no of pickup </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">pickups[0].longitude</td><td>String </td><td> The longitude no of pickup</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries</td><td>JSON Array</td> <td> This is array of delivery details </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries[0].address</td><td>string</td> <td>This address of delivery</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries[0].email</td><td> string <br/> </td><td>  The email of delivery , it is the email of the customer</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries[0].phone</td><td>String <br/> </td> <td> The phone no of delivery , it is the phone no of the customer </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries[0].latitiude</td><td> string </td><td> The latitiude no of delivery </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries[0].longitude</td><td>string </td><td> The longitude no of delivery</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">deliveries[0].has_return_task</td><td>boolean </td><td> The values can be true or false , true if the return task is available and false if not available</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_loader_required</td><td>number</td> <td>If this value is <code>1</code> it means loader is required and if the value is<code>0</code>it means loader is not required.in case the response from /getLoaders api gives is_loaders_enabled = 0 then one cannot use loaders for that job.</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">loaders_amount</td><td>number</td> <td>If this value of is_loader_required is <code>1</code> it means loader is required then you have to specify the total cost of loaders that can be fetch using /getLoaderList api according to count of loaders ,and if the loader is not required you can 0 value</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">loaders_count</td><td>number</td> <td> If this value of is_loader_required is <code>1</code> it means loader is required then you have to specify the count of loaders that can be fetch using /loaders api according to one's requirement ,and if the loader is not required you can 0 value </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_instruction</td><td>string</td> <td>You can specify any instruction for the delivery person </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vehicle_id</td><td>number</td> <td>You can specify vehicle id depending on the size of vehicle required.You can fetch the id from the  response of /getVehicle api mentioned above </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">delivery_images</td><td>string</td> <td> If you need to provide any pictures for the delivery item you can send the url for the same </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">is_cod_job</td><td>number</td> <td>The values are 0 or 1 , 0 is for the normal task and 1 is for the collect on delivery task </td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">parcel_amount</td><td>number</td> <td>If the value for is_cod_job is 1 then specify the consignment amount </td></tr>
+
+
+</table>
+
+
++ Request (application/json)
+{
+  "custom_field_template": "pricing-template",
+  "access_token": "3d1b524d1f07dd22b60d40d3b2292d1b",
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "timezone": -330,
+  "vendor_id": 151,
+  "is_multiple_tasks": 1,
+  "layout_type": 0,
+  "pickup_custom_field_template": "pricing-template",
+  "deliveries": [
+    {
+      "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+      "name": "sjcdgyudts",
+      "latitude": 30.6951827,
+      "longitude": 76.8794589,
+      "time": "2020-10-28 17:07:54",
+      "phone": "+918989898989",
+      "has_return_task": false,
+      "is_package_insured": 0
+    }
+  ],
+  "has_pickup": 1,
+  "has_delivery": 1,
+  "auto_assignment": 1,
+  "user_id": 1,
+  "pickups": [
+    {
+      "address": "CDCL, Madhya Marg, 28B, Sector 28B, Chandigarh, India",
+      "name": "Corporate Grg",
+      "latitude": 30.7188978,
+      "longitude": 76.8102981,
+      "time": "2020-10-28 17:07:54",
+      "phone": "+919885968596",
+      "email": "co@yopmail.com"
+    }
+  ],
+  "payment_method": 32,
+  "form_id": 2,
+  "vehicle_id": 4,
+  "delivery_instruction": "Hey,Please deliver the parcel with safety.Thanks in advance",
+  "delivery_images": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/kjjX1603884709732-stripeconnect.png",
+  "is_loader_required": 1,
+  "loaders_amount": 40,
+  "loaders_count": 4,
+  "is_cod_job": 1,
+  "parcel_amount": 1000
+}
+
++ Response 200 (application/json)
+
+
+    + Body
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "currency": {
+      "currency_id": 29,
+      "code": "NGN",
+      "name": "Nigerian Naira",
+      "symbol": "₦",
+      "is_zero_decimal_currency": 0,
+      "minimum_amount": 181.25
+    },
+    "per_task_cost": "1474.5",
+    "pickups": [
+      {
+        "address": "CDCL, Madhya Marg, 28B, Sector 28B, Chandigarh, India",
+        "name": "Corporate Grg",
+        "latitude": 30.7188978,
+        "longitude": 76.8102981,
+        "time": "2020-10-28 17:07:54",
+        "phone": "+919885968596",
+        "email": "co@yopmail.com"
+      }
+    ],
+    "deliveries": [
+      {
+        "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+        "name": "sjcdgyudts",
+        "latitude": 30.6951827,
+        "longitude": 76.8794589,
+        "time": "2020-10-28T17:27:49.800Z",
+        "phone": "+918989898989",
+        "has_return_task": false,
+        "is_package_insured": 0,
+        "hadVairablePayment": 1,
+        "hadFixedPayment": 0
+      }
+    ],
+    "insurance_amount": 0,
+    "total_no_of_tasks": 1,
+    "total_service_charge": 500,
+    "delivery_charge_by_buyer": 0,
+    "is_cod_job": 1,
+    "is_loader_required": 1,
+    "loaders_amount": 40,
+    "delivery_instruction": "Hey,Please deliver the parcel with safety.Thanks in advance",
+    "delivery_images": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/kjjX1603884709732-stripeconnect.png",
+    "vehicle_id": 4,
+    "loaders_count": 4,
+    "parcel_amount": 1000
+  }
+}
+
+
+## Get Estimated Fare   [/get_bill_breakdown]
+
+### Get breakdown of pricing  [POST]
+
+This API is used to get Estimated Fare for Task.
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">benefit_type</td><td>number</td><td></td></tr>
+<tr><td style="padding-left: 0;" colspan="2">amount</td><td>string</td><td> amount is fetched from send_payment_for_task from key per_task_cost</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">insurance_amount</td><td>string/td><td>is fetched from send_payment_for_task api from key name insurance_amount</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">total_no_of_tasks</td><td>number</td><td> is fetched from send_payment_for_task api from key name total_no_of_tasks.</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">user_id</td><td>number</td><td> it is id for admin which is to be provided to third party</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">form_id</td><td>number</td><td> it is to be provided to third party,it appears in login api,can be hardcoded because it don’t change on every login..It will be always 2</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">promo_value</td><td>number</td><td></td></tr>
+<tr><td style="padding-left: 0;" colspan="2">domain_name</td><td>string</td><td> domain of client web panel</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">credits</td><td>number</td><td></td></tr>
+<tr><td style="padding-left: 0;" colspan="2">total_service_charge</td><td>string</td><td>is fetched from send_payment_for_task api from key name total_service_charge</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_loader_required</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api ,key is_loader_required.</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">loaders_amount</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api ,key loaders_amount.</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">loaders_count</td><td>number</td> <td> Fetch the value from response of /send_payment_for_task api, key loaders_count. </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">delivery_instruction</td><td>string</td> <td>Fetch the value from response of /send_payment_for_task api, key delivery_instruction. </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">vehicle_id</td><td>number</td> <td>Fetch the value from response of /send_payment_for_task api , key vehicle_id. </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">delivery_images</td><td>string</td> <td> Fetch the value from response of /send_payment_for_task api ,key delivery_images. </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_cod_job</td><td>number</td><td>The value is 0 if it is normal task and 1 if it is collect on delivery order</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">parcel_amount</td><td>number</td><td>The consignment value</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">delivery_charge_by_buyer</td><td>number</td><td>The value is 1 if delivery charge is paid by buyer and 2 if delivery charge is paid by kwik customer</td></tr>
+</table>
+
++ Request (application/json)
+
+ {
+  "access_token": "3d1b524d1f07dd22b60d40d3b2292d1b",
+  "benefit_type": null,
+  "amount": "1474.5",
+  "insurance_amount": 0,
+  "total_no_of_tasks": 1,
+  "pickup_time": "2020-10-28 17:35:37",
+  "user_id": 1,
+  "form_id": 2,
+  "promo_value": null,
+  "domain_name": "staging-client-panel.kwik.delivery",
+  "credits": 0,
+  "total_service_charge": 500,
+  "vehicle_id": 4,
+  "delivery_images": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/wPqj1603886372690-stripeconnect.png",
+  "is_loader_required": 1,
+  "loaders_amount": 40,
+  "loaders_count": 4,
+  "is_cod_job": 1,
+  "parcel_amount": 1000,
+  "delivery_charge_by_buyer": 0,
+  "delivery_instruction": "Hey,Please handover parcel with safety.\nThanks"
+}
+
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "ACTUAL_AMOUNT": "1981.50",
+    "DISCOUNT": "0.00",
+    "CREDITS_TO_ADD": 0,
+    "VAT": 0,
+    "PENDING_AMOUNT": 0,
+    "SERVICE_TAX": 0,
+    "BENEFIT_TYPE": null,
+    "PAYABLE_AMOUNT_WITHOUT_CREDITS": 0,
+    "TIP": "0.00",
+    "DEFAULT_VAT_PERCENT": null,
+    "DEFAULT_SERVICE_TAX_PERCENT": null,
+    "INSURANCE_AMOUNT": 0,
+    "AMOUNT_PER_TASK": "1981.50",
+    "TOTAL_NO_OF_TASKS": 1,
+    "AMOUNT_FOR_FIRST_TASK": "2021.50",
+    "TOTAL_SERVICE_CHARGE": 500,
+    "SURGE_PRICING": 7,
+    "SURGE_TYPE": 3,
+    "CREDITS_USED": "0.00",
+    "LOADER_CHARGES": 40,
+    "LOADER_REQUIRED": 1,
+    "LOADERS_INSTRUCTION": "Hey,Please handover parcel with safety.\nThanks",
+    "LOADERS_IMAGES": "https://s3.ap-south-1.amazonaws.com/kwik-project/task_images/wPqj1603886372690-stripeconnect.png",
+    "VEHICLE_ID": 4,
+    "PENDING_CANCELLATION_CHARGE": 0,
+    "PENDING_WAITING_CHARGES": 0,
+    "LOADERS_COUNT": 4,
+    "CURRENT_CREDITS": "0.00",
+    "PROMO_VALUE": null,
+    "DISCOUNTED_AMOUNT": "2021.50",
+    "PAYABLE_AMOUNT": "2021.50",
+    "NET_PAYABLE_AMOUNT": 2100,
+    "ORDER_PAYABLE_AMOUNT": 1600,
+    "ACTUAL_ORDER_PAYABLE_AMOUNT": 2100,
+    "VENDOR_CREDITS": 0,
+    "NET_CREDITS_PAYABLE_AMOUNT": 0,
+    "WALLET_ENABLE": 0,
+    "PARCEL_AMOUNT": 1000,
+    "IS_COD_JOB": 1
+  }
+}
+
+# Group fetching job details
+
+## Get job Details [/get_order_history_with_pagination{?access_token,limit,skip}]
+
+### Get Job Details [GET]
+
+This API is used to get the details of jobs.
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-left: 0;" colspan="1"><strong>Name</strong><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>vendor access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">limit</td><td>integer</td> <td>number of jobs to be in a single page</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">skip</td><td>integer</td> <td>number of jobs to skip</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + limit - Enter limit for jobs
+    + skip - Enter value to skip
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "count": 6,
+    "orders": [
+      {
+        "unique_order_id": "1777AA274",
+        "total_amount": 110,
+        "sender_name": "Corporate Grg",
+        "pickup_address": "Net2Source Sector 22 Panchkula Haryana India",
+        "receiver_name": "Ishita",
+        "delivery_address": "CDCL Madhya Marg 28B Sector 28B Chandigarh India"
+      },
+      {
+        "unique_order_id": "1775AA273",
+        "total_amount": 110,
+        "sender_name": "Corporate Grg",
+        "pickup_address": "Net2Source Sector 22 Panchkula Haryana India",
+        "receiver_name": "Ishita",
+        "delivery_address": "CDCL Madhya Marg 28B Sector 28B Chandigarh India"
+      },
+      {
+        "unique_order_id": "1773AA272",
+        "total_amount": 860,
+        "sender_name": "Corporate Grg",
+        "pickup_address": "Delhi Cantonment New Delhi Delhi India",
+        "receiver_name": "Ishita",
+        "delivery_address": "CDCL Madhya Marg 28B Sector 28B Chandigarh India"
+      },
+ 
+    ]
+  }
+}
+
+## Get job Details [/view_task_by_relationship_id{?access_token,unique_order_id}]
+
+### Get Job Details on basis of relationship id [GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-left: 0;" colspan="1"><strong>Name</strong><td><strong>Type</strong></td><td><strong>Description</strong></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>vendor access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">unique_order_id</td><td>string</td> <td>will get unique order if from order history with pagination’s api</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + unique_order_id - Enter unique order id
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "total_amount": 110,
+    "orders": [
+      {
+        "job_latitude": "30.6951827",
+        "is_return_task": 0,
+        "job_longitude": "76.87945890000003",
+        "recurring_id": "5d6e313d553c81aa6698a8a4",
+        "is_job_edited": 0,
+        "total_amount": 110,
+        "job_type": 0,
+        "job_status": 9,
+        "job_id": 1777,
+        "name": "Corporate Grg",
+        "email": "co@yopmail.com",
+        "phone": "+918765345678",
+        "address": "Net2Source, Sector 22, Panchkula, Haryana, India",
+        "messenger": null,
+        "unique_order_id": "1777AA274"
+      },
+      {
+        "job_latitude": "30.7188978",
+        "is_return_task": 0,
+        "job_longitude": "76.81029809999995",
+        "recurring_id": "5d6e313d553c81aa6698a8a4",
+        "is_job_edited": 0,
+        "total_amount": 110,
+        "job_type": 1,
+        "job_status": 9,
+        "job_id": 1778,
+        "name": "Ishita",
+        "email": null,
+        "phone": "+917898765432",
+        "address": "CDCL, Madhya Marg, 28B, Sector 28B, Chandigarh, India",
+        "messenger": null,
+        "unique_order_id": "1777AA274"
+      }
+    ]
+  }
+}
+
+# Group Corporate End Of month billing logic
+
+## Add corporate   [/customer/add]
+
+### Add corporate [POST]
+
+This API is used to add corporate.
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">address</td><td>string</td><td>address of company</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">domain</td><td>string</td><td>domain of client web pane</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">email</td><td>string</td><td>email of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">first_name</td><td>string</td><td>first name of manager of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">last_name</td><td>string</td><td>last name of manager of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">name</td><td>string</td><td>name of manager of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">default_pickup_latitude</td><td>string</td><td>default pickup latitude of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">default_pickup_longitude</td><td>string</td><td>default pickup longitude of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">default_pickup_address</td><td>string</td><td>default pickup addres of corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">latitude</td><td>string</td><td>latitude of address</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">longitude</td><td>string</td><td>longitude of address</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">password</td><td>string</td><td>password</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">user_type</td><td>number</td><td>fixed <code>1</code> for customer</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">form_ids</td><td>number</td><td>fixed value <code>-1</code></td></tr>
+<tr><td style="padding-left: 0;" colspan="2">customer_type</td><td>number</td><td>if value <code>1</code> then it is corporate otherwise individual</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">company_rc_number</td><td>string</td><td>rc number of a company</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_master_admin</td><td>number</td><td>if value <code>1</code> then it is master admin otherwise sub corporate </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">phone</td><td>string</td><td>phone of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">sla_id</td><td>number</td><td>sla are selected on the basis of eta and rating of agent to which request is to be send</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_monthly_invoice</td><td>number</td><td>if value<code>1</code> is enabled else disabled</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">monthly_invoice_date</td><td>string</td><td>date of start of monthly invoice i.e current date </td></tr>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>Access token of admin</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_surge_enable</td><td>number</td><td>if value<code>1</code> is enabled and if <code>2<code> then disabled</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_kfleet_enable</td><td>number</td><td>if value<code>1</code> is enabled and if <code>0<code> then disabled</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_api_enabled</td><td>number</td><td>if value<code>1</code> is enabled and if <code>0<code> then disabled</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">is_cod_customer</td><td>number</td><td>if value<code>1</code> is enabled and if <code>0<code> then disabled</td></tr>
+
+</table>
+
+
++ Request (application/json)
+
+{
+  "address": "CH Devi Lal Centre of Learning, 28B, Sector 28, Chandigarh, 160102, India",
+  "domain": "staging-client-panel.kwik.delivery",
+  "email": "parser23@yopmail.com",
+  "first_name": "John",
+  "last_name": "Parser",
+  "name": "JohnNaN",
+  "company_name": "Newster",
+  "default_pickup_latitude": "30.7187849",
+  "default_pickup_longitude": "76.81037409999999",
+  "default_pickup_address": "CH Devi Lal Centre of Learning, 28B, Sector 28, Chandigarh, 160102, India",
+  "latitude": "30.7187849",
+  "longitude": "76.81037409999999",
+  "password": "qwerty",
+  "user_type": 1,
+  "form_ids": -1,
+  "customer_type": 1,
+  "company_rc_number": "RC-123456",
+  "is_master_admin": 1,
+  "phone": "+2349876666666",
+  "sla_id": 17,
+  "is_monthly_invoice": 1,
+  "monthly_invoice_date": "2019-10-14T04:30:52.762Z",
+  "access_token": "1.503d3187b84b4d411c152a3d17102d4e1ee6c1f923",
+  "is_surge_enable" : 0,
+  "is_kfleet_enable":0,
+  "is_api_enabled" : 0,
+  "is_cod_customer":0
+}
+
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "customer_id": 578
+  }
+}
+
+## Get Corporate Details [/list_all_corporates{?access_token}]
+
+### Get Corporate Details[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>admin access token</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "count": 2,
+    "data": {
+      "corporates": [
+        {
+          "sla_id": 15,
+          "sla_name": "123111",
+          "latitude": "30.7188978",
+          "longitude": "30.7188978",
+          "address": "CDCL, Madhya Marg, 28B, Sector 28B, Chandigarh, India",
+          "company_rc_number": "RC-312111",
+          "company_name": "Cdcl",
+          "corporate_id": 1,
+          "email": "new_user12@yopmail.com",
+          "customer_id": 1,
+          "phone": "+18787870902",
+          "monthly_amount": 0,
+          "is_monthly_invoice": 0,
+          "monthly_invoice_date": null,
+          "name": "Manager kitne jyda Dev Dev dev Dev",
+          "first_name": "Manager kitne jyda Dev Dev dev",
+          "last_name": "Dev"
+        },
+        {
+          "sla_id": 15,
+          "sla_name": "123111",
+          "latitude": "30.7387558",
+          "longitude": "30.7387558",
+          "address": "17F, Sector 17, Chandigarh, 160017, India",
+          "company_rc_number": "RC-11223311",
+          "company_name": "KWIK-CORPORATE",
+          "corporate_id": 15,
+          "email": "admin1121@yopmail.com",
+          "customer_id": 73,
+          "phone": "+919646522202",
+          "monthly_amount": 0,
+          "is_monthly_invoice": 0,
+          "monthly_invoice_date": "2019-09-16T09:45:31.000Z",
+          "name": "Kwik-manager fdgasd",
+          "first_name": "Kwik-manager",
+          "last_name": "fdgasd"
+        }
+        ]
+    }
+  }
+}
+
+## Get Corporate End of month Payment Details [/list_all_payment_invoice{?access_token,corporate_id}]
+
+### Get Corporate End of month payment Details[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>admin access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">corporate_id</td><td>number</td> <td>fetch corporate id from /list_all_corporates api</td></tr>
+
+
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + corporate_id - Enter corporate id here.
+    
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "data": [
+      {
+        "monthly_bill_id": 1,
+        "corporate_id": 19,
+        "start_date": "2019-10-27T00:00:00.000Z",
+        "end_date": "2019-10-31T00:00:00.000Z",
+        "amount": 10220,
+        "created": "2019-10-11T09:02:39.000Z",
+        "is_pay": 1,
+        "count": 3
+      }
+    ]
+  }
+}
+
+# EndOfMonth Billing Logic
+
+## Settle payment of corporate [/payment_satel_corporates]
+
+# Settle Payment [PUT]
+
+This API is used settle payment.
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">access_token</td><td>string</td><td>access token of individual or corporate</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">monthly_bill_id</td><td>number</td><td>monthly bill id correponding to every corporate,fetch from /list_all_payment_invoice api</td></tr>
+
+</table>
+
+
++ Request (application/json)
+
+{
+  "access_token": "b5a12383b8281911e1cf9d7aceb14938",
+  "monthly_bill_id": 1
+}
+
++ Response 200 (application/json)
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "data": {
+      "fieldCount": 0,
+      "affectedRows": 1,
+      "insertId": 0,
+      "serverStatus": 2,
+      "warningCount": 0,
+      "message": "(Rows matched: 1  Changed: 1  Warnings: 0",
+      "protocol41": true,
+      "changedRows": 1
+    }
+  }
+}
+
+## Get All payment invoice corresponding to corporate [/list_all_job_invoice{?access_token,corporate_id,limit,skip,start_date,end_date}]
+
+### Get Job Payment Invoices[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>admin access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">corporate_id</td><td>string</td> <td>fetch corporate id from /list_all_corporates api</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">limit</td><td>number</td> <td>number of invoices to be shown</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">skip</td><td>number</td> <td>number of invoices to skip from start</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">start_date</td><td>string</td> <td>start date of the invoice cycle,for example<code>2019-10-27</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">end_date</td><td>string</td> <td>end date of invoice cycle,for example<code>2019-10-31</code></td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + corporate_id - Enter corporate id here.
+    + limit        - Enter limit here.
+    + skip         - Enter skip value  here.
+    + start_date   - Enter start date
+    + end_date     - Enter end date
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "data": [
+      {
+        "unique_order_id": "1872AA316",
+        "jobDate": "2019-10-10T00:00:00.000Z",
+        "total_amount": 104.93,
+        "pickup_details": "Kanta Chaudhary,Net2Source Sector 22 Panchkula Haryana India",
+        "delivery_details": "shalu test,Sector 22 Chandigarh India"
+      },
+      {
+        "unique_order_id": "1878AA319",
+        "jobDate": "2019-10-10T00:00:00.000Z",
+        "total_amount": 780,
+        "pickup_details": "Rita Rita,Zirakpur Punjab India",
+        "delivery_details": "Qwertyy,Delhi India"
+      }
+    ]
+  }
+}
+
+
+## Export All payment invoice correponding to corporate [/export_all_payment_invoice{?access_token,corporate_id,start_date,end_date}]
+
+### Export Job Payment Invoices[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>admin access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">corporate_id</td><td>string</td> <td>fetch corporate id from /list_all_corporates api</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">start_date</td><td>string</td> <td>start date of the invoice cycle,for example<code>2019-10-27</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">end_date</td><td>string</td> <td>end date of invoice cycle,for example<code>2019-10-31</code></td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + corporate_id - Enter corporate id here.
+    + start_date   - Enter start date
+    + end_date     - Enter end date
+
++ Response 200 (application/json)
+
+DATE,ORDER_ID,SENDER_NAME, PICKUP_ADDRESS, RECEIVER_NAME, DELIVERY_ADDRESS ,TOTAL_AMOUNT 
+2019-09-19, 1820AA292, Corporate Grg,  Delhi Cantonment New Delhi Delhi India, Corporate Grg, Delhi Cantonment New Delhi Delhi India ,1652.94
+2019-09-19, 1823AA293, Corporate Grg,  Delhi Cantonment New Delhi Delhi India, Corporate Grg, Delhi Cantonment New Delhi Delhi India ,1652.94
+2019-09-19, 1826AA294, Corporate Grg,  Delhi Cantonment New Delhi Delhi India, Corporate Grg, Delhi Cantonment New Delhi Delhi India ,1652.94
+2019-09-19, 1829AA295, Corporate Grg,  Delhi Cantonment New Delhi Delhi India, Corporate Grg, Delhi Cantonment New Delhi Delhi India ,1652.94
+
+# Group client panel end of month billing logic
+
+## Get all customer  [/get_all_customers_per_corporate{?access_token,limit,skip}]
+
+### Get all customer per corporate[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>vendor access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">limit</td><td>number</td> <td>number of invoices to be shown</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">skip</td><td>number</td> <td>number of invoices to skip from start</td></tr>
+
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + limit        - Enter limit here.
+    + skip         - Enter skip value  here.
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "count": 1,
+    "data": {
+      "vendors": [
+        {
+          "vendor_id": 282,
+          "is_created_by_admin": 1,
+          "first_name": "Akash",
+          "last_name": "akash",
+          "email": "akash@yopmail.com",
+          "phone_no": "+911478523569",
+          "description": "1 Mon Sep 16 2019 11:51:19 GMT+0000 (UTC)",
+          "user_id": 1,
+          "access_token": "1_606cf3d5a5c6a403158df6110cf04077",
+          "password": "e10adc3949ba59abbe56e057f20f883e",
+          "company": null,
+          "address": "Chandigarh, India",
+          "password_reset_token": null,
+          "is_blocked": 0,
+          "latitude": "30.6949789",
+          "longitude": "76.8794669",
+          "vendor_image": null,
+          "device_type": 2,
+          "device_token": null,
+          "voice_token": null,
+          "app_versioncode": "100",
+          "app_access_token": "8db9112ebc343bba09fcbf0b3382bb6b",
+          "language": null,
+          "last_login_date_time": "2019-10-10T05:53:27.000Z",
+          "creation_datetime": "2019-09-16T11:55:38.000Z",
+          "vendor_api_key": null,
+          "credits": 0,
+          "pending_amount": 0,
+          "fb_token": null,
+          "otp": 9280,
+          "is_phone_verified": 1,
+          "successful_task_count": 0,
+          "referral_code": null,
+          "referrer_id": null,
+          "reference_id": null,
+          "registration_status": 1,
+          "unverified_phone": null,
+          "customer_id": 552,
+          "cookies": 0,
+          "authentic_phone_no": "+911478523569",
+          "favorite_fleets": null,
+          "vendor_type": 0,
+          "customer_type": 1,
+          "corporate_id": 1,
+          "is_master_admin": 0,
+          "company_name": "akash",
+          "is_email_verified": 1,
+          "temporary_rc_number": null,
+          "default_payment_option": 0,
+          "card_id": "",
+          "paga_access_token": null,
+          "is_paga_verified": 0,
+          "paga_user_name": "",
+          "default_pickup_address": "Chandigarh, India",
+          "default_pickup_latitude": "",
+          "default_pickup_longitude": "",
+          "freshsales_lead_id": null,
+          "freshsales_contact_id": 5005381474,
+          "is_monthly_invoice": 1,
+          "monthly_invoice_date": "2019-09-06T18:30:00.000Z",
+          "monthly_amount": 0,
+          "origin_booking": 0,
+          "freshchat_restore_id": null,
+          "email_verification_token": null
+        }
+      
+      ]
+    }
+  }
+}
+
+## Get Corporate End of month Payment Details [/list_all_payment_invoice_sub{?access_token,corporate_id,vendor_id,limit,skip}]
+
+### View billing history of month payment Details[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>corporte access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">corporate_id</td><td>number</td> <td>fetch corporate id from /get_all_customers_per_corporate api</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td>number</td> <td>fetch vendor id from /get_all_customers_per_corporate api</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">limit</td><td>number</td> <td>number of invoices to be shown</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">skip</td><td>number</td> <td>number of invoices to skip from start</td></tr>
+
+</table>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + corporate_id - Enter corporate id here.
+    + vendor_id    - Enter corporate id here.
+    + limit        - Enter limit here.
+    + skip         - Enter skip here.
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "data": [
+      {
+        "monthly_bill_sub_id": 4,
+        "corporate_id": 38,
+        "vendor_id": 302,
+        "start_date": "2019-10-10T00:00:00.000Z",
+        "end_date": "2019-10-31T00:00:00.000Z",
+        "amount": 874.13,
+        "count": 2,
+        "created": "2019-10-10T10:19:47.000Z"
+      }
+    ]
+  }
+}
+
+## Get All payment invoice corresponding to customer per corporate [/list_all_job_invoice_sub{?access_token,corporate_id,limit,skip,start_date,end_date,vendor_id}]
+
+### Get Job Payment Invoices[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>vendor access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">corporate_id</td><td>string</td> <td>fetch corporate id from /get_all_customers_per_corporate api</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">limit</td><td>number</td> <td>number of invoices to be shown</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">skip</td><td>number</td> <td>number of invoices to skip from start</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">start_date</td><td>string</td> <td>start date of the invoice cycle,for example<code>2019-10-27</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">end_date</td><td>string</td> <td>end date of invoice cycle,for example<code>2019-10-31</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td>string</td> <td>fetch vendor id from /get_all_customers_per_corporate api</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + corporate_id - Enter corporate id here.
+    + vendor_id    - Enter vendor id here.
+    + limit        - Enter limit here.
+    + skip         - Enter skip value  here.
+    + start_date   - Enter start date
+    + end_date     - Enter end date
+
++ Response 200 (application/json)
+
+{
+  "message": "Successful",
+  "status": 200,
+  "data": {
+    "data": [
+      {
+        "unique_order_id": "1878AA319",
+        "total_amount": 780,
+        "pickup_details": "Rita Rita,Zirakpur Punjab India",
+        "delivery_details": "Qwertyy,Delhi India"
+      },
+      {
+        "unique_order_id": "1880AA320",
+        "total_amount": 89.4,
+        "pickup_details": "Rita Rita,Zirakpur Punjab India",
+        "delivery_details": "Qwerty,Net2Source Sector 22 Panchkula Haryana India"
+      }
+    ]
+  }
+}
+
+
+## Export All payment invoice correponding to customer of corporate [/exports_all_job_invoice_sub{?access_token,corporate_id,start_date,end_date,vendor_id}]
+
+### Export Job Payment Invoices[GET]
+
+Query Parameters : 
+
+<table>
+<tr><td style="padding-right: 40px; width: 140px;">access_token</td><td>string</td> <td>vendor access token</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">corporate_id</td><td>string</td> <td>fetch corporate id from /get_all_customers_per_corporate api</td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">start_date</td><td>string</td> <td>start date of the invoice cycle,for example<code>2019-10-27</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">end_date</td><td>string</td> <td>end date of invoice cycle,for example<code>2019-10-31</code></td></tr>
+<tr><td style="padding-right: 40px; width: 140px;">vendor_id</td><td>string</td> <td>fetch vendor id from /get_all_customers_per_corporate api</td></tr>
+</table>
+
++ Parameters
+    + access_token - Enter access token here.
+    + corporate_id - Enter corporate id here.
+    + start_date   - Enter start date
+    + end_date     - Enter end date
+    + vendor_id    - Enter vendor id here.
+
++ Response 200 (application/json)
+
+DATE ORDER_ID SENDER_NAME PICKUP_ADDRESS RECEIVER_NAME DELIVERY_ADDRESS TOTAL_AMOUNT 
+2019-10-14 1878AA319 Rita Rita  Zirakpur Punjab India Qwertyy Delhi India 780
+2019-10-14 1880AA320 Rita Rita  Zirakpur Punjab India Qwerty Net2Source Sector 22 Panchkula Haryana India 89.4
+
+
+
+#   Group Job Status
+
+##  Fetch Job status  [/getJobStatus{?unique_order_id,customer_id}]
+
+### Fetch Job Status [GET]
+
+The api is used to get updated job status..
+
+Request Body Parameters:
+<table>
+<tr><td style="padding-left: 0;" colspan="2">unique_order_id</td><td>string</td><td>unique_order_id for task</td></tr>
+<tr><td style="padding-left: 0;" colspan="2">customer_id</td><td>number</td><td>customer_id</td></tr>
+</table>
+
++ Parameters
+    + unique_order_id - Enter unique_order_id here.
+    + customer_id     - Enter customer id.
+    
++ Response 200 (application/json)
+SUCCESSFUL,SUCCESSFUL
+
+
+
+
+
+

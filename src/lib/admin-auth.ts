@@ -28,8 +28,6 @@ export type Permission =
   | "services.edit"
   | "services.delete"
   | "reviews.view"
-  | "vouchers.view"
-  | "messages.view"
   | "academy.view"
   | "dashboard.sales"
   | "settings.manage"
@@ -119,8 +117,6 @@ const ROUTES: [string, Access][] = [
   ["/admin/orders", "orders.view"],
   ["/admin/customers", "customers.view"],
   ["/admin/reviews", "reviews.view"],
-  ["/admin/vouchers", "vouchers.view"],
-  ["/admin/messages", "messages.view"],
   ["/admin/academy", "academy.view"],
   ["/admin/team", "owner"],
   ["/admin/settings", "settings.manage"],

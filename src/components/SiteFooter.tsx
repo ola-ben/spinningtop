@@ -111,7 +111,17 @@ export default function SiteFooter() {
             Extra space (bottom on mobile, right from sm) so the floating
             WhatsApp button and mobile quote bar never cover anything. */}
         <div className="flex flex-col-reverse gap-5 border-t border-ink/10 pb-28 pt-6 sm:flex-row sm:items-center sm:justify-between sm:pb-6 sm:pr-20">
-          <p className="text-xs text-ink/50">© 2026 Spinning Top Drycleaners &amp; Launderers. All rights reserved.</p>
+          <p className="text-xs text-ink/50">
+            © 2026 Spinning Top Drycleaners &amp; Launderers. All rights reserved. · Built by{" "}
+            <a
+              href="https://benjaminolaoluwa.vercel.app/"
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-ink/70 underline-offset-2 hover:text-brand hover:underline"
+            >
+              ben_devs
+            </a>
+          </p>
           <ul className="flex items-center gap-4">
             {SOCIALS.map((s) => (
               <li key={s.id}>

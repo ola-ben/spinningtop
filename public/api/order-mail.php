@@ -153,7 +153,8 @@ $messages = [
   'Out for delivery' => ["Your order $id is on its way",
     "Your order <b>$id</b> is out for delivery to $where. Please keep your phone close; our rider may call you."],
   'Delivered' => ["Your order $id has been delivered",
-    "Your order <b>$id</b> has been completed. Thank you for choosing Spinning Top. We hope you enjoy it!"],
+    "Your order <b>$id</b> has been completed. Thank you for choosing Spinning Top. We hope you enjoy it!<br><br>" .
+    "How did we do? It takes less than a minute to rate your products, and it helps other customers choose."],
   'Cancelled' => ["Your order $id has been cancelled",
     "Your order <b>$id</b> has been cancelled. If you didn't expect this or have any questions, just reply to our team on WhatsApp or call us."],
 ];
@@ -187,6 +188,10 @@ $rows .= '<tr><td style="padding:10px 0;font-size:15px;font-weight:bold;">Total<
   $naira($orderTotal) . '</td></tr>';
 
 $track = $site . '/account/orders/';
+// Delivered: the main button asks for a review (My account → Pending Reviews).
+$isDelivered = $o['status'] === 'Delivered';
+$ctaHref = $isDelivered ? $site . '/account/reviews/' : $track;
+$ctaLabel = $isDelivered ? 'Rate your products' : 'Track your order';
 $html = <<<HTML
 <!doctype html><html><body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:24px 12px;"><tr><td align="center">
@@ -199,14 +204,14 @@ $html = <<<HTML
 <p style="margin:0 0 16px;font-size:15px;line-height:1.55;color:#333;">$intro</p>
 $noteHtml
 <table width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px;">$rows</table>
-<p style="margin:0 0 24px;" align="center"><a href="$track" style="display:inline-block;background:#111;color:#ffffff;text-decoration:none;padding:12px 26px;border-radius:999px;font-size:14px;font-weight:bold;">Track your order</a></p>
+<p style="margin:0 0 24px;" align="center"><a href="$ctaHref" style="display:inline-block;background:#111;color:#ffffff;text-decoration:none;padding:12px 26px;border-radius:999px;font-size:14px;font-weight:bold;">$ctaLabel</a></p>
 </td></tr>
 <tr><td style="padding:16px 28px 26px;border-top:1px solid #eee;font-size:12px;line-height:1.5;color:#888;" align="center">
 Spinning Top &middot; <a href="$site" style="color:#888;">spinningtop.ng</a><br>This is an automatic message, please don't reply to this email.
 </td></tr></table></td></tr></table></body></html>
 HTML;
 
-$text = strip_tags(str_replace(['<br>', '</p>', '</tr>'], ["\n", "\n\n", "\n"], $intro)) . "\n\nTrack your order: $track\n\nSpinning Top";
+$text = strip_tags(str_replace(['<br>', '</p>', '</tr>'], ["\n", "\n\n", "\n"], $intro)) . "\n\n$ctaLabel: $ctaHref\n\nSpinning Top";
 
 try {
   smtp_send($config, $to, html_entity_decode($subject), $html, html_entity_decode($text));

@@ -300,11 +300,6 @@ function AccountMenu({ onNavigate }: { onNavigate: () => void }) {
           </Link>
         </li>
         <li>
-          <Link href="/account/inbox" onClick={onNavigate} className={item}>
-            Inbox
-          </Link>
-        </li>
-        <li>
           <Link href="/account/wishlist" onClick={onNavigate} className={item}>
             Wishlist
           </Link>

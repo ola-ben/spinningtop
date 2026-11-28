@@ -224,7 +224,7 @@ export default function CheckoutView({ products: initial }: { products: Product[
                     rows={3}
                     defaultValue={user.address}
                     autoComplete="street-address"
-                    placeholder="House number, street, area, city"
+                    placeholder="House number, street and nearest landmark"
                     className={`${input} resize-none`}
                   />
                 </Field>

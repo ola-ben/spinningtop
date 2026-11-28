@@ -28,8 +28,6 @@ export const ADMIN_NAV: { group: string; items: NavItem[] }[] = [
       { href: "/admin/delivery", label: "Delivery", icon: "delivery" },
       { href: "/admin/customers", label: "Customers", icon: "customers" },
       { href: "/admin/reviews", label: "Reviews", icon: "reviews" },
-      { href: "/admin/vouchers", label: "Vouchers", icon: "vouchers" },
-      { href: "/admin/messages", label: "Messages", icon: "messages" },
     ],
   },
   {
